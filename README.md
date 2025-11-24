@@ -314,16 +314,31 @@ After regenerating icons, rebuild the APK:
 ./gradlew assembleRelease
 ```
 
-## Future Enhancements
+## MVP Feature Roadmap
 
-- [ ] Front/back camera switching
-- [ ] Flash toggle
-- [ ] In-app photo gallery
-- [ ] Real-time filters
-- [ ] Video recording
-- [ ] Pinch-to-zoom
-- [ ] Grid overlay
-- [ ] Timer/burst mode
+### Phase 1: Essential Features (Must Have)
+*Priority: HIGH | Timeline: 1-2 weeks*
+
+- 📸 **In-App Photo Gallery** - View captured photos without leaving app
+- 💡 **Flash Control** - Auto/On/Off modes for low-light
+- 🔄 **Front/Back Camera Switch** - Essential for selfies
+- 👁️ **Photo Preview After Capture** - Immediate feedback with Keep/Retake options
+
+### Phase 2: Enhanced Features (Should Have)
+*Priority: MEDIUM | Timeline: 2-3 weeks*
+
+- 🔍 **Zoom Controls** - Pinch-to-zoom functionality
+- 📐 **Grid Overlay** - Rule of thirds for composition
+- ⏱️ **Timer/Self-Timer** - 3s/5s/10s countdown
+- ⚙️ **Photo Quality Settings** - High/Medium/Low quality options
+
+### Phase 3: Premium Features (Future)
+*Priority: LOW | Timeline: 3-4 weeks*
+
+- 📷 **Burst Mode** - Capture fast-moving subjects
+- 🎨 **Basic Filters** - Real-time filter preview
+- 🎥 **Video Recording** - Full video capture capability
+- 📍 **Location Tagging** - Add GPS coordinates to EXIF data
 
 ## Publishing to Google Play
 
