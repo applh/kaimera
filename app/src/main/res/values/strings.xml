@@ -21,4 +21,9 @@
     <string name="mode_video">Video Mode</string>
     <string name="recording">Recording</string>
     <string name="burst_counter">Burst: %1$d</string>
+    <string name="filter_none">None</string>
+    <string name="filter_grayscale">B&amp;W</string>
+    <string name="filter_sepia">Sepia</string>
+    <string name="filter_vivid">Vivid</string>
+    <string name="filter_cool">Cool</string>
 </resources>

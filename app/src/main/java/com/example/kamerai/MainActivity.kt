@@ -2,6 +2,9 @@ package com.example.kamerai
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
 import android.net.Uri
 import android.os.Handler
@@ -13,6 +16,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -61,6 +66,7 @@ class MainActivity : AppCompatActivity() {
     private var burstCount: Int = 0
     private val burstInterval: Long = 200 // milliseconds between burst shots
     private val maxBurstCount: Int = 20
+    private var currentFilter: CameraFilter? = null
     private val handler = Handler(Looper.getMainLooper())
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -225,6 +231,29 @@ class MainActivity : AppCompatActivity() {
             // Restart camera to switch use cases
             startCamera()
         }
+
+        // Set up filter button and selector
+        val filterButton = findViewById<FloatingActionButton>(R.id.filterButton)
+        val filterSelector = findViewById<RecyclerView>(R.id.filterSelector)
+        
+        val filters = createFilters()
+        val filterAdapter = FilterAdapter(filters) { filter ->
+            currentFilter = filter
+            filterButton.contentDescription = filter.name
+            filterSelector.visibility = android.view.View.GONE
+            Toast.makeText(this, "Filter: ${filter.name}", Toast.LENGTH_SHORT).show()
+        }
+        
+        filterSelector.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        filterSelector.adapter = filterAdapter
+        
+        filterButton.setOnClickListener {
+            filterSelector.visibility = if (filterSelector.visibility == android.view.View.VISIBLE) {
+                android.view.View.GONE
+            } else {
+                android.view.View.VISIBLE
+            }
+        }
     }
 
     private fun toggleFlash(flashButton: FloatingActionButton) {
@@ -373,13 +402,31 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
-                    val msg = "Photo capture succeeded: $savedUri"
-                    Log.d(TAG, msg)
-
-                    // Show toast and launch preview on main thread
+                    // Apply filter to saved image if any
+                    val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
+                    if (currentFilter?.matrix != null) {
+                        try {
+                            val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                            val filteredBitmap = Bitmap.createBitmap(
+                                originalBitmap.width,
+                                originalBitmap.height,
+                                Bitmap.Config.ARGB_8888
+                            )
+                            val canvas = android.graphics.Canvas(filteredBitmap)
+                            val paint = android.graphics.Paint()
+                            paint.colorFilter = ColorMatrixColorFilter(currentFilter!!.matrix)
+                            canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
+                            // Overwrite file
+                            val out = java.io.FileOutputStream(photoFile)
+                            filteredBitmap.compress(Bitmap.CompressFormat.JPEG, photoQuality.jpegQuality, out)
+                            out.flush()
+                            out.close()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to apply filter", e)
+                        }
+                    }
                     runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Capture Success", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(baseContext, "Photo captured: ${photoFile.name}", Toast.LENGTH_SHORT).show()
                         
                         // Launch PreviewActivity
                         val intent = android.content.Intent(this@MainActivity, PreviewActivity::class.java)
