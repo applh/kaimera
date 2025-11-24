@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var captureButton: FloatingActionButton
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
+    private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         previewView = findViewById(R.id.previewView)
         captureButton = findViewById(R.id.captureButton)
         val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
+        val switchButton = findViewById<FloatingActionButton>(R.id.switchButton)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         // Request camera permission
@@ -65,6 +67,20 @@ class MainActivity : AppCompatActivity() {
             val intent = android.content.Intent(this, GalleryActivity::class.java)
             startActivity(intent)
         }
+
+        // Set up switch button click listener
+        switchButton.setOnClickListener {
+            toggleCamera()
+        }
+    }
+
+    private fun toggleCamera() {
+        cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+            CameraSelector.DEFAULT_FRONT_CAMERA
+        } else {
+            CameraSelector.DEFAULT_BACK_CAMERA
+        }
+        startCamera()
     }
 
     private fun startCamera() {
@@ -83,9 +99,6 @@ class MainActivity : AppCompatActivity() {
             // ImageCapture use case
             imageCapture = ImageCapture.Builder()
                 .build()
-
-            // Select back camera as default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
                 // Unbind all use cases before rebinding
