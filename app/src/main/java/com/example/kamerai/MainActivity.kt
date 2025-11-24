@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+    private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         captureButton = findViewById(R.id.captureButton)
         val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
         val switchButton = findViewById<FloatingActionButton>(R.id.switchButton)
+        val flashButton = findViewById<FloatingActionButton>(R.id.flashButton)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         // Request camera permission
@@ -72,6 +74,31 @@ class MainActivity : AppCompatActivity() {
         switchButton.setOnClickListener {
             toggleCamera()
         }
+
+        // Set up flash button click listener
+        flashButton.setOnClickListener {
+            toggleFlash(flashButton)
+        }
+    }
+
+    private fun toggleFlash(flashButton: FloatingActionButton) {
+        flashMode = when (flashMode) {
+            ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_ON
+            ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_AUTO
+            else -> ImageCapture.FLASH_MODE_OFF
+        }
+
+        imageCapture?.flashMode = flashMode
+
+        val (iconRes, stringRes) = when (flashMode) {
+            ImageCapture.FLASH_MODE_ON -> Pair(android.R.drawable.ic_menu_always_landscape_portrait, R.string.flash_on)
+            ImageCapture.FLASH_MODE_AUTO -> Pair(android.R.drawable.ic_menu_compass, R.string.flash_auto)
+            else -> Pair(android.R.drawable.ic_menu_close_clear_cancel, R.string.flash_off)
+        }
+
+        flashButton.setImageResource(iconRes)
+        flashButton.contentDescription = getString(stringRes)
+        Toast.makeText(this, stringRes, Toast.LENGTH_SHORT).show()
     }
 
     private fun toggleCamera() {
@@ -98,6 +125,7 @@ class MainActivity : AppCompatActivity() {
 
             // ImageCapture use case
             imageCapture = ImageCapture.Builder()
+                .setFlashMode(flashMode)
                 .build()
 
             try {

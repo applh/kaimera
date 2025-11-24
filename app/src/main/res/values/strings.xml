@@ -5,4 +5,7 @@
     <string name="gallery_image">Captured photo</string>
     <string name="no_photos">No photos yet</string>
     <string name="switch_camera">Switch Camera</string>
+    <string name="flash_off">Flash Off</string>
+    <string name="flash_on">Flash On</string>
+    <string name="flash_auto">Flash Auto</string>
 </resources>
