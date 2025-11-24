@@ -19,8 +19,8 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - 🎥 **Video Recording** - Full video capture with audio
 - 🔄 **Camera Switch** - Toggle between front and back cameras
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes
-- 🖼️ **In-App Gallery** - View captured photos in a grid layout
-- 🔐 **Runtime Permissions** - Proper camera permission handling
+- 🖼️ **In-App Gallery** - View photos and videos with thumbnails, delete functionality
+- 🔐 **Runtime Permissions** - Proper camera and audio permission handling
 - 💾 **Auto-Save** - Photos automatically saved with timestamps
 - 📱 **Material Design** - Modern UI with Material Design components
 - ⚡ **Lifecycle-Aware** - Automatic camera lifecycle management
@@ -346,8 +346,7 @@ After regenerating icons, rebuild the APK:
 
 - 📷 **Burst Mode** - Capture fast-moving subjects
 - ✅ **Video Recording** - Full video capture capability
-- 🎨 **Filters and Effects** - Real-time camera filters preview
-- 🎥 **Video Recording** - Full video capture capability
+- 🎨 **Filters and Effects** - Real-time camera filters
 - 📍 **Location Tagging** - Add GPS coordinates to EXIF data
 
 ## Publishing to Google Play

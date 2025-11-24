@@ -10,18 +10,30 @@ import java.io.File
 
 class GalleryActivity : AppCompatActivity() {
 
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var emptyView: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gallery)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        val emptyView = findViewById<TextView>(R.id.emptyView)
+        recyclerView = findViewById(R.id.recyclerView)
+        emptyView = findViewById(R.id.emptyView)
 
-        // Load files from external files directory
+        loadGallery()
+        
+        // Add back button support
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = getString(R.string.gallery)
+    }
+
+    private fun loadGallery() {
+        // Load files from external files directory (both photos and videos)
         val directory = getExternalFilesDir(null)
         val files = directory?.listFiles { file ->
-            file.extension.lowercase() == "jpg"
-        }?.sortedByDescending { it.lastModified() } ?: emptyList()
+            val ext = file.extension.lowercase()
+            ext == "jpg" || ext == "mp4"
+        }?.sortedByDescending { it.lastModified() }?.toMutableList() ?: mutableListOf()
 
         if (files.isEmpty()) {
             recyclerView.visibility = View.GONE
@@ -32,12 +44,11 @@ class GalleryActivity : AppCompatActivity() {
 
             // Set up RecyclerView
             recyclerView.layoutManager = GridLayoutManager(this, 3)
-            recyclerView.adapter = GalleryAdapter(files)
+            recyclerView.adapter = GalleryAdapter(files) {
+                // Refresh gallery when file is deleted
+                loadGallery()
+            }
         }
-        
-        // Add back button support
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = getString(R.string.gallery)
     }
 
     override fun onSupportNavigateUp(): Boolean {
