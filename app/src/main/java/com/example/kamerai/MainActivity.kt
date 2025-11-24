@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
         val switchButton = findViewById<FloatingActionButton>(R.id.switchButton)
         val flashButton = findViewById<FloatingActionButton>(R.id.flashButton)
+        val gridButton = findViewById<FloatingActionButton>(R.id.gridButton)
+        val gridOverlay = findViewById<GridOverlayView>(R.id.gridOverlay)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         // Request camera permission
@@ -86,6 +88,17 @@ class MainActivity : AppCompatActivity() {
         // Set up flash button click listener
         flashButton.setOnClickListener {
             toggleFlash(flashButton)
+        }
+
+        // Set up grid button click listener
+        gridButton.setOnClickListener {
+            if (gridOverlay.visibility == android.view.View.VISIBLE) {
+                gridOverlay.visibility = android.view.View.GONE
+                Toast.makeText(this, "Grid Off", Toast.LENGTH_SHORT).show()
+            } else {
+                gridOverlay.visibility = android.view.View.VISIBLE
+                Toast.makeText(this, "Grid On", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

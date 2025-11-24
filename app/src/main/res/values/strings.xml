@@ -10,4 +10,5 @@
     <string name="flash_auto">Flash Auto</string>
     <string name="retake">Retake</string>
     <string name="keep">Keep</string>
+    <string name="grid_toggle">Toggle Grid</string>
 </resources>
