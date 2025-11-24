@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.net.Uri
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -139,9 +141,24 @@ class MainActivity : AppCompatActivity() {
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
+                val camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture
                 )
+
+                // Set up pinch-to-zoom
+                val scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    override fun onScale(detector: ScaleGestureDetector): Boolean {
+                        val currentZoomRatio = camera.cameraInfo.zoomState.value?.zoomRatio ?: 1f
+                        val delta = detector.scaleFactor
+                        camera.cameraControl.setZoomRatio(currentZoomRatio * delta)
+                        return true
+                    }
+                })
+
+                previewView.setOnTouchListener { _, event ->
+                    scaleGestureDetector.onTouchEvent(event)
+                    true
+                }
 
             } catch (e: Exception) {
                 Toast.makeText(this, "Failed to start camera: ${e.message}", Toast.LENGTH_SHORT).show()
