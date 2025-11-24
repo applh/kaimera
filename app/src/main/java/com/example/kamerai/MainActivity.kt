@@ -57,6 +57,10 @@ class MainActivity : AppCompatActivity() {
     private var timerDelay: TimerDelay = TimerDelay.OFF
     private var photoQuality: PhotoQuality = PhotoQuality.HIGH
     private var captureMode: CaptureMode = CaptureMode.PHOTO
+    private var isBurstMode: Boolean = false
+    private var burstCount: Int = 0
+    private val burstInterval: Long = 200 // milliseconds between burst shots
+    private val maxBurstCount: Int = 20
     private val handler = Handler(Looper.getMainLooper())
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -110,13 +114,33 @@ class MainActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(permissionsNeeded.toTypedArray())
         }
 
-        // Set up capture button click listener
+        // Set up capture button click and long-press listeners
+        val burstCounter = findViewById<TextView>(R.id.burstCounter)
+        
         captureButton.setOnClickListener {
             if (captureMode == CaptureMode.PHOTO) {
                 takePhoto(countdownText)
             } else {
                 toggleVideoRecording(recordingIndicator)
             }
+        }
+
+        // Long-press for burst mode (Photo mode only)
+        captureButton.setOnLongClickListener {
+            if (captureMode == CaptureMode.PHOTO && !isBurstMode) {
+                startBurstMode(burstCounter)
+                true
+            } else {
+                false
+            }
+        }
+
+        // Stop burst on release
+        captureButton.setOnTouchListener { _, event ->
+            if (event.action == android.view.MotionEvent.ACTION_UP && isBurstMode) {
+                stopBurstMode(burstCounter)
+            }
+            false // Return false to allow other listeners to process
         }
 
         // Set up gallery button click listener
@@ -372,6 +396,74 @@ class MainActivity : AppCompatActivity() {
                             "Photo capture failed: ${exception.message}",
                             Toast.LENGTH_SHORT
                         ).show()
+                    }
+                }
+            }
+        )
+    }
+
+    private fun startBurstMode(burstCounter: TextView) {
+        isBurstMode = true
+        burstCount = 0
+        burstCounter.visibility = android.view.View.VISIBLE
+        burstCounter.text = getString(R.string.burst_counter, burstCount)
+        
+        // Start capturing burst photos
+        captureBurstPhoto(burstCounter)
+    }
+
+    private fun stopBurstMode(burstCounter: TextView) {
+        isBurstMode = false
+        burstCounter.visibility = android.view.View.GONE
+        handler.removeCallbacksAndMessages(null) // Cancel any pending burst captures
+        Toast.makeText(this, "Burst complete: $burstCount photos", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun captureBurstPhoto(burstCounter: TextView) {
+        if (!isBurstMode || burstCount >= maxBurstCount) {
+            if (burstCount >= maxBurstCount) {
+                stopBurstMode(burstCounter)
+            }
+            return
+        }
+
+        val imageCapture = imageCapture ?: return
+
+        // Create output file with burst sequence number
+        val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US).format(System.currentTimeMillis())
+        val photoFile = File(
+            getExternalFilesDir(null),
+            "${timestamp}-${String.format("%03d", burstCount + 1)}.jpg"
+        )
+
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+        // Capture image
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    burstCount++
+                    runOnUiThread {
+                        burstCounter.text = getString(R.string.burst_counter, burstCount)
+                    }
+                    
+                    // Schedule next burst photo if still in burst mode
+                    if (isBurstMode && burstCount < maxBurstCount) {
+                        handler.postDelayed({
+                            captureBurstPhoto(burstCounter)
+                        }, burstInterval)
+                    }
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e(TAG, "Burst photo capture failed", exception)
+                    // Continue burst even if one photo fails
+                    if (isBurstMode && burstCount < maxBurstCount) {
+                        handler.postDelayed({
+                            captureBurstPhoto(burstCounter)
+                        }, burstInterval)
                     }
                 }
             }

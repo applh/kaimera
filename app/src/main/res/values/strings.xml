@@ -20,4 +20,5 @@
     <string name="mode_photo">Photo Mode</string>
     <string name="mode_video">Video Mode</string>
     <string name="recording">Recording</string>
+    <string name="burst_counter">Burst: %1$d</string>
 </resources>
