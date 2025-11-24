@@ -36,6 +36,10 @@ class MainActivity : AppCompatActivity() {
         OFF(0), THREE_SEC(3), TEN_SEC(10)
     }
 
+    enum class PhotoQuality(val jpegQuality: Int) {
+        HIGH(95), MEDIUM(75), LOW(50)
+    }
+
     private lateinit var previewView: PreviewView
     private lateinit var captureButton: FloatingActionButton
     private var imageCapture: ImageCapture? = null
@@ -43,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
     private var timerDelay: TimerDelay = TimerDelay.OFF
+    private var photoQuality: PhotoQuality = PhotoQuality.HIGH
     private val handler = Handler(Looper.getMainLooper())
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -69,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         val gridOverlay = findViewById<GridOverlayView>(R.id.gridOverlay)
         val timerButton = findViewById<FloatingActionButton>(R.id.timerButton)
         val countdownText = findViewById<TextView>(R.id.countdownText)
+        val qualityButton = findViewById<FloatingActionButton>(R.id.qualityButton)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         // Request camera permission
@@ -129,6 +135,27 @@ class MainActivity : AppCompatActivity() {
             timerButton.contentDescription = getString(stringRes)
             Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
         }
+
+        // Set up quality button click listener
+        qualityButton.setOnClickListener {
+            photoQuality = when (photoQuality) {
+                PhotoQuality.HIGH -> PhotoQuality.MEDIUM
+                PhotoQuality.MEDIUM -> PhotoQuality.LOW
+                PhotoQuality.LOW -> PhotoQuality.HIGH
+            }
+            
+            val (stringRes, toastMsg) = when (photoQuality) {
+                PhotoQuality.HIGH -> Pair(R.string.quality_high, "Quality: High (95%)")
+                PhotoQuality.MEDIUM -> Pair(R.string.quality_medium, "Quality: Medium (75%)")
+                PhotoQuality.LOW -> Pair(R.string.quality_low, "Quality: Low (50%)")
+            }
+            
+            qualityButton.contentDescription = getString(stringRes)
+            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
+            
+            // Restart camera to apply new quality setting
+            startCamera()
+        }
     }
 
     private fun toggleFlash(flashButton: FloatingActionButton) {
@@ -176,6 +203,7 @@ class MainActivity : AppCompatActivity() {
             // ImageCapture use case
             imageCapture = ImageCapture.Builder()
                 .setFlashMode(flashMode)
+                .setJpegQuality(photoQuality.jpegQuality)
                 .build()
 
             try {

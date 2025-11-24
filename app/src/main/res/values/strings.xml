@@ -14,4 +14,7 @@
     <string name="timer_off">Timer Off</string>
     <string name="timer_3s">Timer 3s</string>
     <string name="timer_10s">Timer 10s</string>
+    <string name="quality_high">Quality High</string>
+    <string name="quality_medium">Quality Medium</string>
+    <string name="quality_low">Quality Low</string>
 </resources>
