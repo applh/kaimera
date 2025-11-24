@@ -32,6 +32,10 @@
             android:name=".GalleryActivity"
             android:label="@string/gallery"
             android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".PreviewActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
     </application>
 
 </manifest>

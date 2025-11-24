@@ -8,4 +8,6 @@
     <string name="flash_off">Flash Off</string>
     <string name="flash_on">Flash On</string>
     <string name="flash_auto">Flash Auto</string>
+    <string name="retake">Retake</string>
+    <string name="keep">Keep</string>
 </resources>

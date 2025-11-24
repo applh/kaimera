@@ -3,6 +3,8 @@ package com.example.kamerai
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +23,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "Kamerai"
+    }
+
     private lateinit var previewView: PreviewView
     private lateinit var captureButton: FloatingActionButton
     private var imageCapture: ImageCapture? = null
@@ -162,19 +168,30 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Photo saved: ${photoFile.absolutePath}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    val savedUri = Uri.fromFile(photoFile)
+                    val msg = "Photo capture succeeded: $savedUri"
+                    Log.d(TAG, msg)
+
+                    // Show toast and launch preview on main thread
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Capture Success", Toast.LENGTH_SHORT).show()
+                        
+                        // Launch PreviewActivity
+                        val intent = android.content.Intent(this@MainActivity, PreviewActivity::class.java)
+                        intent.putExtra("image_uri", savedUri.toString())
+                        startActivity(intent)
+                    }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Photo capture failed: ${exception.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Photo capture failed: ${exception.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         )
