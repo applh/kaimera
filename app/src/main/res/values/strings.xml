@@ -11,4 +11,7 @@
     <string name="retake">Retake</string>
     <string name="keep">Keep</string>
     <string name="grid_toggle">Toggle Grid</string>
+    <string name="timer_off">Timer Off</string>
+    <string name="timer_3s">Timer 3s</string>
+    <string name="timer_10s">Timer 10s</string>
 </resources>

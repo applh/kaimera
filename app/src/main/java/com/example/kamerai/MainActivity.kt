@@ -4,9 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -29,12 +32,18 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "Kamerai"
     }
 
+    enum class TimerDelay(val seconds: Int) {
+        OFF(0), THREE_SEC(3), TEN_SEC(10)
+    }
+
     private lateinit var previewView: PreviewView
     private lateinit var captureButton: FloatingActionButton
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
+    private var timerDelay: TimerDelay = TimerDelay.OFF
+    private val handler = Handler(Looper.getMainLooper())
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -58,6 +67,8 @@ class MainActivity : AppCompatActivity() {
         val flashButton = findViewById<FloatingActionButton>(R.id.flashButton)
         val gridButton = findViewById<FloatingActionButton>(R.id.gridButton)
         val gridOverlay = findViewById<GridOverlayView>(R.id.gridOverlay)
+        val timerButton = findViewById<FloatingActionButton>(R.id.timerButton)
+        val countdownText = findViewById<TextView>(R.id.countdownText)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         // Request camera permission
@@ -71,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set up capture button click listener
         captureButton.setOnClickListener {
-            takePhoto()
+            takePhoto(countdownText)
         }
 
         // Set up gallery button click listener
@@ -99,6 +110,24 @@ class MainActivity : AppCompatActivity() {
                 gridOverlay.visibility = android.view.View.VISIBLE
                 Toast.makeText(this, "Grid On", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        // Set up timer button click listener
+        timerButton.setOnClickListener {
+            timerDelay = when (timerDelay) {
+                TimerDelay.OFF -> TimerDelay.THREE_SEC
+                TimerDelay.THREE_SEC -> TimerDelay.TEN_SEC
+                TimerDelay.TEN_SEC -> TimerDelay.OFF
+            }
+            
+            val (stringRes, toastMsg) = when (timerDelay) {
+                TimerDelay.OFF -> Pair(R.string.timer_off, "Timer Off")
+                TimerDelay.THREE_SEC -> Pair(R.string.timer_3s, "Timer: 3s")
+                TimerDelay.TEN_SEC -> Pair(R.string.timer_10s, "Timer: 10s")
+            }
+            
+            timerButton.contentDescription = getString(stringRes)
+            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -180,7 +209,35 @@ class MainActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun takePhoto() {
+    private fun takePhoto(countdownText: TextView) {
+        if (timerDelay == TimerDelay.OFF) {
+            capturePhoto()
+        } else {
+            startCountdown(countdownText)
+        }
+    }
+
+    private fun startCountdown(countdownText: TextView) {
+        var remainingSeconds = timerDelay.seconds
+        countdownText.visibility = android.view.View.VISIBLE
+        countdownText.text = remainingSeconds.toString()
+
+        val countdownRunnable = object : Runnable {
+            override fun run() {
+                remainingSeconds--
+                if (remainingSeconds > 0) {
+                    countdownText.text = remainingSeconds.toString()
+                    handler.postDelayed(this, 1000)
+                } else {
+                    countdownText.visibility = android.view.View.GONE
+                    capturePhoto()
+                }
+            }
+        }
+        handler.postDelayed(countdownRunnable, 1000)
+    }
+
+    private fun capturePhoto() {
         val imageCapture = imageCapture ?: return
 
         // Create output file

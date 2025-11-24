@@ -13,8 +13,9 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - 🎯 **One-Tap Capture** - Simple floating action button for photo capture
 - 👁️ **Photo Preview** - Immediate preview with Keep/Retake options
 - 🔍 **Zoom Controls** - Pinch-to-zoom functionality
-- � **Grid Overlay** - Toggleable rule-of-thirds grid
-- �🔄 **Camera Switch** - Toggle between front and back cameras
+- 📏 **Grid Overlay** - Toggleable rule-of-thirds grid
+- ⏱️ **Timer/Self-Timer** - 3s and 10s delay options
+- 🔄 **Camera Switch** - Toggle between front and back cameras
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes
 - 🖼️ **In-App Gallery** - View captured photos in a grid layout
 - 🔐 **Runtime Permissions** - Proper camera permission handling
@@ -335,7 +336,8 @@ After regenerating icons, rebuild the APK:
 
 - ✅ **Zoom Controls** - Pinch-to-zoom functionality
 - ✅ **Grid Overlay** - Rule of thirds guide
-- ⏱️ **Timer/Self-Timer** - 3s/10s delay optionsuntdo- ⚙️ **Photo Quality Settings** - High/Medium/Low quality options
+- ✅ **Timer/Self-Timer** - 3s/10s delay options
+- ⚙️ **Photo Quality Settings** - High/Medium/Low quality options
 
 ### Phase 3: Premium Features (Future)
 *Priority: LOW | Timeline: 3-4 weeks*
