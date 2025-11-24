@@ -20,6 +20,41 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 
 > **Note:** The app features a full-screen camera preview with a floating capture button at the bottom center.
 
+## Quick Start
+
+### For New Developers
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd kamerai
+
+# Run the setup script (macOS only)
+./setup.sh
+
+# Build the app
+./gradlew assembleRelease
+```
+
+The `setup.sh` script will automatically:
+- ✅ Check and install Homebrew (if needed)
+- ✅ Verify/install JDK 17+
+- ✅ Check for Android SDK and required components
+- ✅ Create `local.properties` with SDK path
+- ✅ Verify Git installation
+
+### Manual Setup
+
+If you prefer manual setup or are on a different platform:
+
+1. Install **JDK 17** or higher
+2. Install **Android Studio** and **Android SDK**
+3. Install **SDK Platform 33** and **Build Tools 33.0.0+**
+4. Create `local.properties`:
+   ```properties
+   sdk.dir=/path/to/your/android/sdk
+   ```
+
 ## Requirements
 
 - **Android 7.0 (API 24)** or higher
@@ -28,29 +63,25 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 
 ## Installation
 
-### Download APK
+### Option 1: Download Pre-built APK
 
 The signed APK is available at:
 ```
 app/build/outputs/apk/release/app-release.apk
 ```
 
-### Install via ADB
-
+Install via ADB:
 ```bash
 adb install app/build/outputs/apk/release/app-release.apk
 ```
 
-### Build from Source
+### Option 2: Build from Source
 
 ```bash
-# Clone or download the project
-cd kamerai
-
-# Build release APK
+# After running setup.sh (see Quick Start above)
 ./gradlew assembleRelease
 
-# Or use the build script
+# Or use the convenience script
 sh build_app.sh
 ```
 
@@ -114,10 +145,14 @@ kamerai/
 │   │   └── AndroidManifest.xml
 │   ├── build.gradle.kts                 # App module config
 │   └── release.keystore                 # Signing key
+├── gradle/wrapper/                      # Gradle wrapper
 ├── build.gradle.kts                     # Root config
 ├── settings.gradle.kts
 ├── gradle.properties
 ├── local.properties
+├── .gitignore
+├── setup.sh                             # Development setup script
+├── build_app.sh                         # Build convenience script
 └── README.md
 ```
 
@@ -130,6 +165,39 @@ The app requires the following permission:
 ```
 
 Camera permission is requested at runtime when the app launches.
+
+## Git Workflow
+
+The repository is initialized with Git and includes a comprehensive `.gitignore`.
+
+### Initial Setup
+
+```bash
+# Already initialized with:
+git init
+git add -A
+git commit -m "Initial commit: Kamerai camera app with CameraX"
+```
+
+### Adding Remote and Pushing
+
+```bash
+# Add your remote repository
+git remote add origin <your-repo-url>
+
+# Push to GitHub/GitLab/etc
+git push -u origin main
+```
+
+### What's Tracked
+
+- ✅ Source code (Kotlin, XML)
+- ✅ Build configuration (Gradle files)
+- ✅ Documentation (README, scripts)
+- ✅ Resources (icons, strings, themes)
+- ❌ Build artifacts (APKs, build folders)
+- ❌ IDE files (.idea, *.iml)
+- ❌ Local configuration (local.properties)
 
 ## Building
 
