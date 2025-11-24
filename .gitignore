@@ -1,0 +1,73 @@
+# Gradle files
+.gradle/
+build/
+*.iml
+.idea/
+local.properties
+
+# Android Studio
+.DS_Store
+captures/
+.externalNativeBuild
+.cxx
+
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Keystore files (keep release.keystore for this demo, but normally exclude)
+# *.jks
+# *.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild/
+
+# NDK
+obj/
+
+# IntelliJ IDEA
+*.iws
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Downloaded JDK
+jdk-*/
+*.tar.gz
+
+# Build logs and scripts
+build_log*.txt
+build_error.log
+build_debug.log
+build_output.txt
+diagnosis.log
+diagnose.sh
+debug_build.sh
+build.py
+create_icons.py
+create_icons.sh
