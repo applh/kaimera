@@ -287,6 +287,33 @@ private fun takePhoto() {
 - Verify app has storage access (automatic for external files directory)
 - Check logcat for error messages: `adb logcat | grep Kamerai`
 
+## Customization
+
+### Regenerating App Icons
+
+The project includes scripts to generate launcher icons:
+
+**Using ImageMagick (recommended):**
+```bash
+./generate_icons.sh
+```
+
+**Using Python/Pillow:**
+```bash
+pip3 install Pillow
+python3 generate_icons.py
+```
+
+Both scripts create professional camera icons with:
+- Purple gradient background (#6200EE to #3700B3)
+- White camera design with lens and aperture
+- All required densities (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
+
+After regenerating icons, rebuild the APK:
+```bash
+./gradlew assembleRelease
+```
+
 ## Future Enhancements
 
 - [ ] Front/back camera switching
