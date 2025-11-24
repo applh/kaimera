@@ -18,8 +18,10 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.*
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.File
 import java.text.SimpleDateFormat
@@ -40,24 +42,38 @@ class MainActivity : AppCompatActivity() {
         HIGH(95), MEDIUM(75), LOW(50)
     }
 
+    enum class CaptureMode {
+        PHOTO, VIDEO
+    }
+
     private lateinit var previewView: PreviewView
     private lateinit var captureButton: FloatingActionButton
     private var imageCapture: ImageCapture? = null
+    private var videoCapture: VideoCapture<Recorder>? = null
+    private var recording: Recording? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
     private var timerDelay: TimerDelay = TimerDelay.OFF
     private var photoQuality: PhotoQuality = PhotoQuality.HIGH
+    private var captureMode: CaptureMode = CaptureMode.PHOTO
     private val handler = Handler(Looper.getMainLooper())
 
     private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
+        val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
+        
+        if (cameraGranted) {
             startCamera()
         } else {
             Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
             finish()
+        }
+        
+        if (!audioGranted) {
+            Toast.makeText(this, "Audio permission required for video recording", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -75,20 +91,32 @@ class MainActivity : AppCompatActivity() {
         val timerButton = findViewById<FloatingActionButton>(R.id.timerButton)
         val countdownText = findViewById<TextView>(R.id.countdownText)
         val qualityButton = findViewById<FloatingActionButton>(R.id.qualityButton)
+        val modeButton = findViewById<FloatingActionButton>(R.id.modeButton)
+        val recordingIndicator = findViewById<TextView>(R.id.recordingIndicator)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        // Request camera permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
+        // Request camera and audio permissions
+        val permissionsNeeded = mutableListOf<String>()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.CAMERA)
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.RECORD_AUDIO)
+        }
+        
+        if (permissionsNeeded.isEmpty()) {
             startCamera()
         } else {
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            requestPermissionLauncher.launch(permissionsNeeded.toTypedArray())
         }
 
         // Set up capture button click listener
         captureButton.setOnClickListener {
-            takePhoto(countdownText)
+            if (captureMode == CaptureMode.PHOTO) {
+                takePhoto(countdownText)
+            } else {
+                toggleVideoRecording(recordingIndicator)
+            }
         }
 
         // Set up gallery button click listener
@@ -156,6 +184,23 @@ class MainActivity : AppCompatActivity() {
             // Restart camera to apply new quality setting
             startCamera()
         }
+
+        // Set up mode button click listener
+        modeButton.setOnClickListener {
+            captureMode = if (captureMode == CaptureMode.PHOTO) CaptureMode.VIDEO else CaptureMode.PHOTO
+            
+            val (stringRes, icon, toastMsg) = when (captureMode) {
+                CaptureMode.PHOTO -> Triple(R.string.mode_photo, android.R.drawable.ic_menu_camera, "Photo Mode")
+                CaptureMode.VIDEO -> Triple(R.string.mode_video, android.R.drawable.ic_menu_gallery, "Video Mode")
+            }
+            
+            modeButton.contentDescription = getString(stringRes)
+            modeButton.setImageResource(icon)
+            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
+            
+            // Restart camera to switch use cases
+            startCamera()
+        }
     }
 
     private fun toggleFlash(flashButton: FloatingActionButton) {
@@ -200,41 +245,62 @@ class MainActivity : AppCompatActivity() {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
 
-            // ImageCapture use case
-            imageCapture = ImageCapture.Builder()
-                .setFlashMode(flashMode)
-                .setJpegQuality(photoQuality.jpegQuality)
-                .build()
-
             try {
                 // Unbind all use cases before rebinding
                 cameraProvider.unbindAll()
 
-                // Bind use cases to camera
-                val camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
-                )
+                if (captureMode == CaptureMode.PHOTO) {
+                    // ImageCapture use case for photos
+                    imageCapture = ImageCapture.Builder()
+                        .setFlashMode(flashMode)
+                        .setJpegQuality(photoQuality.jpegQuality)
+                        .build()
 
-                // Set up pinch-to-zoom
-                val scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                    override fun onScale(detector: ScaleGestureDetector): Boolean {
-                        val currentZoomRatio = camera.cameraInfo.zoomState.value?.zoomRatio ?: 1f
-                        val delta = detector.scaleFactor
-                        camera.cameraControl.setZoomRatio(currentZoomRatio * delta)
-                        return true
-                    }
-                })
+                    // Bind use cases to camera
+                    val camera = cameraProvider.bindToLifecycle(
+                        this, cameraSelector, preview, imageCapture
+                    )
 
-                previewView.setOnTouchListener { _, event ->
-                    scaleGestureDetector.onTouchEvent(event)
-                    true
+                    // Set up pinch-to-zoom
+                    setupPinchToZoom(camera)
+                } else {
+                    // VideoCapture use case for videos
+                    val recorder = Recorder.Builder()
+                        .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                        .build()
+                    videoCapture = VideoCapture.withOutput(recorder)
+
+                    // Bind use cases to camera
+                    val camera = cameraProvider.bindToLifecycle(
+                        this, cameraSelector, preview, videoCapture
+                    )
+
+                    // Set up pinch-to-zoom
+                    setupPinchToZoom(camera)
                 }
 
             } catch (e: Exception) {
                 Toast.makeText(this, "Failed to start camera: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Camera binding failed", e)
             }
 
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun setupPinchToZoom(camera: androidx.camera.core.Camera) {
+        val scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val currentZoomRatio = camera.cameraInfo.zoomState.value?.zoomRatio ?: 1f
+                val delta = detector.scaleFactor
+                camera.cameraControl.setZoomRatio(currentZoomRatio * delta)
+                return true
+            }
+        })
+
+        previewView.setOnTouchListener { _, event ->
+            scaleGestureDetector.onTouchEvent(event)
+            true
+        }
     }
 
     private fun takePhoto(countdownText: TextView) {
@@ -310,6 +376,61 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    private fun toggleVideoRecording(recordingIndicator: TextView) {
+        val videoCapture = this.videoCapture ?: return
+
+        if (recording != null) {
+            // Stop recording
+            recording?.stop()
+            recording = null
+            recordingIndicator.visibility = android.view.View.GONE
+            Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check audio permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Audio permission required for video recording", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Start recording
+        val videoFile = File(
+            getExternalFilesDir(null),
+            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
+                .format(System.currentTimeMillis()) + ".mp4"
+        )
+
+        val outputOptions = FileOutputOptions.Builder(videoFile).build()
+
+        recording = videoCapture.output
+            .prepareRecording(this, outputOptions)
+            .withAudioEnabled()
+            .start(ContextCompat.getMainExecutor(this)) { recordEvent ->
+                when (recordEvent) {
+                    is VideoRecordEvent.Start -> {
+                        runOnUiThread {
+                            recordingIndicator.visibility = android.view.View.VISIBLE
+                            Toast.makeText(this, "Recording started", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    is VideoRecordEvent.Finalize -> {
+                        runOnUiThread {
+                            recordingIndicator.visibility = android.view.View.GONE
+                            if (!recordEvent.hasError()) {
+                                val savedUri = Uri.fromFile(videoFile)
+                                Toast.makeText(this, "Video saved: ${videoFile.name}", Toast.LENGTH_SHORT).show()
+                                Log.d(TAG, "Video saved: $savedUri")
+                            } else {
+                                Toast.makeText(this, "Video capture failed: ${recordEvent.error}", Toast.LENGTH_SHORT).show()
+                                Log.e(TAG, "Video capture failed", recordEvent.cause)
+                            }
+                        }
+                    }
+                }
+            }
     }
 
     override fun onDestroy() {

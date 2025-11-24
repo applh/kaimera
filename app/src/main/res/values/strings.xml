@@ -17,4 +17,7 @@
     <string name="quality_high">Quality High</string>
     <string name="quality_medium">Quality Medium</string>
     <string name="quality_low">Quality Low</string>
+    <string name="mode_photo">Photo Mode</string>
+    <string name="mode_video">Video Mode</string>
+    <string name="recording">Recording</string>
 </resources>
