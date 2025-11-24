@@ -51,4 +51,8 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
     implementation("androidx.camera:camera-extensions:${cameraxVersion}")
+    
+    // Gallery dependencies
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
+    implementation("io.coil-kt:coil:2.4.0")
 }

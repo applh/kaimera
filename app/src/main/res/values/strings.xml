@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Kamerai</string>
     <string name="capture_photo">Capture Photo</string>
+    <string name="gallery">Gallery</string>
+    <string name="gallery_image">Captured photo</string>
+    <string name="no_photos">No photos yet</string>
 </resources>

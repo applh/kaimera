@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         previewView = findViewById(R.id.previewView)
         captureButton = findViewById(R.id.captureButton)
+        val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         // Request camera permission
@@ -57,6 +58,12 @@ class MainActivity : AppCompatActivity() {
         // Set up capture button click listener
         captureButton.setOnClickListener {
             takePhoto()
+        }
+
+        // Set up gallery button click listener
+        galleryButton.setOnClickListener {
+            val intent = android.content.Intent(this, GalleryActivity::class.java)
+            startActivity(intent)
         }
     }
 
