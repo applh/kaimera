@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="General">
         <SwitchPreferenceCompat
@@ -30,6 +31,15 @@
             app:title="Grid Overlay"
             app:summary="Show rule of thirds grid"
             app:defaultValue="false" />
+
+        <SeekBarPreference
+            app:key="preview_auto_save_delay"
+            app:title="Preview Auto-Save Delay"
+            app:summary="Automatically save photo after preview (0 = instant save)"
+            android:max="5"
+            app:defaultValue="2"
+            app:showSeekBarValue="true"
+            app:updatesContinuously="false" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="About">
