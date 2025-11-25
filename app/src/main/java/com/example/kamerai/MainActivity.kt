@@ -3,10 +3,13 @@ package com.example.kamerai
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
-import android.os.Bundle
+import android.graphics.Paint
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -62,6 +65,9 @@ class MainActivity : AppCompatActivity() {
     private var timerDelay: TimerDelay = TimerDelay.OFF
     private var photoQuality: PhotoQuality = PhotoQuality.HIGH
     private var captureMode: CaptureMode = CaptureMode.PHOTO
+    // Data class representing a filter
+    data class CameraFilter(val name: String, val matrix: ColorMatrix?)
+
     private var isBurstMode: Boolean = false
     private var burstCount: Int = 0
     private val burstInterval: Long = 200 // milliseconds between burst shots
@@ -232,7 +238,8 @@ class MainActivity : AppCompatActivity() {
             startCamera()
         }
 
-        // Set up filter button and selector
+
+     // Set up filter button and selector
         val filterButton = findViewById<FloatingActionButton>(R.id.filterButton)
         val filterSelector = findViewById<RecyclerView>(R.id.filterSelector)
         
@@ -403,8 +410,10 @@ class MainActivity : AppCompatActivity() {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     // Apply filter to saved image if any
-                    val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                    if (currentFilter?.matrix != null) {
+                    val filter = currentFilter
+                    val matrix = filter?.matrix
+                    val savedUri = Uri.fromFile(photoFile)
+                    if (matrix != null) {
                         try {
                             val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
                             val filteredBitmap = Bitmap.createBitmap(
@@ -414,7 +423,7 @@ class MainActivity : AppCompatActivity() {
                             )
                             val canvas = android.graphics.Canvas(filteredBitmap)
                             val paint = android.graphics.Paint()
-                            paint.colorFilter = ColorMatrixColorFilter(currentFilter!!.matrix)
+                            paint.colorFilter = ColorMatrixColorFilter(matrix)
                             canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
                             // Overwrite file
                             val out = java.io.FileOutputStream(photoFile)
@@ -575,5 +584,27 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+    }
+    // Helper to create list of available filters
+    private fun createFilters(): List<CameraFilter> {
+        return listOf(
+            CameraFilter(getString(R.string.filter_none), null),
+            CameraFilter(getString(R.string.filter_grayscale), ColorMatrix().apply { setSaturation(0f) }),
+            CameraFilter(getString(R.string.filter_sepia), ColorMatrix().apply {
+                setScale(1f, 0.95f, 0.82f, 1f)
+                val sepia = floatArrayOf(
+                    0.393f, 0.769f, 0.189f, 0f, 0f,
+                    0.349f, 0.686f, 0.168f, 0f, 0f,
+                    0.272f, 0.534f, 0.131f, 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f
+                )
+                setConcat(ColorMatrix(sepia), this)
+            }),
+            CameraFilter(getString(R.string.filter_vivid), ColorMatrix().apply { setScale(1.2f, 1.2f, 1.2f, 1f) }),
+            CameraFilter(getString(R.string.filter_cool), ColorMatrix().apply {
+                setRotate(0, -10f)
+                setRotate(1, -10f)
+            })
+        )
     }
 }

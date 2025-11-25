@@ -6,10 +6,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.kamerai.MainActivity.CameraFilter
 
 class FilterAdapter(
-    private val filters: List<MainActivity.CameraFilter>,
-    private val onFilterSelected: (MainActivity.CameraFilter) -> Unit
+    private val filters: List<CameraFilter>,
+    private val onFilterSelected: (CameraFilter) -> Unit
 ) : RecyclerView.Adapter<FilterAdapter.FilterViewHolder>() {
 
     inner class FilterViewHolder(view: View) : RecyclerView.ViewHolder(view) {

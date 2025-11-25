@@ -17,9 +17,10 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - ⏱️ **Timer/Self-Timer** - 3s and 10s delay options
 - ⚙️ **Photo Quality Settings** - High/Medium/Low JPEG quality options
 - 🎥 **Video Recording** - Full video capture with audio
-- � **Burst Mode** - Rapid photo capture with long-press (up to 20 photos)
-- �🔄 **Camera Switch** - Toggle between front and back cameras
+- 📸 **Burst Mode** - Rapid photo capture with long-press (up to 20 photos)
+- 🔄 **Camera Switch** - Toggle between front and back cameras
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes
+- 🎨 **Filters and Effects** - Real-time color filters (Grayscale, Sepia, Vivid, Cool)
 - 🖼️ **In-App Gallery** - View photos and videos with thumbnails, delete functionality
 - 🔐 **Runtime Permissions** - Proper camera and audio permission handling
 - 💾 **Auto-Save** - Photos automatically saved with timestamps
@@ -347,7 +348,7 @@ After regenerating icons, rebuild the APK:
 
 - ✅ **Burst Mode** - Capture fast-moving subjects
 - ✅ **Video Recording** - Full video capture capability
-- 🎨 **Filters and Effects** - Real-time camera filters
+- ✅ **Filters and Effects** - Real-time camera filters
 - 📍 **Location Tagging** - Add GPS coordinates to EXIF data
 
 ## Publishing to Google Play
