@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.kamerai"
         minSdk = 24
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 13
+        versionName = "13.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -26,6 +26,8 @@ android {
                 storePassword = "password"
                 keyAlias = "key0"
                 keyPassword = "password"
+                enableV1Signing = true
+                enableV2Signing = true
             }
         }
     }
