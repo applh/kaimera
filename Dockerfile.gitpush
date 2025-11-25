@@ -1,0 +1,16 @@
+FROM alpine:latest
+
+# Install git and openssh
+RUN apk add --no-cache git openssh
+
+# Set working directory
+WORKDIR /repo
+
+# Copy the repository
+COPY . .
+
+# Entry point script
+COPY docker-push.sh /docker-push.sh
+RUN chmod +x /docker-push.sh
+
+ENTRYPOINT ["/docker-push.sh"]

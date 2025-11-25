@@ -14,7 +14,9 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
+import android.view.OrientationEventListener
 import android.view.ScaleGestureDetector
+import android.view.Surface
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -84,6 +86,7 @@ class MainActivity : AppCompatActivity() {
     private var audioRecorder: android.media.MediaRecorder? = null
     private var isRecordingAudio = false
     private var audioFilePath: String? = null
+    private var orientationEventListener: OrientationEventListener? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -273,6 +276,25 @@ class MainActivity : AppCompatActivity() {
         filterSelector.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         filterSelector.adapter = filterAdapter
         
+        // Initialize OrientationEventListener
+        orientationEventListener = object : OrientationEventListener(this) {
+            override fun onOrientationChanged(orientation: Int) {
+                if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
+                    return
+                }
+
+                val rotation = when (orientation) {
+                    in 45..134 -> Surface.ROTATION_270
+                    in 135..224 -> Surface.ROTATION_180
+                    in 225..314 -> Surface.ROTATION_90
+                    else -> Surface.ROTATION_0
+                }
+
+                imageCapture?.targetRotation = rotation
+                videoCapture?.targetRotation = rotation
+            }
+        }
+    
         filterButton.setOnClickListener {
             filterSelector.visibility = if (filterSelector.visibility == android.view.View.VISIBLE) {
                 android.view.View.GONE
@@ -337,6 +359,7 @@ class MainActivity : AppCompatActivity() {
                     imageCapture = ImageCapture.Builder()
                         .setFlashMode(flashMode)
                         .setJpegQuality(photoQuality.jpegQuality)
+                        .setTargetRotation(windowManager.defaultDisplay.rotation)
                         .build()
 
                     // Bind use cases to camera
@@ -718,6 +741,16 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
             Toast.makeText(this, "Failed to stop audio recording", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        orientationEventListener?.enable()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        orientationEventListener?.disable()
     }
 
     override fun onDestroy() {

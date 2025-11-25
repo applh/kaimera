@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.kamerai"
         minSdk = 24
         targetSdk = 33
-        versionCode = 13
-        versionName = "13.0.0"
+        versionCode = 19
+        versionName = "19.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -59,4 +59,5 @@ dependencies {
     // Gallery dependencies
     implementation("androidx.recyclerview:recyclerview:1.3.0")
     implementation("io.coil-kt:coil:2.4.0")
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
 }

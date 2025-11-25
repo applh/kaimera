@@ -23,8 +23,9 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes
 - 🎨 **Filters and Effects** - Real-time color filters (Grayscale, Sepia, Vivid, Cool)
 - ⚙️ **Settings Screen** - Configure shutter sound, photo quality, grid overlay, flash mode, and preview auto-save delay
-- 🖼️ **In-App Gallery** - View photos, videos, and audio files with thumbnails and delete functionality
-- 🔐 **Runtime Permissions** - Proper camera and audio permission handling
+- 🖼️ **In-App Gallery** - View and manage your captured photos, videos, and audio recordings. Tap to play videos and audio directly in the app.
+- � **Smart Orientation** - Photos are automatically rotated based on device orientation, even when UI is locked to portrait.
+- ⏱️ **Chronometer** - Built-in stopwatch with audio recording integration.
 - 💾 **Auto-Save** - Photos automatically saved with timestamps
 - 📱 **Material Design** - Modern UI with Material Design components
 - ⚡ **Lifecycle-Aware** - Automatic camera lifecycle management
@@ -369,7 +370,103 @@ After regenerating icons, rebuild the APK:
 - ✅ **Burst Mode** - Capture fast-moving subjects
 - ✅ **Video Recording** - Full video capture capability
 - ✅ **Filters and Effects** - Real-time camera filters
+- ✅ **Gallery Playback** - Play videos and audio directly in the app
 - 📍 **Location Tagging** - Add GPS coordinates to EXIF data
+
+## Future Feature Ideas
+
+### 📸 Photography Enhancements
+- **Manual Controls** - Exposure compensation, ISO, white balance presets
+- **Advanced Capture Modes** - Time-lapse, HDR, panorama, night mode
+- **Composition Aids** - Level indicator, histogram, focus peaking
+
+### 🎨 Creative Features
+- **More Filters** - Vintage, B&W with color accent, vignette, bokeh
+- **Watermarking** - Custom text/logo, timestamp, GPS location stamp
+
+### 🎥 Video Enhancements
+- **Video Settings** - Quality options (4K, 1080p, 720p), frame rate (24/30/60fps)
+- **Video Features** - Stabilization toggle, slow motion
+
+### 📱 Usability & Organization
+- **Gallery Improvements** - Sort/filter by date/type, search, batch operations
+- **Smart Organization** - Auto-organize by date/event, favorites, albums
+- **Editing Tools** - Crop/rotate, brightness/contrast, trim audio/video
+
+### ⚙️ Settings & Customization
+- **Storage Options** - Save location, file naming patterns, auto-delete old files
+- **UI Customization** - Dark/light theme, button customization, gesture controls
+
+### 🔧 Advanced Features
+- **Professional Tools** - RAW capture, manual focus, shutter speed, EXIF viewer
+- **Sharing** - Quick share to social media, batch export, QR code generation
+
+
+## Deploying to GitHub
+
+### 🐳 Containerized Deployment (Recommended)
+
+Use the included Docker-based deployment for isolated, secure GitHub publishing:
+
+```bash
+# Run the deployment script
+./deploy-to-github.sh YOUR_GITHUB_USERNAME kamerai
+```
+
+**What it does:**
+1. Builds a lightweight Alpine Linux container (~50MB)
+2. Checks for existing SSH key in `.github-deploy-key` (gitignored)
+3. If no key exists: generates new key and saves it locally
+4. If key exists: reuses it (no need to re-add to GitHub!)
+5. Displays the public key for you to add to GitHub (first time only)
+6. Pushes the repository with all tags
+7. Destroys the container (key remains on disk for reuse)
+
+**Step-by-step:**
+
+1. **Create GitHub repository** at https://github.com/new
+   - Repository name: `kamerai`
+   - Don't initialize with anything
+
+2. **Run deployment**:
+   ```bash
+   ./deploy-to-github.sh YOUR_GITHUB_USERNAME kamerai
+   ```
+
+3. **First time only - Add SSH key to GitHub** when prompted:
+   - Go to https://github.com/settings/ssh/new
+   - Title: "Kamerai Deploy Key"
+   - Paste the displayed key
+   - Click "Add SSH key"
+
+4. **Press ENTER** to continue the push
+
+5. **Future deployments**: Just run step 2 again - the key is reused automatically!
+
+**Advantages:**
+- ✅ SSH key stored locally in `.github-deploy-key` (gitignored)
+- ✅ Only add key to GitHub once
+- ✅ Container is removed after push
+- ✅ One command to deploy
+- ✅ Automatic key reuse for updates
+
+### Manual GitHub Deployment
+
+If you prefer not to use Docker:
+
+```bash
+# Add GitHub remote
+git remote add origin https://github.com/YOUR_USERNAME/kamerai.git
+
+# Commit changes
+git add .
+git commit -m "Release v19.0.0"
+
+# Push to GitHub
+git push -u origin main --tags
+```
+
+**Note:** You'll need a GitHub Personal Access Token (Settings → Developer settings → Personal access tokens) or SSH key configured on your system.
 
 ## Publishing to Google Play
 

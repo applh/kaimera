@@ -22,6 +22,7 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,6 +43,9 @@
             android:name=".SettingsActivity"
             android:label="Settings"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".MediaViewerActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
     </application>
 
 </manifest>
