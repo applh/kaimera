@@ -146,10 +146,26 @@ kamerai/
 ├── app/
 │   ├── src/main/
 │   │   ├── java/com/example/kamerai/
-│   │   │   └── MainActivity.kt          # Main camera implementation
+│   │   │   ├── MainActivity.kt          # Main camera implementation
+│   │   │   ├── GalleryActivity.kt       # Photo/video gallery
+│   │   │   ├── GalleryAdapter.kt        # Gallery RecyclerView adapter
+│   │   │   ├── PreviewActivity.kt       # Photo preview after capture
+│   │   │   ├── SettingsActivity.kt      # Settings screen host
+│   │   │   ├── SettingsFragment.kt      # Settings preferences
+│   │   │   ├── FilterAdapter.kt         # Filter selection adapter
+│   │   │   └── GridOverlayView.kt       # Custom grid overlay view
 │   │   ├── res/
 │   │   │   ├── layout/
-│   │   │   │   └── activity_main.xml    # UI layout
+│   │   │   │   ├── activity_main.xml    # Main camera UI
+│   │   │   │   ├── activity_gallery.xml # Gallery layout
+│   │   │   │   ├── activity_preview.xml # Preview layout
+│   │   │   │   ├── activity_settings.xml # Settings layout
+│   │   │   │   ├── item_gallery_image.xml # Gallery item
+│   │   │   │   └── item_filter.xml      # Filter item
+│   │   │   ├── xml/
+│   │   │   │   ├── root_preferences.xml # Settings preferences
+│   │   │   │   ├── backup_rules.xml
+│   │   │   │   └── data_extraction_rules.xml
 │   │   │   ├── values/
 │   │   │   │   ├── strings.xml
 │   │   │   │   ├── colors.xml
