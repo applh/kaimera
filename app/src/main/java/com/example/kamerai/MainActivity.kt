@@ -283,30 +283,25 @@ class MainActivity : AppCompatActivity() {
 
         // Set up chronometer controls
         val chronometerDisplay = findViewById<TextView>(R.id.chronometerDisplay)
-        val chronoStartStopButton = findViewById<MaterialButton>(R.id.chronoStartStopButton)
+        val chronoStartButton = findViewById<MaterialButton>(R.id.chronoStartButton)
+        val chronoStartWithAudioButton = findViewById<MaterialButton>(R.id.chronoStartWithAudioButton)
+        val chronoStopButton = findViewById<MaterialButton>(R.id.chronoStopButton)
         val chronoResetButton = findViewById<MaterialButton>(R.id.chronoResetButton)
-        val chronoAudioButton = findViewById<MaterialButton>(R.id.chronoAudioButton)
 
-        chronoStartStopButton.setOnClickListener {
-            if (chronometerRunning) {
-                stopChronometer(chronoStartStopButton, chronoAudioButton)
-            } else {
-                startChronometer(chronometerDisplay, chronoStartStopButton, chronoAudioButton)
-            }
+        chronoStartButton.setOnClickListener {
+            startChronometer(chronometerDisplay, chronoStartButton, chronoStartWithAudioButton, chronoStopButton, false)
+        }
+
+        chronoStartWithAudioButton.setOnClickListener {
+            startChronometer(chronometerDisplay, chronoStartButton, chronoStartWithAudioButton, chronoStopButton, true)
+        }
+
+        chronoStopButton.setOnClickListener {
+            stopChronometer(chronoStartButton, chronoStartWithAudioButton, chronoStopButton)
         }
 
         chronoResetButton.setOnClickListener {
-            resetChronometer(chronometerDisplay, chronoStartStopButton, chronoAudioButton)
-        }
-
-        chronoAudioButton.setOnClickListener {
-            if (isRecordingAudio) {
-                stopAudioRecording()
-                chronoAudioButton.text = "🎤"
-            } else {
-                startAudioRecording()
-                chronoAudioButton.text = "⏹️"
-            }
+            resetChronometer(chronometerDisplay, chronoStartButton, chronoStartWithAudioButton, chronoStopButton)
         }
     }
 
@@ -616,10 +611,24 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun startChronometer(display: TextView, startStopButton: MaterialButton, audioButton: MaterialButton) {
+    private fun startChronometer(
+        display: TextView,
+        startButton: MaterialButton,
+        startWithAudioButton: MaterialButton,
+        stopButton: MaterialButton,
+        withAudio: Boolean
+    ) {
         chronometerRunning = true
-        startStopButton.text = "Stop"
-        audioButton.isEnabled = true
+        
+        // Hide start buttons, show stop button
+        startButton.visibility = android.view.View.GONE
+        startWithAudioButton.visibility = android.view.View.GONE
+        stopButton.visibility = android.view.View.VISIBLE
+        
+        // Start audio recording if requested
+        if (withAudio) {
+            startAudioRecording()
+        }
         
         chronometerRunnable = object : Runnable {
             override fun run() {
@@ -633,10 +642,18 @@ class MainActivity : AppCompatActivity() {
         handler.post(chronometerRunnable!!)
     }
 
-    private fun stopChronometer(startStopButton: MaterialButton, audioButton: MaterialButton) {
+    private fun stopChronometer(
+        startButton: MaterialButton,
+        startWithAudioButton: MaterialButton,
+        stopButton: MaterialButton
+    ) {
         chronometerRunning = false
-        startStopButton.text = "Start"
-        audioButton.isEnabled = false
+        
+        // Show start buttons, hide stop button
+        startButton.visibility = android.view.View.VISIBLE
+        startWithAudioButton.visibility = android.view.View.VISIBLE
+        stopButton.visibility = android.view.View.GONE
+        
         chronometerRunnable?.let {
             handler.removeCallbacks(it)
         }
@@ -644,12 +661,16 @@ class MainActivity : AppCompatActivity() {
         // Stop audio recording if active
         if (isRecordingAudio) {
             stopAudioRecording()
-            audioButton.text = "🎤"
         }
     }
 
-    private fun resetChronometer(display: TextView, startStopButton: MaterialButton, audioButton: MaterialButton) {
-        stopChronometer(startStopButton, audioButton)
+    private fun resetChronometer(
+        display: TextView,
+        startButton: MaterialButton,
+        startWithAudioButton: MaterialButton,
+        stopButton: MaterialButton
+    ) {
+        stopChronometer(startButton, startWithAudioButton, stopButton)
         chronometerSeconds = 0
         display.text = "00:00"
     }

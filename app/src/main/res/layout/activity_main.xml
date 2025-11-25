@@ -189,11 +189,28 @@
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/chronoStartStopButton"
+            android:id="@+id/chronoStartButton"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start"
+            android:text="▶️"
+            android:textColor="@android:color/white" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/chronoStartWithAudioButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎤"
+            android:textColor="@android:color/white" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/chronoStopButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏹️"
+            android:visibility="gone"
             android:textColor="@android:color/white" />
 
         <com.google.android.material.button.MaterialButton
@@ -201,16 +218,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reset"
-            android:textColor="@android:color/white" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/chronoAudioButton"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="🎤"
+            android:text="🔄"
             android:textColor="@android:color/white" />
     </LinearLayout>
 
