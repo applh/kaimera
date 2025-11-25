@@ -21,12 +21,13 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - 🔄 **Camera Switch** - Toggle between front and back cameras
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes
 - 🎨 **Filters and Effects** - Real-time color filters (Grayscale, Sepia, Vivid, Cool)
-- ⚙️ **Settings Screen** - Configure shutter sound, photo quality, and grid overlay
+- ⚙️ **Settings Screen** - Configure shutter sound, photo quality, grid overlay, and flash mode
 - 🖼️ **In-App Gallery** - View photos and videos with thumbnails, delete functionality
 - 🔐 **Runtime Permissions** - Proper camera and audio permission handling
 - 💾 **Auto-Save** - Photos automatically saved with timestamps
 - 📱 **Material Design** - Modern UI with Material Design components
 - ⚡ **Lifecycle-Aware** - Automatic camera lifecycle management
+- 🎯 **Clean UI** - Streamlined interface with settings-based configuration
 
 ## Screenshots
 
