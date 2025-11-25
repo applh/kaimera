@@ -187,13 +187,14 @@ kamerai/
 
 ## Permissions
 
-The app requires the following permission:
+The app requires the following permissions:
 
 ```xml
 <uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
-Camera permission is requested at runtime when the app launches.
+Both permissions are requested at runtime when the app launches. RECORD_AUDIO is required for video recording with audio.
 
 ## Git Workflow
 
