@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kamerai"
+    namespace = "com.example.kaimera"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.kamerai"
+        applicationId = "com.example.kaimera"
         minSdk = 24
         targetSdk = 33
         versionCode = 19

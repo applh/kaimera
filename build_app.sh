@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Building Kamerai APK..."
+echo "Building Kaimera APK..."
 
 # Ensure executable
 chmod +x gradlew

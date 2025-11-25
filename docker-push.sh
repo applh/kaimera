@@ -20,7 +20,7 @@ if [ -f "$SSH_KEY_FILE" ] && [ -f "$SSH_PUB_FILE" ]; then
     echo ""
 else
     echo "🔑 Generating new SSH key..."
-    ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "kamerai-deploy"
+    ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "kaimera-deploy"
     
     # Save key to repository (gitignored)
     cp /root/.ssh/id_ed25519 "$SSH_KEY_FILE"
@@ -36,7 +36,7 @@ else
     echo ""
     echo "📝 Steps to add this key to GitHub:"
     echo "1. Go to: https://github.com/settings/ssh/new"
-    echo "2. Title: 'Kamerai Deploy Key'"
+    echo "2. Title: 'Kaimera Deploy Key'"
     echo "3. Paste the key above"
     echo "4. Click 'Add SSH key'"
     echo ""
@@ -54,8 +54,8 @@ Host github.com
 EOF
 
 # Configure git
-git config --global user.email "${GIT_EMAIL:-deploy@kamerai.local}"
-git config --global user.name "${GIT_NAME:-Kamerai Deploy}"
+git config --global user.email "${GIT_EMAIL:-deploy@kaimera.local}"
+git config --global user.name "${GIT_NAME:-Kaimera Deploy}"
 
 # Add remote if not exists
 if ! git remote get-url origin 2>/dev/null; then

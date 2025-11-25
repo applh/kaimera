@@ -1,4 +1,4 @@
-package com.example.kamerai
+package com.example.kaimera
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

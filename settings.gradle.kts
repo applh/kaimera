@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "kamerai"
+rootProject.name = "kaimera"
 include(":app")

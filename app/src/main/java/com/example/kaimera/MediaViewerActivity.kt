@@ -1,4 +1,4 @@
-package com.example.kamerai
+package com.example.kaimera
 
 import android.media.MediaPlayer
 import android.net.Uri

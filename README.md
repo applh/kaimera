@@ -1,4 +1,4 @@
-# Kamerai 📸
+# Kaimera 📸
 
 A modern Android camera application built with Kotlin and CameraX, featuring real-time preview and one-tap photo capture.
 
@@ -42,7 +42,7 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd kamerai
+cd kaimera
 
 # Run the setup script (macOS only)
 ./setup.sh
@@ -102,7 +102,7 @@ sh build_app.sh
 
 ## Usage
 
-1. **Launch** the Kamerai app
+1. **Launch** the Kaimera app
 2. **Grant** camera permission when prompted
 3. **Preview** appears automatically in full-screen
 4. **Tap** the camera button (bottom center) to capture a photo
@@ -112,7 +112,7 @@ sh build_app.sh
 
 Photos are saved to the app's private external storage:
 ```
-/storage/emulated/0/Android/data/com.example.kamerai/files/
+/storage/emulated/0/Android/data/com.example.kaimera/files/
 ```
 
 File naming format: `yyyy-MM-dd-HH-mm-ss-SSS.jpg`
@@ -144,10 +144,10 @@ implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 ### Project Structure
 
 ```
-kamerai/
+kaimera/
 ├── app/
 │   ├── src/main/
-│   │   ├── java/com/example/kamerai/
+│   │   ├── java/com/example/kaimera/
 │   │   │   ├── MainActivity.kt          # Main camera implementation
 │   │   │   ├── GalleryActivity.kt       # Photo/video gallery
 │   │   │   ├── GalleryAdapter.kt        # Gallery RecyclerView adapter
@@ -208,7 +208,7 @@ The repository is initialized with Git and includes a comprehensive `.gitignore`
 # Already initialized with:
 git init
 git add -A
-git commit -m "Initial commit: Kamerai camera app with CameraX"
+git commit -m "Initial commit: Kaimera camera app with CameraX"
 ```
 
 ### Adding Remote and Pushing
@@ -299,7 +299,7 @@ private fun takePhoto() {
 
 ### Camera Not Working
 
-- Ensure camera permission is granted: **Settings → Apps → Kamerai → Permissions**
+- Ensure camera permission is granted: **Settings → Apps → Kaimera → Permissions**
 - Verify device has a working rear camera
 - Check Android version is 7.0 or higher
 
@@ -317,7 +317,7 @@ private fun takePhoto() {
 
 - Check device storage space
 - Verify app has storage access (automatic for external files directory)
-- Check logcat for error messages: `adb logcat | grep Kamerai`
+- Check logcat for error messages: `adb logcat | grep Kaimera`
 
 ## Customization
 
@@ -410,7 +410,7 @@ Use the included Docker-based deployment for isolated, secure GitHub publishing:
 
 ```bash
 # Run the deployment script
-./deploy-to-github.sh YOUR_GITHUB_USERNAME kamerai
+./deploy-to-github.sh YOUR_GITHUB_USERNAME kaimera
 ```
 
 **What it does:**
@@ -425,17 +425,17 @@ Use the included Docker-based deployment for isolated, secure GitHub publishing:
 **Step-by-step:**
 
 1. **Create GitHub repository** at https://github.com/new
-   - Repository name: `kamerai`
+   - Repository name: `kaimera`
    - Don't initialize with anything
 
 2. **Run deployment**:
    ```bash
-   ./deploy-to-github.sh YOUR_GITHUB_USERNAME kamerai
+   ./deploy-to-github.sh YOUR_GITHUB_USERNAME kaimera
    ```
 
 3. **First time only - Add SSH key to GitHub** when prompted:
    - Go to https://github.com/settings/ssh/new
-   - Title: "Kamerai Deploy Key"
+   - Title: "Kaimera Deploy Key"
    - Paste the displayed key
    - Click "Add SSH key"
 
@@ -456,7 +456,7 @@ If you prefer not to use Docker:
 
 ```bash
 # Add GitHub remote
-git remote add origin https://github.com/YOUR_USERNAME/kamerai.git
+git remote add origin https://github.com/YOUR_USERNAME/kaimera.git
 
 # Commit changes
 git add .

@@ -1,4 +1,4 @@
-package com.example.kamerai
+package com.example.kaimera
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.kamerai.MainActivity.CameraFilter
+import com.example.kaimera.MainActivity.CameraFilter
 
 class FilterAdapter(
     private val filters: List<CameraFilter>,

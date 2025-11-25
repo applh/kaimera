@@ -1,10 +1,10 @@
 #!/bin/bash
-# Kamerai Icon Generator using ImageMagick
+# Kaimera Icon Generator using ImageMagick
 # Creates professional launcher icons for all Android densities
 
 set -e
 
-echo "🎨 Generating Kamerai launcher icons with ImageMagick..."
+echo "🎨 Generating Kaimera launcher icons with ImageMagick..."
 echo ""
 
 # Check for ImageMagick

@@ -1,10 +1,10 @@
 #!/bin/bash
-# Kamerai Development Environment Setup Script
-# This script sets up the required tools for building the Kamerai Android app
+# Kaimera Development Environment Setup Script
+# This script sets up the required tools for building the Kaimera Android app
 
 set -e  # Exit on error
 
-echo "🚀 Kamerai Development Environment Setup"
+echo "🚀 Kaimera Development Environment Setup"
 echo "========================================"
 echo ""
 

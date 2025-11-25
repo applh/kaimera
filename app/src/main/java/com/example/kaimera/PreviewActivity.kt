@@ -1,4 +1,4 @@
-package com.example.kamerai
+package com.example.kaimera
 
 import android.net.Uri
 import android.os.Bundle

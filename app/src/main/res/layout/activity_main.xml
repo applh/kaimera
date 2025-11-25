@@ -60,7 +60,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_menu_rotate" />
 
-    <com.example.kamerai.GridOverlayView
+    <com.example.kaimera.GridOverlayView
         android:id="@+id/gridOverlay"
         android:layout_width="0dp"
         android:layout_height="0dp"

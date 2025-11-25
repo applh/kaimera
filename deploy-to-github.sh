@@ -3,11 +3,11 @@ set -e
 
 # Configuration
 GITHUB_USERNAME="${1:-YOUR_USERNAME}"
-REPO_NAME="${2:-kamerai}"
+REPO_NAME="${2:-kaimera}"
 GITHUB_REPO="git@github.com:${GITHUB_USERNAME}/${REPO_NAME}.git"
 
 echo "🐳 Building Docker image..."
-docker build -f Dockerfile.gitpush -t kamerai-deploy .
+docker build -f Dockerfile.gitpush -t kaimera-deploy .
 
 echo ""
 echo "🚀 Running deployment container..."
@@ -16,10 +16,10 @@ echo ""
 
 docker run -it --rm \
   -e GITHUB_REPO="${GITHUB_REPO}" \
-  -e GIT_EMAIL="${GIT_EMAIL:-deploy@kamerai.local}" \
-  -e GIT_NAME="${GIT_NAME:-Kamerai Deploy}" \
+  -e GIT_EMAIL="${GIT_EMAIL:-deploy@kaimera.local}" \
+  -e GIT_NAME="${GIT_NAME:-Kaimera Deploy}" \
   -e COMMIT_MESSAGE="${COMMIT_MESSAGE:-Release v19.0.0}" \
-  kamerai-deploy
+  kaimera-deploy
 
 echo ""
 echo "✨ Deployment complete!"

@@ -1,4 +1,4 @@
-package com.example.kamerai
+package com.example.kaimera
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -43,7 +43,7 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        private const val TAG = "Kamerai"
+        private const val TAG = "Kaimera"
     }
 
     enum class TimerDelay(val seconds: Int) {
