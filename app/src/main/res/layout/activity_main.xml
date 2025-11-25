@@ -70,58 +70,29 @@
         app:layout_constraintStart_toStartOf="@+id/previewView"
         app:layout_constraintTop_toTopOf="@+id/previewView" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/flashButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:contentDescription="@string/flash_off"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/gridButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="32dp"
-        android:contentDescription="@string/grid_toggle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_dialog_dialer" />
+
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/timerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:layout_marginStart="32dp"
+        android:layout_margin="16dp"
         android:contentDescription="@string/timer_off"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_recent_history" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/qualityButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="180dp"
-        android:layout_marginStart="32dp"
-        android:contentDescription="@string/quality_high"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_info_details" />
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/modeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="32dp"
+        android:layout_margin="16dp"
         android:contentDescription="@string/mode_photo"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/filterButton"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_camera" />
 
@@ -129,10 +100,9 @@
         android:id="@+id/filterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="180dp"
-        android:layout_marginEnd="32dp"
+        android:layout_margin="16dp"
         android:contentDescription="@string/filter_none"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/settingsButton"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_edit" />
 

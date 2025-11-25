@@ -17,6 +17,14 @@
             app:entryValues="@array/photo_quality_values"
             app:defaultValue="high" />
 
+        <ListPreference
+            app:key="flash_mode"
+            app:title="Flash Mode"
+            app:summary="%s"
+            app:entries="@array/flash_mode_entries"
+            app:entryValues="@array/flash_mode_values"
+            app:defaultValue="auto" />
+
         <SwitchPreferenceCompat
             app:key="grid_overlay"
             app:title="Grid Overlay"

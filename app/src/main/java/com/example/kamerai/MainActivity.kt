@@ -115,6 +115,15 @@ class MainActivity : AppCompatActivity() {
             else -> PhotoQuality.HIGH
         }
         
+        // Apply Flash Mode
+        val flashModePref = sharedPreferences.getString("flash_mode", "auto")
+        flashMode = when (flashModePref) {
+            "auto" -> ImageCapture.FLASH_MODE_AUTO
+            "on" -> ImageCapture.FLASH_MODE_ON
+            "off" -> ImageCapture.FLASH_MODE_OFF
+            else -> ImageCapture.FLASH_MODE_AUTO
+        }
+        
         // Shutter sound is handled during capture
     }
 
@@ -126,12 +135,8 @@ class MainActivity : AppCompatActivity() {
         captureButton = findViewById(R.id.captureButton)
         val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
         val switchButton = findViewById<FloatingActionButton>(R.id.switchButton)
-        val flashButton = findViewById<FloatingActionButton>(R.id.flashButton)
-        val gridButton = findViewById<FloatingActionButton>(R.id.gridButton)
-        val gridOverlay = findViewById<GridOverlayView>(R.id.gridOverlay)
         val timerButton = findViewById<FloatingActionButton>(R.id.timerButton)
         val countdownText = findViewById<TextView>(R.id.countdownText)
-        val qualityButton = findViewById<FloatingActionButton>(R.id.qualityButton)
         val modeButton = findViewById<FloatingActionButton>(R.id.modeButton)
         val recordingIndicator = findViewById<TextView>(R.id.recordingIndicator)
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -198,21 +203,7 @@ class MainActivity : AppCompatActivity() {
             toggleCamera()
         }
 
-        // Set up flash button click listener
-        flashButton.setOnClickListener {
-            toggleFlash(flashButton)
-        }
 
-        // Set up grid button click listener
-        gridButton.setOnClickListener {
-            if (gridOverlay.visibility == android.view.View.VISIBLE) {
-                gridOverlay.visibility = android.view.View.GONE
-                Toast.makeText(this, "Grid Off", Toast.LENGTH_SHORT).show()
-            } else {
-                gridOverlay.visibility = android.view.View.VISIBLE
-                Toast.makeText(this, "Grid On", Toast.LENGTH_SHORT).show()
-            }
-        }
 
         // Set up timer button click listener
         timerButton.setOnClickListener {
@@ -232,26 +223,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
         }
 
-        // Set up quality button click listener
-        qualityButton.setOnClickListener {
-            photoQuality = when (photoQuality) {
-                PhotoQuality.HIGH -> PhotoQuality.MEDIUM
-                PhotoQuality.MEDIUM -> PhotoQuality.LOW
-                PhotoQuality.LOW -> PhotoQuality.HIGH
-            }
-            
-            val (stringRes, toastMsg) = when (photoQuality) {
-                PhotoQuality.HIGH -> Pair(R.string.quality_high, "Quality: High (95%)")
-                PhotoQuality.MEDIUM -> Pair(R.string.quality_medium, "Quality: Medium (75%)")
-                PhotoQuality.LOW -> Pair(R.string.quality_low, "Quality: Low (50%)")
-            }
-            
-            qualityButton.contentDescription = getString(stringRes)
-            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
-            
-            // Restart camera to apply new quality setting
-            startCamera()
-        }
+
 
         // Set up mode button click listener
         modeButton.setOnClickListener {
@@ -295,25 +267,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggleFlash(flashButton: FloatingActionButton) {
-        flashMode = when (flashMode) {
-            ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_ON
-            ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_AUTO
-            else -> ImageCapture.FLASH_MODE_OFF
-        }
-
-        imageCapture?.flashMode = flashMode
-
-        val (iconRes, stringRes) = when (flashMode) {
-            ImageCapture.FLASH_MODE_ON -> Pair(android.R.drawable.ic_menu_always_landscape_portrait, R.string.flash_on)
-            ImageCapture.FLASH_MODE_AUTO -> Pair(android.R.drawable.ic_menu_compass, R.string.flash_auto)
-            else -> Pair(android.R.drawable.ic_menu_close_clear_cancel, R.string.flash_off)
-        }
-
-        flashButton.setImageResource(iconRes)
-        flashButton.contentDescription = getString(stringRes)
-        Toast.makeText(this, stringRes, Toast.LENGTH_SHORT).show()
-    }
 
     private fun toggleCamera() {
         cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
