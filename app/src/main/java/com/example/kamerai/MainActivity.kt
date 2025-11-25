@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -33,6 +34,7 @@ import androidx.core.content.PermissionChecker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.File
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -74,6 +76,14 @@ class MainActivity : AppCompatActivity() {
     private val maxBurstCount: Int = 20
     private var currentFilter: CameraFilter? = null
     private val handler = Handler(Looper.getMainLooper())
+
+    // Chronometer state
+    private var chronometerRunning = false
+    private var chronometerSeconds = 0
+    private var chronometerRunnable: Runnable? = null
+    private var audioRecorder: android.media.MediaRecorder? = null
+    private var isRecordingAudio = false
+    private var audioFilePath: String? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -123,6 +133,11 @@ class MainActivity : AppCompatActivity() {
             "off" -> ImageCapture.FLASH_MODE_OFF
             else -> ImageCapture.FLASH_MODE_AUTO
         }
+        
+        // Apply Chronometer visibility
+        val showChronometer = sharedPreferences.getBoolean("enable_chronometer", false)
+        val chronometerPanel = findViewById<android.widget.LinearLayout>(R.id.chronometerPanel)
+        chronometerPanel?.visibility = if (showChronometer) android.view.View.VISIBLE else android.view.View.GONE
         
         // Shutter sound is handled during capture
     }
@@ -263,6 +278,34 @@ class MainActivity : AppCompatActivity() {
                 android.view.View.GONE
             } else {
                 android.view.View.VISIBLE
+            }
+        }
+
+        // Set up chronometer controls
+        val chronometerDisplay = findViewById<TextView>(R.id.chronometerDisplay)
+        val chronoStartStopButton = findViewById<MaterialButton>(R.id.chronoStartStopButton)
+        val chronoResetButton = findViewById<MaterialButton>(R.id.chronoResetButton)
+        val chronoAudioButton = findViewById<MaterialButton>(R.id.chronoAudioButton)
+
+        chronoStartStopButton.setOnClickListener {
+            if (chronometerRunning) {
+                stopChronometer(chronoStartStopButton, chronoAudioButton)
+            } else {
+                startChronometer(chronometerDisplay, chronoStartStopButton, chronoAudioButton)
+            }
+        }
+
+        chronoResetButton.setOnClickListener {
+            resetChronometer(chronometerDisplay, chronoStartStopButton, chronoAudioButton)
+        }
+
+        chronoAudioButton.setOnClickListener {
+            if (isRecordingAudio) {
+                stopAudioRecording()
+                chronoAudioButton.text = "🎤"
+            } else {
+                startAudioRecording()
+                chronoAudioButton.text = "⏹️"
             }
         }
     }
@@ -573,8 +616,99 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    private fun startChronometer(display: TextView, startStopButton: MaterialButton, audioButton: MaterialButton) {
+        chronometerRunning = true
+        startStopButton.text = "Stop"
+        audioButton.isEnabled = true
+        
+        chronometerRunnable = object : Runnable {
+            override fun run() {
+                chronometerSeconds++
+                val minutes = chronometerSeconds / 60
+                val seconds = chronometerSeconds % 60
+                display.text = String.format("%02d:%02d", minutes, seconds)
+                handler.postDelayed(this, 1000)
+            }
+        }
+        handler.post(chronometerRunnable!!)
+    }
+
+    private fun stopChronometer(startStopButton: MaterialButton, audioButton: MaterialButton) {
+        chronometerRunning = false
+        startStopButton.text = "Start"
+        audioButton.isEnabled = false
+        chronometerRunnable?.let {
+            handler.removeCallbacks(it)
+        }
+        
+        // Stop audio recording if active
+        if (isRecordingAudio) {
+            stopAudioRecording()
+            audioButton.text = "🎤"
+        }
+    }
+
+    private fun resetChronometer(display: TextView, startStopButton: MaterialButton, audioButton: MaterialButton) {
+        stopChronometer(startStopButton, audioButton)
+        chronometerSeconds = 0
+        display.text = "00:00"
+    }
+
+    private fun startAudioRecording() {
+        try {
+            val outputDir = getExternalFilesDir(null)
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            audioFilePath = "${outputDir}/AUDIO_$timestamp.m4a"
+            
+            audioRecorder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                android.media.MediaRecorder(this)
+            } else {
+                @Suppress("DEPRECATION")
+                android.media.MediaRecorder()
+            }
+            
+            audioRecorder?.apply {
+                setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
+                setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
+                setOutputFile(audioFilePath)
+                prepare()
+                start()
+            }
+            
+            isRecordingAudio = true
+            Toast.makeText(this, "Audio recording started", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to start audio recording", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun stopAudioRecording() {
+        try {
+            audioRecorder?.apply {
+                stop()
+                release()
+            }
+            audioRecorder = null
+            isRecordingAudio = false
+            Toast.makeText(this, "Audio saved: ${audioFilePath?.substringAfterLast("/")}", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to stop audio recording", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        // Clean up chronometer
+        chronometerRunnable?.let {
+            handler.removeCallbacks(it)
+        }
+        // Clean up audio recorder
+        if (isRecordingAudio) {
+            stopAudioRecording()
+        }
         cameraExecutor.shutdown()
     }
     // Helper to create list of available filters

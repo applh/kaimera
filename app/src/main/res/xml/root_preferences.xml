@@ -40,6 +40,12 @@
             app:defaultValue="2"
             app:showSeekBarValue="true"
             app:updatesContinuously="false" />
+
+        <SwitchPreferenceCompat
+            app:key="enable_chronometer"
+            app:title="Enable Chronometer"
+            app:summary="Show stopwatch overlay on camera screen"
+            app:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="About">
