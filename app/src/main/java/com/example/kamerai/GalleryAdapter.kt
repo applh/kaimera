@@ -31,25 +31,40 @@ class GalleryAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = files[position]
-        val isVideo = file.extension.lowercase() == "mp4"
+        val extension = file.extension.lowercase()
+        val isVideo = extension == "mp4"
+        val isAudio = extension == "m4a"
 
-        if (isVideo) {
-            // Load video thumbnail
-            holder.videoIndicator.visibility = View.VISIBLE
-            loadVideoThumbnail(file, holder.imageView)
-        } else {
-            // Load image
-            holder.videoIndicator.visibility = View.GONE
-            holder.imageView.load(file) {
-                crossfade(true)
+        when {
+            isVideo -> {
+                // Load video thumbnail
+                holder.videoIndicator.visibility = View.VISIBLE
+                loadVideoThumbnail(file, holder.imageView)
+            }
+            isAudio -> {
+                // Show audio icon
+                holder.videoIndicator.visibility = View.VISIBLE
+                holder.imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
+            }
+            else -> {
+                // Load image
+                holder.videoIndicator.visibility = View.GONE
+                holder.imageView.load(file) {
+                    crossfade(true)
+                }
             }
         }
 
         // Set up delete button
         holder.deleteButton.setOnClickListener {
             val context = holder.itemView.context
+            val fileType = when {
+                isVideo -> "Video"
+                isAudio -> "Audio"
+                else -> "Photo"
+            }
             AlertDialog.Builder(context)
-                .setTitle("Delete ${if (isVideo) "Video" else "Photo"}?")
+                .setTitle("Delete $fileType?")
                 .setMessage("This action cannot be undone.")
                 .setPositiveButton("Delete") { _, _ ->
                     if (file.delete()) {

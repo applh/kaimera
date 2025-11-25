@@ -28,11 +28,11 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun loadGallery() {
-        // Load files from external files directory (both photos and videos)
+        // Load files from external files directory (photos, videos, and audio)
         val directory = getExternalFilesDir(null)
         val files = directory?.listFiles { file ->
             val ext = file.extension.lowercase()
-            ext == "jpg" || ext == "mp4"
+            ext == "jpg" || ext == "mp4" || ext == "m4a"
         }?.sortedByDescending { it.lastModified() }?.toMutableList() ?: mutableListOf()
 
         if (files.isEmpty()) {
