@@ -93,6 +93,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        applyPreferences()
+    }
+
+    private fun applyPreferences() {
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        
+        // Apply Grid Overlay
+        val showGrid = sharedPreferences.getBoolean("grid_overlay", false)
+        val gridOverlay = findViewById<GridOverlayView>(R.id.gridOverlay)
+        gridOverlay.visibility = if (showGrid) android.view.View.VISIBLE else android.view.View.GONE
+        
+        // Apply Photo Quality
+        val quality = sharedPreferences.getString("photo_quality", "high")
+        photoQuality = when (quality) {
+            "high" -> PhotoQuality.HIGH
+            "medium" -> PhotoQuality.MEDIUM
+            "low" -> PhotoQuality.LOW
+            else -> PhotoQuality.HIGH
+        }
+        
+        // Shutter sound is handled during capture
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -158,6 +183,13 @@ class MainActivity : AppCompatActivity() {
         // Set up gallery button click listener
         galleryButton.setOnClickListener {
             val intent = android.content.Intent(this, GalleryActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Set up settings button click listener
+        val settingsButton = findViewById<FloatingActionButton>(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            val intent = android.content.Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
 
@@ -404,6 +436,13 @@ class MainActivity : AppCompatActivity() {
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         // Capture image
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val playSound = sharedPreferences.getBoolean("shutter_sound", true)
+        
+        if (playSound) {
+            android.media.MediaActionSound().play(android.media.MediaActionSound.SHUTTER_CLICK)
+        }
+
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
