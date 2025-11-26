@@ -109,6 +109,29 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         applyPreferences()
+        checkAutoDelete()
+    }
+
+    private fun checkAutoDelete() {
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val autoDeleteEnabled = sharedPreferences.getBoolean("auto_delete_enabled", false)
+        
+        if (autoDeleteEnabled) {
+            val keepFilesFor = sharedPreferences.getString("keep_files_for", "30")?.toIntOrNull() ?: 30
+            if (keepFilesFor > 0) {
+                val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+                val directory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
+                
+                cameraExecutor.execute {
+                    val deletedCount = StorageManager.deleteOldFiles(directory, keepFilesFor)
+                    if (deletedCount > 0) {
+                        runOnUiThread {
+                            Toast.makeText(this, "Cleaned up $deletedCount old files", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun applyPreferences() {
@@ -441,16 +464,29 @@ class MainActivity : AppCompatActivity() {
         val imageCapture = imageCapture ?: return
 
         // Create output file
-        val photoFile = File(
-            getExternalFilesDir(null),
-            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
-                .format(System.currentTimeMillis()) + ".jpg"
+        // Create output file
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+        val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
+        val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
+        
+        val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
+        val fileName = if (namingPattern == "sequential") {
+            StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "IMG", "jpg")
+        } else {
+            StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "IMG", "jpg")
+        }
+        
+        val photoFile = File(outputDirectory, fileName)
+
+        val outputOptions = StorageManager.createOutputFileOptions(
+            this,
+            photoFile,
+            saveLocationPref ?: "app_storage",
+            fileName
         )
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
         // Capture image
-        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
         val playSound = sharedPreferences.getBoolean("shutter_sound", true)
         
         if (playSound) {
@@ -462,11 +498,13 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    // Apply filter to saved image if any
+                    // Get the saved URI (works for both file and MediaStore)
+                    val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
+                    
+                    // Apply filter to saved image if any (only for file-based storage)
                     val filter = currentFilter
                     val matrix = filter?.matrix
-                    val savedUri = Uri.fromFile(photoFile)
-                    if (matrix != null) {
+                    if (matrix != null && saveLocationPref != "dcim") {
                         try {
                             val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
                             val filteredBitmap = Bitmap.createBitmap(
@@ -488,11 +526,17 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     runOnUiThread {
-                        Toast.makeText(baseContext, "Photo captured: ${photoFile.name}", Toast.LENGTH_SHORT).show()
+                        val fileName = if (saveLocationPref == "dcim") {
+                            "Photo saved to gallery"
+                        } else {
+                            "Photo captured: ${photoFile.name}"
+                        }
+                        Toast.makeText(baseContext, fileName, Toast.LENGTH_SHORT).show()
                         
                         // Launch PreviewActivity
                         val intent = android.content.Intent(this@MainActivity, PreviewActivity::class.java)
                         intent.putExtra("image_uri", savedUri.toString())
+                        intent.putExtra("is_dcim", saveLocationPref == "dcim")
                         startActivity(intent)
                     }
                 }
@@ -539,13 +583,30 @@ class MainActivity : AppCompatActivity() {
         val imageCapture = imageCapture ?: return
 
         // Create output file with burst sequence number
-        val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US).format(System.currentTimeMillis())
-        val photoFile = File(
-            getExternalFilesDir(null),
-            "${timestamp}-${String.format("%03d", burstCount + 1)}.jpg"
-        )
+        // Create output file with burst sequence number
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+        val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
+        val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
+        
+        val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
+        val baseFileName = if (namingPattern == "sequential") {
+            // For burst, we use sequential numbering regardless, but respect the prefix
+            "${customPrefix ?: "IMG"}_BURST"
+        } else {
+            val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US).format(System.currentTimeMillis())
+            "${customPrefix ?: "IMG"}_${timestamp}"
+        }
+        
+        val fileName = "${baseFileName}-${String.format("%03d", burstCount + 1)}.jpg"
+        val photoFile = File(outputDirectory, fileName)
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val outputOptions = StorageManager.createOutputFileOptions(
+            this,
+            photoFile,
+            saveLocationPref ?: "app_storage",
+            fileName
+        )
 
         // Capture image
         imageCapture.takePicture(
@@ -598,16 +659,35 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Start recording
-        val videoFile = File(
-            getExternalFilesDir(null),
-            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
-                .format(System.currentTimeMillis()) + ".mp4"
+        // Start recording
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+        val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
+        val customPrefix = sharedPreferences.getString("custom_file_prefix", "VID")
+        
+        val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
+        val fileName = if (namingPattern == "sequential") {
+            StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "VID", "mp4")
+        } else {
+            StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "VID", "mp4")
+        }
+        
+        val videoFile = File(outputDirectory, fileName)
+
+        val outputOptions = StorageManager.createVideoOutputOptions(
+            this,
+            videoFile,
+            saveLocationPref ?: "app_storage",
+            fileName
         )
 
-        val outputOptions = FileOutputOptions.Builder(videoFile).build()
+        val pendingRecording = if (outputOptions is FileOutputOptions) {
+            videoCapture.output.prepareRecording(this, outputOptions)
+        } else {
+            videoCapture.output.prepareRecording(this, outputOptions as MediaStoreOutputOptions)
+        }
 
-        recording = videoCapture.output
-            .prepareRecording(this, outputOptions)
+        recording = pendingRecording
             .withAudioEnabled()
             .start(ContextCompat.getMainExecutor(this)) { recordEvent ->
                 when (recordEvent) {
@@ -700,9 +780,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun startAudioRecording() {
         try {
-            val outputDir = getExternalFilesDir(null)
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            audioFilePath = "${outputDir}/AUDIO_$timestamp.m4a"
+            val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+            val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+            val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
+            val customPrefix = sharedPreferences.getString("custom_file_prefix", "AUDIO")
+            
+            val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
+            val fileName = if (namingPattern == "sequential") {
+                StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "AUDIO", "m4a")
+            } else {
+                StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "AUDIO", "m4a")
+            }
+            
+            audioFilePath = File(outputDirectory, fileName).absolutePath
             
             audioRecorder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                 android.media.MediaRecorder(this)

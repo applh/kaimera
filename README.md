@@ -394,7 +394,10 @@ After regenerating icons, rebuild the APK:
 - **Editing Tools** - Crop/rotate, brightness/contrast, trim audio/video
 
 ### ⚙️ Settings & Customization
-- **Storage Options** - Save location, file naming patterns, auto-delete old files
+- **Storage Options** - Choose save location (App Storage/SD Card/DCIM), customize file naming (Timestamp/Sequential/Custom), and auto-delete old files
+  - **DCIM (Public Gallery)** - Save photos directly to device gallery (visible in Google Photos, etc.)
+  - **Smart Gallery** - In-app gallery shows warning for DCIM mode with quick access to system gallery
+  - **MediaStore Integration** - Proper content URI handling for public storage
 - **UI Customization** - Dark/light theme, button customization, gesture controls
 
 ### 🔧 Advanced Features

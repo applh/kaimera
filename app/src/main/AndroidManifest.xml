@@ -34,6 +34,7 @@
         <activity
             android:name=".GalleryActivity"
             android:label="@string/gallery"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:parentActivityName=".MainActivity" />
 
         <activity

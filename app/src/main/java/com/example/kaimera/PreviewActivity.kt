@@ -30,7 +30,8 @@ class PreviewActivity : AppCompatActivity() {
         val countdownText = findViewById<TextView>(R.id.previewCountdownText)
 
         val imageUriString = intent.getStringExtra("image_uri")
-        android.util.Log.d("PreviewActivity", "Received URI string: $imageUriString")
+        val isDcim = intent.getBooleanExtra("is_dcim", false)
+        android.util.Log.d("PreviewActivity", "Received URI string: $imageUriString, isDcim: $isDcim")
 
         if (imageUriString == null) {
             android.util.Log.e("PreviewActivity", "URI is null, finishing")
@@ -39,7 +40,90 @@ class PreviewActivity : AppCompatActivity() {
         }
 
         val imageUri = Uri.parse(imageUriString)
-        previewImageView.load(imageUri)
+        
+        // Load image with EXIF orientation support
+        try {
+            if (isDcim || imageUri.scheme == "content") {
+                // For MediaStore content URIs, use ContentResolver
+                val inputStream = contentResolver.openInputStream(imageUri)
+                val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                inputStream?.close()
+                
+                if (bitmap != null) {
+                    // Try to read EXIF from content URI
+                    try {
+                        val exifInputStream = contentResolver.openInputStream(imageUri)
+                        if (exifInputStream != null) {
+                            val exif = androidx.exifinterface.media.ExifInterface(exifInputStream)
+                            val orientation = exif.getAttributeInt(
+                                androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                                androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
+                            )
+                            val matrix = android.graphics.Matrix()
+                            when (orientation) {
+                                androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                                androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                                androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                            }
+                            val rotatedBitmap = if (matrix.isIdentity) {
+                                bitmap
+                            } else {
+                                android.graphics.Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                            }
+                            previewImageView.setImageBitmap(rotatedBitmap)
+                            exifInputStream.close()
+                        } else {
+                            previewImageView.setImageBitmap(bitmap)
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.w("PreviewActivity", "Could not read EXIF from content URI", e)
+                        previewImageView.setImageBitmap(bitmap)
+                    }
+                } else {
+                    android.util.Log.e("PreviewActivity", "Failed to decode bitmap from content URI")
+                    finish()
+                    return
+                }
+            } else {
+                // For file URIs
+                val file = File(imageUri.path!!)
+                if (file.exists()) {
+                    val bitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+                    if (bitmap != null) {
+                        // Apply EXIF orientation
+                        val exif = androidx.exifinterface.media.ExifInterface(file.absolutePath)
+                        val orientation = exif.getAttributeInt(
+                            androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                            androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
+                        )
+                        val matrix = android.graphics.Matrix()
+                        when (orientation) {
+                            androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                            androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                            androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                        }
+                        val rotatedBitmap = if (matrix.isIdentity) {
+                            bitmap
+                        } else {
+                            android.graphics.Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                        }
+                        previewImageView.setImageBitmap(rotatedBitmap)
+                    } else {
+                        android.util.Log.e("PreviewActivity", "Failed to decode bitmap")
+                        finish()
+                        return
+                    }
+                } else {
+                    android.util.Log.e("PreviewActivity", "File does not exist: ${file.absolutePath}")
+                    finish()
+                    return
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("PreviewActivity", "Error loading image", e)
+            // Fallback to Coil
+            previewImageView.load(imageUri)
+        }
 
         // Get auto-save delay from preferences
         val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
