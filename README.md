@@ -2,6 +2,8 @@
 
 A modern Android camera application built with Kotlin and CameraX, featuring real-time preview and one-tap photo capture.
 
+**Kaimera** is a play on words, blending "Camera" with *Kaizen* (the Japanese concept of continuous improvement). Like the mythical Chimera, this project strives to be a fantastic hybrid—a modern camera app that constantly evolves with progressive features.
+
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)](https://kotlinlang.org)
 [![CameraX](https://img.shields.io/badge/CameraX-1.2.2-orange.svg)](https://developer.android.com/training/camerax)
@@ -547,3 +549,7 @@ For issues or questions about the implementation, refer to:
 ---
 
 **Made with ❤️ using Kotlin and CameraX**
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
