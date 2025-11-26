@@ -25,6 +25,22 @@
             app:entries="@array/flash_mode_entries"
             app:entryValues="@array/flash_mode_values"
             app:defaultValue="auto" />
+            
+        <ListPreference
+            app:key="video_quality"
+            app:title="Video Quality"
+            app:summary="%s"
+            app:entries="@array/video_quality_entries"
+            app:entryValues="@array/video_quality_values"
+            app:defaultValue="fhd" />
+
+        <ListPreference
+            app:key="video_frame_rate"
+            app:title="Video Frame Rate"
+            app:summary="%s"
+            app:entries="@array/video_frame_rate_entries"
+            app:entryValues="@array/video_frame_rate_values"
+            app:defaultValue="30" />
 
         <SwitchPreferenceCompat
             app:key="grid_overlay"

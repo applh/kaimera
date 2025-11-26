@@ -42,9 +42,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        private const val TAG = "Kaimera"
-    }
+
 
     enum class TimerDelay(val seconds: Int) {
         OFF(0), THREE_SEC(3), TEN_SEC(10)
@@ -110,6 +108,26 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         applyPreferences()
         checkAutoDelete()
+        
+        if (allPermissionsGranted()) {
+            startCamera()
+        }
+    }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    companion object {
+        private const val TAG = "Kaimera"
+        private val REQUIRED_PERMISSIONS = mutableListOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+        ).apply {
+            if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.P) {
+                add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }.toTypedArray()
     }
 
     private fun checkAutoDelete() {
@@ -191,9 +209,7 @@ class MainActivity : AppCompatActivity() {
             permissionsNeeded.add(Manifest.permission.RECORD_AUDIO)
         }
         
-        if (permissionsNeeded.isEmpty()) {
-            startCamera()
-        } else {
+        if (permissionsNeeded.isNotEmpty()) {
             requestPermissionLauncher.launch(permissionsNeeded.toTypedArray())
         }
 
@@ -394,8 +410,10 @@ class MainActivity : AppCompatActivity() {
                     setupPinchToZoom(camera)
                 } else {
                     // VideoCapture use case for videos
+                    val quality = getVideoQuality()
+                    val fallback = FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
                     val recorder = Recorder.Builder()
-                        .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                        .setQualitySelector(QualitySelector.from(quality, fallback))
                         .build()
                     videoCapture = VideoCapture.withOutput(recorder)
 
@@ -415,6 +433,18 @@ class MainActivity : AppCompatActivity() {
 
         }, ContextCompat.getMainExecutor(this))
     }
+
+    private fun getVideoQuality(): androidx.camera.video.Quality {
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val qualityString = sharedPreferences.getString("video_quality", "fhd")
+        return when (qualityString) {
+            "uhd" -> androidx.camera.video.Quality.UHD
+            "hd" -> androidx.camera.video.Quality.HD
+            else -> androidx.camera.video.Quality.FHD
+        }
+    }
+
+
 
     private fun setupPinchToZoom(camera: androidx.camera.core.Camera) {
         val scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
