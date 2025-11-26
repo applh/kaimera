@@ -24,4 +24,4 @@
 
 ## Further Debugging
 
-For more detailed debugging information, including on-device logs and ADB usage, see [DEBUGGING.md](../DEBUGGING.md) and [DEVICE_LOGGING.md](../DEVICE_LOGGING.md).
+For more detailed debugging information, including on-device logs and ADB usage, see [DEBUGGING.md](DEBUGGING.md) and [DEVICE_LOGGING.md](DEVICE_LOGGING.md).

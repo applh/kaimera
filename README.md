@@ -62,9 +62,9 @@ We have detailed documentation available in the `docs/` directory:
 - 🚀 **[Deployment](docs/DEPLOYMENT.md)** - Deploying to GitHub and publishing to Google Play.
 - 🗺️ **[Roadmap](docs/ROADMAP.md)** - Planned features and future ideas.
 - 🔧 **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and fixes.
-- 🐛 **[Debugging](DEBUGGING.md)** - Detailed debugging guide.
-- 🐳 **[Docker Build](DOCKER_BUILD.md)** - Using the containerized build system.
-- 📊 **[Build Comparison](BUILD_COMPARISON.md)** - Local vs. Docker builds.
+- 🐛 **[Debugging](docs/DEBUGGING.md)** - Detailed debugging guide.
+- 🐳 **[Docker Build](docs/DOCKER_BUILD.md)** - Using the containerized build system.
+- 📊 **[Build Comparison](docs/BUILD_COMPARISON.md)** - Local vs. Docker builds.
 
 ## Usage
 
