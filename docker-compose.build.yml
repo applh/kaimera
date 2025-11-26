@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Android APK Builder
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    image: kaimera-builder
+    container_name: kaimera-builder
+    volumes:
+      - ./build-output:/app/app/build/outputs
+      - gradle-cache:/root/.gradle
+    command: ./gradlew assembleRelease --no-daemon
+
+  # Debug build variant
+  builder-debug:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    image: kaimera-builder
+    container_name: kaimera-builder-debug
+    volumes:
+      - ./build-output:/app/app/build/outputs
+      - gradle-cache:/root/.gradle
+    command: ./gradlew assembleDebug --no-daemon
+
+volumes:
+  gradle-cache:
+    driver: local
