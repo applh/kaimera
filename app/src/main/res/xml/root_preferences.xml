@@ -98,6 +98,12 @@
             app:key="version"
             app:title="Version"
             app:summary="1.0.0" />
+        
+        <Preference
+            app:key="debug_logs"
+            app:title="🐛 Debug Logs"
+            app:summary="View app logs for troubleshooting"
+            app:icon="@android:drawable/ic_menu_info_details" />
     </PreferenceCategory>
 
 </PreferenceScreen>

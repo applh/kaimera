@@ -30,6 +30,7 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - 📱 **Material Design** - Modern UI with Material Design components
 - ⚡ **Lifecycle-Aware** - Automatic camera lifecycle management
 - 🎯 **Clean UI** - Streamlined interface with settings-based configuration
+- 🐛 **Debug Logs** - On-device log viewer for troubleshooting (Settings → Debug Logs)
 
 ## Screenshots
 
@@ -318,6 +319,41 @@ private fun takePhoto() {
 - Check device storage space
 - Verify app has storage access (automatic for external files directory)
 - Check logcat for error messages: `adb logcat | grep Kaimera`
+
+## Debugging
+
+### On-Device Debug Logs
+
+Access the built-in debug log viewer:
+1. Open Kaimera
+2. Go to **Settings** (⚙️)
+3. Scroll to bottom → **🐛 Debug Logs**
+4. Tap **🧪 Test** to generate sample logs
+5. Tap **🔄 Refresh** to reload logs
+
+**Note:** On Android 4.1+, apps have limited log access. The Test button validates logging works. For full logs, use ADB or install "Logcat Reader" from Play Store.
+
+### Using ADB (Recommended for Developers)
+
+```bash
+# View real-time logs
+adb logcat | grep Kaimera
+
+# Filter by specific activity
+adb logcat -s GalleryActivity MainActivity
+
+# Save logs to file
+adb logcat > kaimera_debug.txt
+```
+
+### Log Viewer Apps (No Computer Needed)
+
+Install from Play Store:
+- **Logcat Reader** (recommended, no ads)
+- **MatLog** (advanced filtering)
+- Filter by package: `com.example.kaimera`
+
+See [DEBUGGING.md](DEBUGGING.md) and [DEVICE_LOGGING.md](DEVICE_LOGGING.md) for comprehensive debugging guides.
 
 ## Customization
 

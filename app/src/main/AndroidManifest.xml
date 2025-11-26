@@ -47,6 +47,11 @@
         <activity
             android:name=".MediaViewerActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+        <activity
+            android:name=".DebugLogActivity"
+            android:label="Debug Logs"
+            android:theme="@style/Theme.MaterialComponents.DayNight"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>

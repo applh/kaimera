@@ -15,18 +15,41 @@ class GalleryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_gallery)
-
-        recyclerView = findViewById(R.id.recyclerView)
-        emptyView = findViewById(R.id.emptyView)
-
-        // Set up system gallery button
-        val openSystemGalleryButton = findViewById<com.google.android.material.button.MaterialButton>(R.id.openSystemGalleryButton)
-        openSystemGalleryButton.setOnClickListener {
-            openSystemGallery()
+        android.util.Log.d(TAG, "onCreate: Starting GalleryActivity")
+        
+        try {
+            setContentView(R.layout.activity_gallery)
+            android.util.Log.d(TAG, "onCreate: Layout inflated successfully")
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "onCreate: Failed to inflate layout", e)
+            android.widget.Toast.makeText(this, "Failed to load gallery: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            finish()
+            return
         }
 
-        loadGallery()
+        try {
+            recyclerView = findViewById(R.id.recyclerView)
+            emptyView = findViewById(R.id.emptyView)
+            android.util.Log.d(TAG, "onCreate: Views initialized")
+
+            // Set up system gallery button
+            val openSystemGalleryButton = findViewById<com.google.android.material.button.MaterialButton>(R.id.openSystemGalleryButton)
+            openSystemGalleryButton.setOnClickListener {
+                openSystemGallery()
+            }
+            android.util.Log.d(TAG, "onCreate: Button listeners set")
+
+            loadGallery()
+            android.util.Log.d(TAG, "onCreate: Gallery loaded successfully")
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "onCreate: Error during initialization", e)
+            android.widget.Toast.makeText(this, "Error initializing gallery: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
+
+    companion object {
+        private const val TAG = "GalleryActivity"
     }
 
     private fun openSystemGallery() {
