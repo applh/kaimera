@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import java.io.File
 
+import android.widget.TextView
+
 class GalleryAdapter(
     private var files: MutableList<File>,
     private val onFileDeleted: () -> Unit
@@ -22,9 +24,10 @@ class GalleryAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.imageView)
-        val deleteButton: ImageView = view.findViewById(R.id.deleteButton)
         val videoIndicator: ImageView = view.findViewById(R.id.videoIndicator)
-        val fileSizeText: android.widget.TextView = view.findViewById(R.id.fileSizeText)
+        val deleteButton: android.widget.ImageButton = view.findViewById(R.id.btnDelete)
+        val btnInfo: android.widget.ImageButton = view.findViewById(R.id.btnInfo)
+        val fileSizeText: TextView = view.findViewById(R.id.fileSizeText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -59,8 +62,12 @@ class GalleryAdapter(
 
         // Display file size
         val fileSize = file.length()
-        holder.fileSizeText.text = StorageManager.formatStorageSize(fileSize)
-
+        holder.fileSizeText.text = StorageManager.formatStorageSize(file.length())
+        
+        holder.btnInfo.setOnClickListener {
+            ExifUtils.showExifEditorDialog(holder.itemView.context, file)
+        }
+        
         // Set up item click listener
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
