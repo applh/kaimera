@@ -3,6 +3,10 @@ package com.example.kaimera
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.ColorMatrix
@@ -89,6 +93,31 @@ class MainActivity : AppCompatActivity() {
     // Recording timer state
     private var recordingSeconds = 0
     private var recordingTimerRunnable: Runnable? = null
+    
+    // Level indicator
+    private lateinit var levelIndicator: LevelIndicatorView
+    private lateinit var sensorManager: SensorManager
+    private var gravitySensor: Sensor? = null
+    
+    private val sensorListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent?) {
+            event?.let {
+                val x = it.values[0]
+                val y = it.values[1]
+                val z = it.values[2]
+                
+                // Calculate pitch and roll
+                val pitch = Math.toDegrees(kotlin.math.atan2(x.toDouble(), kotlin.math.sqrt((y * y + z * z).toDouble()))).toFloat()
+                val roll = Math.toDegrees(kotlin.math.atan2(y.toDouble(), kotlin.math.sqrt((x * x + z * z).toDouble()))).toFloat()
+                
+                levelIndicator.updateTilt(pitch, roll)
+            }
+        }
+        
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+            // Not needed
+        }
+    }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -113,9 +142,26 @@ class MainActivity : AppCompatActivity() {
         applyPreferences()
         checkAutoDelete()
         
+        // Register sensor listener if level indicator is enabled
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val levelIndicatorEnabled = sharedPreferences.getBoolean("enable_level_indicator", true)
+        if (levelIndicatorEnabled) {
+            gravitySensor?.let {
+                sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
+            }
+            levelIndicator.visibility = android.view.View.VISIBLE
+        } else {
+            levelIndicator.visibility = android.view.View.GONE
+        }
+        
         if (allPermissionsGranted()) {
             startCamera()
         }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(sensorListener)
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -196,6 +242,13 @@ class MainActivity : AppCompatActivity() {
 
         previewView = findViewById(R.id.previewView)
         captureButton = findViewById(R.id.captureButton)
+        levelIndicator = findViewById(R.id.levelIndicator)
+        
+        // Initialize sensor manager
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
+            ?: sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
         val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
         val switchButton = findViewById<FloatingActionButton>(R.id.switchButton)
         val timerButton = findViewById<FloatingActionButton>(R.id.timerButton)

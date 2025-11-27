@@ -76,8 +76,14 @@
         <SwitchPreferenceCompat
             app:key="enable_chronometer"
             app:title="Enable Chronometer"
-            app:summary="Show stopwatch overlay on camera screen"
+            app:summary="Show chronometer overlay on camera screen"
             app:defaultValue="false" />
+            
+        <SwitchPreferenceCompat
+            app:key="enable_level_indicator"
+            app:title="Enable Level Indicator"
+            app:summary="Show spirit level overlay to help align shots"
+            app:defaultValue="true" />
 
         <SeekBarPreference
             app:key="gallery_max_zoom"
@@ -139,7 +145,7 @@
         <Preference
             app:key="version"
             app:title="Version"
-            app:summary="22.3.7" />
+            app:summary="23.0.0" />
         
         <Preference
             app:key="debug_logs"
