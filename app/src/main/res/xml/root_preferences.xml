@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -10,59 +11,26 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="Camera">
-        <ListPreference
-            app:key="photo_quality"
-            app:title="Photo Quality"
-            app:summary="%s"
-            app:entries="@array/photo_quality_entries"
-            app:entryValues="@array/photo_quality_values"
-            app:defaultValue="high" />
+        <Preference
+            app:key="photo_settings"
+            app:title="Photo Settings"
+            app:summary="Quality, resolution, flash, and capture mode"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:fragment="com.example.kaimera.PhotoSettingsFragment" />
 
-        <ListPreference
-            app:key="capture_mode_preference"
-            app:title="Capture Mode"
-            app:summary="%s"
-            app:entries="@array/capture_mode_entries"
-            app:entryValues="@array/capture_mode_values"
-            app:defaultValue="latency" />
+        <Preference
+            app:key="video_settings"
+            app:title="Video Settings"
+            app:summary="Quality and frame rate"
+            app:icon="@android:drawable/ic_menu_gallery"
+            app:fragment="com.example.kaimera.VideoSettingsFragment" />
 
-        <ListPreference
-            app:key="target_resolution"
-            app:title="Target Resolution"
-            app:summary="%s"
-            app:entries="@array/target_resolution_entries"
-            app:entryValues="@array/target_resolution_values"
-            app:defaultValue="max" />
-
-        <ListPreference
-            app:key="flash_mode"
-            app:title="Flash Mode"
-            app:summary="%s"
-            app:entries="@array/flash_mode_entries"
-            app:entryValues="@array/flash_mode_values"
-            app:defaultValue="auto" />
-            
-        <ListPreference
-            app:key="video_quality"
-            app:title="Video Quality"
-            app:summary="%s"
-            app:entries="@array/video_quality_entries"
-            app:entryValues="@array/video_quality_values"
-            app:defaultValue="fhd" />
-
-        <ListPreference
-            app:key="video_frame_rate"
-            app:title="Video Frame Rate"
-            app:summary="%s"
-            app:entries="@array/video_frame_rate_entries"
-            app:entryValues="@array/video_frame_rate_values"
-            app:defaultValue="30" />
-
-        <SwitchPreferenceCompat
-            app:key="grid_overlay"
-            app:title="Grid Overlay"
-            app:summary="Show rule of thirds grid"
-            app:defaultValue="false" />
+        <Preference
+            app:key="overlays_settings"
+            app:title="Overlays &amp; Level Indicator"
+            app:summary="Grid, chronometer, and level indicator settings"
+            app:icon="@android:drawable/ic_menu_view"
+            app:fragment="com.example.kaimera.OverlaysSettingsFragment" />
 
         <SeekBarPreference
             app:key="preview_auto_save_delay"
@@ -72,28 +40,6 @@
             app:defaultValue="2"
             app:showSeekBarValue="true"
             app:updatesContinuously="false" />
-
-        <SwitchPreferenceCompat
-            app:key="enable_chronometer"
-            app:title="Enable Chronometer"
-            app:summary="Show chronometer overlay on camera screen"
-            app:defaultValue="false" />
-            
-        <SwitchPreferenceCompat
-            app:key="enable_level_indicator"
-            app:title="Enable Level Indicator"
-            app:summary="Show spirit level overlay to help align shots"
-            app:defaultValue="true" />
-            
-        <SeekBarPreference
-            app:key="level_indicator_sensitivity"
-            app:title="Level Indicator Sensitivity"
-            app:summary="Adjust threshold for green indicator (1° = strict, 10° = loose)"
-            app:defaultValue="5"
-            android:min="1"
-            android:max="10"
-            app:showSeekBarValue="true"
-            app:dependency="enable_level_indicator" />
 
         <SeekBarPreference
             app:key="gallery_max_zoom"
@@ -107,48 +53,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="Storage">
-        <ListPreference
-            app:key="file_naming_pattern"
-            app:title="File Naming Pattern"
-            app:summary="%s"
-            app:entries="@array/file_naming_entries"
-            app:entryValues="@array/file_naming_values"
-            app:defaultValue="timestamp" />
-
-        <EditTextPreference
-            app:key="custom_file_prefix"
-            app:title="Custom File Prefix"
-            app:summary="Prefix for filenames (default: IMG/VID/AUDIO)"
-            app:defaultValue="IMG"
-            app:dependency="file_naming_pattern" />
-
-        <ListPreference
-            app:key="save_location"
-            app:title="Save Location"
-            app:summary="%s"
-            app:entries="@array/save_location_entries"
-            app:entryValues="@array/save_location_values"
-            app:defaultValue="app_storage" />
-
         <Preference
-            app:key="storage_usage"
-            app:title="Storage Usage"
-            app:summary="Calculating..." />
-
-        <SwitchPreferenceCompat
-            app:key="auto_delete_enabled"
-            app:title="Auto-Delete Old Files"
-            app:summary="Automatically delete files after a specified period"
-            app:defaultValue="false" />
-
-        <ListPreference
-            app:key="keep_files_for"
-            app:title="Keep Files For"
-            app:summary="%s"
-            app:entries="@array/keep_files_entries"
-            app:entryValues="@array/keep_files_values"
-            app:defaultValue="30"
-            app:dependency="auto_delete_enabled" />
+            app:key="storage_settings"
+            app:title="Storage Settings"
+            app:summary="File naming, location, and auto-delete options"
+            app:icon="@android:drawable/ic_menu_save"
+            app:fragment="com.example.kaimera.StorageSettingsFragment" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="About">

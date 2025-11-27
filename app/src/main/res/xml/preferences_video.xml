@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:key="video_quality"
+        app:title="Video Quality"
+        app:summary="%s"
+        app:entries="@array/video_quality_entries"
+        app:entryValues="@array/video_quality_values"
+        app:defaultValue="fhd" />
+
+    <ListPreference
+        app:key="video_frame_rate"
+        app:title="Video Frame Rate"
+        app:summary="%s"
+        app:entries="@array/video_frame_rate_entries"
+        app:entryValues="@array/video_frame_rate_values"
+        app:defaultValue="30" />
+
+</PreferenceScreen>

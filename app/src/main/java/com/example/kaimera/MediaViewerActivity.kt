@@ -163,6 +163,7 @@ class MediaViewerActivity : AppCompatActivity() {
         videoView.visibility = View.VISIBLE
         audioIcon.visibility = View.GONE
         mediaControls.visibility = View.VISIBLE
+        btnInfo.visibility = View.GONE  // Hide EXIF button for videos
         
         val uri = Uri.parse(filePath)
         videoView.setVideoURI(uri)
@@ -206,6 +207,7 @@ class MediaViewerActivity : AppCompatActivity() {
         videoView.visibility = View.GONE
         audioIcon.visibility = View.VISIBLE
         mediaControls.visibility = View.VISIBLE
+        btnInfo.visibility = View.GONE  // Hide EXIF button for audio
         
         try {
             mediaPlayer = MediaPlayer().apply {
@@ -273,6 +275,7 @@ class MediaViewerActivity : AppCompatActivity() {
         audioIcon.visibility = View.GONE
         mediaControls.visibility = View.GONE
         photoView.visibility = View.VISIBLE
+        btnInfo.visibility = View.VISIBLE  // Show EXIF button for photos
         
         try {
             val bitmap = android.graphics.BitmapFactory.decodeFile(filePath)

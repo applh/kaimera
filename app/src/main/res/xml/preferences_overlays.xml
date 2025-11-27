@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="grid_overlay"
+        app:title="Grid Overlay"
+        app:summary="Show rule of thirds grid"
+        app:defaultValue="false" />
+
+    <SwitchPreferenceCompat
+        app:key="enable_chronometer"
+        app:title="Enable Chronometer"
+        app:summary="Show chronometer overlay on camera screen"
+        app:defaultValue="false" />
+
+    <SwitchPreferenceCompat
+        app:key="enable_level_indicator"
+        app:title="Enable Level Indicator"
+        app:summary="Show spirit level overlay to help align shots"
+        app:defaultValue="true" />
+
+    <SeekBarPreference
+        app:key="level_indicator_sensitivity"
+        app:title="Level Indicator Sensitivity"
+        app:summary="Adjust threshold for green indicator (1° = strict, 10° = loose)"
+        app:defaultValue="5"
+        android:min="1"
+        android:max="10"
+        app:showSeekBarValue="true"
+        app:dependency="enable_level_indicator" />
+
+    <SeekBarPreference
+        app:key="level_indicator_crosshair_size"
+        app:title="Level Indicator Crosshair Size"
+        app:summary="Adjust the size of the crosshair (0-100%)"
+        app:defaultValue="20"
+        android:min="0"
+        android:max="100"
+        app:showSeekBarValue="true"
+        app:dependency="enable_level_indicator" />
+
+    <SeekBarPreference
+        app:key="level_indicator_circle_size"
+        app:title="Level Indicator Circle Size"
+        app:summary="Adjust the size of the green circle (0-100%)"
+        app:defaultValue="10"
+        android:min="0"
+        android:max="100"
+        app:showSeekBarValue="true"
+        app:dependency="enable_level_indicator" />
+
+</PreferenceScreen>

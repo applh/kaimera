@@ -104,13 +104,12 @@ class MainActivity : AppCompatActivity() {
             event?.let {
                 val x = it.values[0]
                 val y = it.values[1]
-                val z = it.values[2]
+
                 
-                // Calculate pitch and roll
-                val pitch = Math.toDegrees(kotlin.math.atan2(x.toDouble(), kotlin.math.sqrt((y * y + z * z).toDouble()))).toFloat()
-                val roll = Math.toDegrees(kotlin.math.atan2(y.toDouble(), kotlin.math.sqrt((x * x + z * z).toDouble()))).toFloat()
+                // Calculate orientation angle
+                val angle = Math.toDegrees(kotlin.math.atan2(x.toDouble(), y.toDouble())).toFloat()
                 
-                levelIndicator.updateTilt(pitch, roll)
+                levelIndicator.updateAngle(angle)
             }
         }
         
@@ -153,6 +152,14 @@ class MainActivity : AppCompatActivity() {
             // Apply sensitivity preference
             val sensitivity = sharedPreferences.getInt("level_indicator_sensitivity", 5)
             levelIndicator.setThreshold(sensitivity.toFloat())
+            
+            // Apply crosshair size preference
+            val crosshairSize = sharedPreferences.getInt("level_indicator_crosshair_size", 20)
+            levelIndicator.setCrosshairSizePercentage(crosshairSize)
+            
+            // Apply circle size preference
+            val circleSize = sharedPreferences.getInt("level_indicator_circle_size", 10)
+            levelIndicator.setCircleSizePercentage(circleSize)
             
             levelIndicator.visibility = android.view.View.VISIBLE
         } else {

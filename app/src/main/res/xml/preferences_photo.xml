@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:key="photo_quality"
+        app:title="Photo Quality"
+        app:summary="%s"
+        app:entries="@array/photo_quality_entries"
+        app:entryValues="@array/photo_quality_values"
+        app:defaultValue="high" />
+
+    <ListPreference
+        app:key="capture_mode_preference"
+        app:title="Capture Mode"
+        app:summary="%s"
+        app:entries="@array/capture_mode_entries"
+        app:entryValues="@array/capture_mode_values"
+        app:defaultValue="latency" />
+
+    <ListPreference
+        app:key="target_resolution"
+        app:title="Target Resolution"
+        app:summary="%s"
+        app:entries="@array/target_resolution_entries"
+        app:entryValues="@array/target_resolution_values"
+        app:defaultValue="max" />
+
+    <ListPreference
+        app:key="flash_mode"
+        app:title="Flash Mode"
+        app:summary="%s"
+        app:entries="@array/flash_mode_entries"
+        app:entryValues="@array/flash_mode_values"
+        app:defaultValue="auto" />
+
+</PreferenceScreen>
