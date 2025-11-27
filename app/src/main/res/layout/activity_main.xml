@@ -123,16 +123,17 @@
         android:id="@+id/recordingIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:background="@android:color/holo_red_dark"
-        android:padding="8dp"
-        android:text="@string/recording"
-        android:textColor="@android:color/white"
+        android:layout_marginBottom="100dp"
+        android:background="#CC000000"
+        android:padding="12dp"
+        android:text="⏺ 00:00"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/burstCounter"

@@ -85,6 +85,10 @@ class MainActivity : AppCompatActivity() {
     private var isRecordingAudio = false
     private var audioFilePath: String? = null
     private var orientationEventListener: OrientationEventListener? = null
+    
+    // Recording timer state
+    private var recordingSeconds = 0
+    private var recordingTimerRunnable: Runnable? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -703,6 +707,11 @@ class MainActivity : AppCompatActivity() {
             recording?.stop()
             recording = null
             recordingIndicator.visibility = android.view.View.GONE
+            
+            // Stop recording timer
+            recordingTimerRunnable?.let { handler.removeCallbacks(it) }
+            recordingSeconds = 0
+            
             Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show()
             return
         }
@@ -749,12 +758,31 @@ class MainActivity : AppCompatActivity() {
                     is VideoRecordEvent.Start -> {
                         runOnUiThread {
                             recordingIndicator.visibility = android.view.View.VISIBLE
+                            
+                            // Start recording timer
+                            recordingSeconds = 0
+                            recordingTimerRunnable = object : Runnable {
+                                override fun run() {
+                                    recordingSeconds++
+                                    val minutes = recordingSeconds / 60
+                                    val seconds = recordingSeconds % 60
+                                    recordingIndicator.text = String.format("⏺ %02d:%02d", minutes, seconds)
+                                    handler.postDelayed(this, 1000)
+                                }
+                            }
+                            handler.post(recordingTimerRunnable!!)
+                            
                             Toast.makeText(this, "Recording started", Toast.LENGTH_SHORT).show()
                         }
                     }
                     is VideoRecordEvent.Finalize -> {
                         runOnUiThread {
                             recordingIndicator.visibility = android.view.View.GONE
+                            
+                            // Stop recording timer
+                            recordingTimerRunnable?.let { handler.removeCallbacks(it) }
+                            recordingSeconds = 0
+                            
                             if (!recordEvent.hasError()) {
                                 val savedUri = Uri.fromFile(videoFile)
                                 Toast.makeText(this, "Video saved: ${videoFile.name}", Toast.LENGTH_SHORT).show()
