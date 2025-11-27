@@ -38,7 +38,9 @@ kaimera/
 │   │   │   ├── SettingsActivity.kt      # Settings screen host
 │   │   │   ├── SettingsFragment.kt      # Settings preferences
 │   │   │   ├── FilterAdapter.kt         # Filter selection adapter
-│   │   │   └── GridOverlayView.kt       # Custom grid overlay view
+│   │   │   ├── GridOverlayView.kt       # Custom grid overlay view
+│   │   │   ├── ZoomableImageView.kt     # Custom zoomable image view
+│   │   │   └── ZoomableVideoLayout.kt   # Custom zoomable video container
 │   │   ├── res/
 │   │   │   ├── layout/
 │   │   │   │   ├── activity_main.xml    # Main camera UI

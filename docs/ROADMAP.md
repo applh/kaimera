@@ -23,6 +23,9 @@
 
 - ✅ **Burst Mode** - Capture fast-moving subjects
 - ✅ **Video Recording** - Full video capture capability
+- ✅ **Video Settings** - Quality (4K/1080p/720p) and Frame Rate (24/30/60fps)
+- ✅ **Video Zoom** - Pinch-to-zoom playback
+- ✅ **Media Controls** - Unified replay toolbar with seek bar
 - ✅ **Filters and Effects** - Real-time camera filters
 - ✅ **Gallery Playback** - Play videos and audio directly in the app
 - 📍 **Location Tagging** - Add GPS coordinates to EXIF data
@@ -39,7 +42,6 @@
 - **Watermarking** - Custom text/logo, timestamp, GPS location stamp
 
 ### 🎥 Video Enhancements
-- **Video Settings** - Quality options (4K, 1080p, 720p), frame rate (24/30/60fps)
 - **Video Features** - Stabilization toggle, slow motion
 
 ### 📱 Usability & Organization
