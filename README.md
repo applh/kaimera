@@ -24,7 +24,7 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - ⏱️ **Chronometer** - Stopwatch overlay with optional audio recording
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes
 - 🎨 **Filters and Effects** - Real-time color filters (Grayscale, Sepia, Vivid, Cool)
-- ⚙️ **Settings Screen** - Configure shutter sound, photo quality, grid overlay, flash mode, and preview auto-save delay
+- ⚙️ **Settings Screen** - Configure shutter sound, photo quality, grid overlay, flash mode, preview auto-save delay, capture mode (latency/quality), and target resolution.
 - 🖼️ **In-App Gallery** - View and manage your captured photos, videos, and audio recordings. Tap to play videos and audio directly in the app.
 - ⏯️ **Media Controls** - Unified playback controls with seek bar, play/pause, and time display for both video and audio.
 - 📱 **Smart Orientation** - Photos are automatically rotated based on device orientation, even when UI is locked to portrait.

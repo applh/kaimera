@@ -395,11 +395,36 @@ class MainActivity : AppCompatActivity() {
 
                 if (captureMode == CaptureMode.PHOTO) {
                     // ImageCapture use case for photos
-                    imageCapture = ImageCapture.Builder()
+                    val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+                    
+                    // Capture Mode
+                    val captureModePref = sharedPreferences.getString("capture_mode_preference", "latency")
+                    val captureModeValue = if (captureModePref == "quality") {
+                        ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+                    } else {
+                        ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
+                    }
+                    
+                    // Target Resolution
+                    val resolutionPref = sharedPreferences.getString("target_resolution", "max")
+                    val targetResolution = when (resolutionPref) {
+                        "12mp" -> android.util.Size(4000, 3000)
+                        "fhd" -> android.util.Size(1920, 1080)
+                        "hd" -> android.util.Size(1280, 720)
+                        else -> null // Max/Default
+                    }
+
+                    val imageCaptureBuilder = ImageCapture.Builder()
                         .setFlashMode(flashMode)
                         .setJpegQuality(photoQuality.jpegQuality)
+                        .setCaptureMode(captureModeValue)
                         .setTargetRotation(windowManager.defaultDisplay.rotation)
-                        .build()
+                        
+                    if (targetResolution != null) {
+                        imageCaptureBuilder.setTargetResolution(targetResolution)
+                    }
+                    
+                    imageCapture = imageCaptureBuilder.build()
 
                     // Bind use cases to camera
                     val camera = cameraProvider.bindToLifecycle(

@@ -102,4 +102,26 @@
         <item>30</item>
         <item>60</item>
     </string-array>
+
+    <string-array name="capture_mode_entries">
+        <item>Minimize Latency (Faster)</item>
+        <item>Maximize Quality (Slower)</item>
+    </string-array>
+    <string-array name="capture_mode_values">
+        <item>latency</item>
+        <item>quality</item>
+    </string-array>
+
+    <string-array name="target_resolution_entries">
+        <item>Default (Max)</item>
+        <item>12MP (4:3)</item>
+        <item>FHD (16:9)</item>
+        <item>HD (16:9)</item>
+    </string-array>
+    <string-array name="target_resolution_values">
+        <item>max</item>
+        <item>12mp</item>
+        <item>fhd</item>
+        <item>hd</item>
+    </string-array>
 </resources>

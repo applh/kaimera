@@ -19,6 +19,22 @@
             app:defaultValue="high" />
 
         <ListPreference
+            app:key="capture_mode_preference"
+            app:title="Capture Mode"
+            app:summary="%s"
+            app:entries="@array/capture_mode_entries"
+            app:entryValues="@array/capture_mode_values"
+            app:defaultValue="latency" />
+
+        <ListPreference
+            app:key="target_resolution"
+            app:title="Target Resolution"
+            app:summary="%s"
+            app:entries="@array/target_resolution_entries"
+            app:entryValues="@array/target_resolution_values"
+            app:defaultValue="max" />
+
+        <ListPreference
             app:key="flash_mode"
             app:title="Flash Mode"
             app:summary="%s"
