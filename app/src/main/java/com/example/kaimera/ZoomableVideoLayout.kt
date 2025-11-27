@@ -153,4 +153,8 @@ class ZoomableVideoLayout @JvmOverloads constructor(
             child.translationY = 0f
         }
     }
+    
+    fun setMaxZoom(maxZoom: Float) {
+        maxScale = maxZoom
+    }
 }

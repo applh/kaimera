@@ -196,4 +196,8 @@ class ZoomableImageView @JvmOverloads constructor(
 
     override fun onLongPress(e: MotionEvent) {}
     override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
+    
+    fun setMaxZoom(maxZoom: Float) {
+        maxScale = maxZoom
+    }
 }

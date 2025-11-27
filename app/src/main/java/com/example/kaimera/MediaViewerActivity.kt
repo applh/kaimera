@@ -71,6 +71,18 @@ class MediaViewerActivity : AppCompatActivity() {
         }
         
         setupSeekBar()
+        applyMaxZoom()
+    }
+    
+    private fun applyMaxZoom() {
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        val maxZoom = sharedPreferences.getInt("gallery_max_zoom", 10).toFloat()
+        
+        val videoContainer = findViewById<ZoomableVideoLayout>(R.id.videoContainer)
+        val photoView = findViewById<ZoomableImageView>(R.id.photoView)
+        
+        videoContainer.setMaxZoom(maxZoom)
+        photoView.setMaxZoom(maxZoom)
     }
     
     private fun setupSeekBar() {
