@@ -51,16 +51,18 @@ class LevelIndicatorView @JvmOverloads constructor(
         val centerX = width / 2f
         val centerY = height / 2f
         
-        // Determine if device is level
-        val isLevel = abs(pitch) < levelThreshold && abs(roll) < levelThreshold
+        // Determine if device is vertical (upright for taking photos)
+        // We only care about roll (left/right tilt) when holding phone vertically
+        // Pitch will be around 90° when phone is upright, so we ignore it
+        val isLevel = abs(roll) < levelThreshold
         bubblePaint.color = if (isLevel) 0xFF00FF00.toInt() else 0xFFFF0000.toInt()
         
-        // Draw horizontal level (roll)
+        // Draw horizontal level (roll) - shows left/right tilt when phone is vertical
         val horizontalTrack = RectF(
             centerX - trackWidth / 2,
-            centerY - trackHeight / 2 - 30,
+            centerY - trackHeight / 2,
             centerX + trackWidth / 2,
-            centerY + trackHeight / 2 - 30
+            centerY + trackHeight / 2
         )
         canvas.drawRoundRect(horizontalTrack, trackHeight / 2, trackHeight / 2, trackPaint)
         
@@ -75,34 +77,12 @@ class LevelIndicatorView @JvmOverloads constructor(
         
         // Draw horizontal bubble (constrained to track)
         val horizontalBubbleX = centerX + (roll * 5).coerceIn(-trackWidth / 2 + bubbleRadius, trackWidth / 2 - bubbleRadius)
-        canvas.drawCircle(horizontalBubbleX, centerY - 30, bubbleRadius, bubblePaint)
-        
-        // Draw vertical level (pitch)
-        val verticalTrack = RectF(
-            centerX - trackHeight / 2,
-            centerY - trackWidth / 2 + 30,
-            centerX + trackHeight / 2,
-            centerY + trackWidth / 2 + 30
-        )
-        canvas.drawRoundRect(verticalTrack, trackHeight / 2, trackHeight / 2, trackPaint)
-        
-        // Draw center line for vertical
-        canvas.drawLine(
-            verticalTrack.left,
-            centerY + 30,
-            verticalTrack.right,
-            centerY + 30,
-            centerLinePaint
-        )
-        
-        // Draw vertical bubble (constrained to track)
-        val verticalBubbleY = centerY + 30 + (pitch * 5).coerceIn(-trackWidth / 2 + bubbleRadius, trackWidth / 2 - bubbleRadius)
-        canvas.drawCircle(centerX, verticalBubbleY, bubbleRadius, bubblePaint)
+        canvas.drawCircle(horizontalBubbleX, centerY, bubbleRadius, bubblePaint)
     }
     
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val desiredWidth = (trackWidth + 100).toInt()
-        val desiredHeight = (trackWidth + 100).toInt()
+        val desiredHeight = (trackHeight + 60).toInt()
         setMeasuredDimension(desiredWidth, desiredHeight)
     }
 }
