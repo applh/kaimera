@@ -54,10 +54,8 @@ object ExifUtils {
                     try {
                         exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION, newDesc)
                         
-                        // Use UNICODE prefix for better character support including newlines
-                        // "UNICODE\0"
-                        val commentWithPrefix = "UNICODE\u0000" + newComment
-                        exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, commentWithPrefix)
+                        // Let ExifInterface handle the encoding automatically
+                        exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, newComment)
                         
                         exif.saveAttributes()
                         Toast.makeText(context, "Info saved successfully", Toast.LENGTH_SHORT).show()
