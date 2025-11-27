@@ -149,6 +149,11 @@ class MainActivity : AppCompatActivity() {
             gravitySensor?.let {
                 sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
             }
+            
+            // Apply sensitivity preference
+            val sensitivity = sharedPreferences.getInt("level_indicator_sensitivity", 5)
+            levelIndicator.setThreshold(sensitivity.toFloat())
+            
             levelIndicator.visibility = android.view.View.VISIBLE
         } else {
             levelIndicator.visibility = android.view.View.GONE

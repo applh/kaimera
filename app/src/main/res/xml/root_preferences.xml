@@ -84,6 +84,16 @@
             app:title="Enable Level Indicator"
             app:summary="Show spirit level overlay to help align shots"
             app:defaultValue="true" />
+            
+        <SeekBarPreference
+            app:key="level_indicator_sensitivity"
+            app:title="Level Indicator Sensitivity"
+            app:summary="Adjust threshold for green indicator (1° = strict, 10° = loose)"
+            app:defaultValue="5"
+            android:min="1"
+            android:max="10"
+            app:showSeekBarValue="true"
+            app:dependency="enable_level_indicator" />
 
         <SeekBarPreference
             app:key="gallery_max_zoom"
@@ -145,7 +155,7 @@
         <Preference
             app:key="version"
             app:title="Version"
-            app:summary="23.1.0" />
+            app:summary="23.2.0" />
         
         <Preference
             app:key="debug_logs"
