@@ -34,7 +34,10 @@ object ExifUtils {
             
             // Sanitize: remove any remaining null characters that might break display
             currentComment = currentComment.replace("\u0000", "")
-
+            
+            // Decode newlines: we store them as a placeholder to avoid EXIF encoding issues
+            currentComment = currentComment.replace("<<<NEWLINE>>>", "\n")
+            
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_exif_editor, null)
             val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
             val etUserComment = dialogView.findViewById<EditText>(R.id.etUserComment)
@@ -49,12 +52,13 @@ object ExifUtils {
                 .setView(dialogView)
                 .setPositiveButton("Save") { _, _ ->
                     val newDesc = etDescription.text.toString()
-                    val newComment = etUserComment.text.toString()
+                    var newComment = etUserComment.text.toString()
 
                     try {
                         exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION, newDesc)
                         
-                        // Let ExifInterface handle the encoding automatically
+                        // Encode newlines as placeholder to preserve them through EXIF encoding
+                        newComment = newComment.replace("\n", "<<<NEWLINE>>>")
                         exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, newComment)
                         
                         exif.saveAttributes()
