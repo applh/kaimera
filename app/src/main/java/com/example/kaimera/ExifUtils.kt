@@ -22,12 +22,18 @@ object ExifUtils {
             val currentDesc = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION) ?: ""
             var currentComment = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT) ?: ""
             
-            // Handle UserComment prefix if present (ExifInterface might not strip it in all cases, or if we added it manually)
-            if (currentComment.startsWith("ASCII\u0000\u0000\u0000")) {
-                currentComment = currentComment.substring(7)
-            } else if (currentComment.startsWith("UNICODE\u0000")) {
-                currentComment = currentComment.substring(8)
+            // Handle UserComment prefix. Standard EXIF header is 8 bytes.
+            // If we see "UNICODE" or "ASCII" at the start, we strip the first 8 chars.
+            if (currentComment.length >= 8) {
+                if (currentComment.startsWith("UNICODE")) {
+                    currentComment = currentComment.substring(8)
+                } else if (currentComment.startsWith("ASCII")) {
+                    currentComment = currentComment.substring(8)
+                }
             }
+            
+            // Sanitize: remove any remaining null characters that might break display
+            currentComment = currentComment.replace("\u0000", "")
 
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_exif_editor, null)
             val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
