@@ -3,7 +3,6 @@ package com.example.kaimera
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import kotlin.math.abs
@@ -23,25 +22,25 @@ class LevelIndicatorView @JvmOverloads constructor(
         levelThreshold = threshold
     }
     
-    private val bubblePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-    }
-    
-    private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val horizonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 4f
+        strokeWidth = 3f
         color = 0xFFFFFFFF.toInt()
     }
     
-    private val centerLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 2f
-        color = 0x80FFFFFF.toInt()
+        strokeWidth = 4f
+        color = 0xFF00FF00.toInt()
     }
     
-    private val bubbleRadius = 20f
-    private val trackWidth = 200f
-    private val trackHeight = 40f
+    private val centerDotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        color = 0xFFFFFFFF.toInt()
+    }
+    
+    private val crosshairLength = 150f
+    private val circleRadius = 60f
     
     fun updateTilt(newPitch: Float, newRoll: Float) {
         pitch = newPitch
@@ -55,38 +54,36 @@ class LevelIndicatorView @JvmOverloads constructor(
         val centerX = width / 2f
         val centerY = height / 2f
         
-        // Determine if device is vertical (upright for taking photos)
-        // We only care about roll (left/right tilt) when holding phone vertically
-        // Pitch will be around 90° when phone is upright, so we ignore it
-        val isLevel = abs(roll) < levelThreshold
-        bubblePaint.color = if (isLevel) 0xFF00FF00.toInt() else 0xFFFF0000.toInt()
+        // Save canvas state
+        canvas.save()
         
-        // Draw horizontal level (roll) - shows left/right tilt when phone is vertical
-        val horizontalTrack = RectF(
-            centerX - trackWidth / 2,
-            centerY - trackHeight / 2,
-            centerX + trackWidth / 2,
-            centerY + trackHeight / 2
-        )
-        canvas.drawRoundRect(horizontalTrack, trackHeight / 2, trackHeight / 2, trackPaint)
+        // Rotate canvas based on roll (horizon tilt)
+        canvas.rotate(-roll, centerX, centerY)
         
-        // Draw center line for horizontal
+        // Draw horizontal horizon line (crosshair)
         canvas.drawLine(
-            centerX,
-            horizontalTrack.top,
-            centerX,
-            horizontalTrack.bottom,
-            centerLinePaint
+            centerX - crosshairLength,
+            centerY,
+            centerX + crosshairLength,
+            centerY,
+            horizonPaint
         )
         
-        // Draw horizontal bubble (constrained to track)
-        val horizontalBubbleX = centerX + (roll * 5).coerceIn(-trackWidth / 2 + bubbleRadius, trackWidth / 2 - bubbleRadius)
-        canvas.drawCircle(horizontalBubbleX, centerY, bubbleRadius, bubblePaint)
+        // Restore canvas
+        canvas.restore()
+        
+        // Draw center dot
+        canvas.drawCircle(centerX, centerY, 4f, centerDotPaint)
+        
+        // Draw green circle when device is level (horizontal)
+        val isLevel = abs(roll) < levelThreshold
+        if (isLevel) {
+            canvas.drawCircle(centerX, centerY, circleRadius, circlePaint)
+        }
     }
     
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val desiredWidth = (trackWidth + 100).toInt()
-        val desiredHeight = (trackHeight + 60).toInt()
-        setMeasuredDimension(desiredWidth, desiredHeight)
+        val desiredSize = ((crosshairLength * 2) + 100).toInt()
+        setMeasuredDimension(desiredSize, desiredSize)
     }
 }
