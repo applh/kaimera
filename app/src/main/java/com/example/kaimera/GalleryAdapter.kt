@@ -24,6 +24,7 @@ class GalleryAdapter(
         val imageView: ImageView = view.findViewById(R.id.imageView)
         val deleteButton: ImageView = view.findViewById(R.id.deleteButton)
         val videoIndicator: ImageView = view.findViewById(R.id.videoIndicator)
+        val fileSizeText: android.widget.TextView = view.findViewById(R.id.fileSizeText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -55,6 +56,10 @@ class GalleryAdapter(
                 loadImageWithOrientation(file, holder.imageView)
             }
         }
+
+        // Display file size
+        val fileSize = file.length()
+        holder.fileSizeText.text = StorageManager.formatStorageSize(fileSize)
 
         // Set up item click listener
         holder.itemView.setOnClickListener {
