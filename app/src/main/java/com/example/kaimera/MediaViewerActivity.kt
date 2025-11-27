@@ -57,6 +57,8 @@ class MediaViewerActivity : AppCompatActivity() {
     }
     
     private fun setupVideoPlayback(filePath: String) {
+        val videoContainer = findViewById<View>(R.id.videoContainer)
+        videoContainer.visibility = View.VISIBLE
         videoView.visibility = View.VISIBLE
         audioIcon.visibility = View.GONE
         audioControls.visibility = View.GONE
@@ -77,6 +79,7 @@ class MediaViewerActivity : AppCompatActivity() {
     }
     
     private fun setupAudioPlayback(filePath: String) {
+        findViewById<View>(R.id.videoContainer).visibility = View.GONE
         videoView.visibility = View.GONE
         audioIcon.visibility = View.VISIBLE
         audioControls.visibility = View.VISIBLE
@@ -118,6 +121,7 @@ class MediaViewerActivity : AppCompatActivity() {
     }
     
     private fun setupPhotoViewing(filePath: String) {
+        findViewById<View>(R.id.videoContainer).visibility = View.GONE
         videoView.visibility = View.GONE
         audioIcon.visibility = View.GONE
         audioControls.visibility = View.GONE
