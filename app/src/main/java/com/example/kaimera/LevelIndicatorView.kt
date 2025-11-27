@@ -60,12 +60,21 @@ class LevelIndicatorView @JvmOverloads constructor(
         // Rotate canvas based on roll (horizon tilt)
         canvas.rotate(-roll, centerX, centerY)
         
-        // Draw horizontal horizon line (crosshair)
+        // Draw horizontal horizon line
         canvas.drawLine(
             centerX - crosshairLength,
             centerY,
             centerX + crosshairLength,
             centerY,
+            horizonPaint
+        )
+        
+        // Draw vertical line (crosshair)
+        canvas.drawLine(
+            centerX,
+            centerY - crosshairLength,
+            centerX,
+            centerY + crosshairLength,
             horizonPaint
         )
         
@@ -75,7 +84,8 @@ class LevelIndicatorView @JvmOverloads constructor(
         // Draw center dot
         canvas.drawCircle(centerX, centerY, 4f, centerDotPaint)
         
-        // Draw green circle when device is level (horizontal)
+        // Draw green circle when device is level
+        // Device is level when roll is close to 0 (not tilted left/right)
         val isLevel = abs(roll) < levelThreshold
         if (isLevel) {
             canvas.drawCircle(centerX, centerY, circleRadius, circlePaint)
