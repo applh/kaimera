@@ -15,12 +15,24 @@ class MediaViewerActivity : AppCompatActivity() {
     private lateinit var videoView: VideoView
     private lateinit var photoView: ImageView
     private lateinit var audioIcon: ImageView
-    private lateinit var audioControls: LinearLayout
+    private lateinit var mediaControls: View
     private lateinit var btnPlayPause: ImageButton
     private lateinit var btnClose: ImageButton
+    private lateinit var seekBar: android.widget.SeekBar
+    private lateinit var tvCurrentTime: android.widget.TextView
+    private lateinit var tvTotalTime: android.widget.TextView
     
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var isTrackingTouch = false
+    
+    private val updateProgressAction = object : Runnable {
+        override fun run() {
+            updateProgress()
+            handler.postDelayed(this, 1000)
+        }
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +41,12 @@ class MediaViewerActivity : AppCompatActivity() {
         videoView = findViewById(R.id.videoView)
         photoView = findViewById(R.id.photoView)
         audioIcon = findViewById(R.id.audioIcon)
-        audioControls = findViewById(R.id.audioControls)
+        mediaControls = findViewById(R.id.mediaControls)
         btnPlayPause = findViewById(R.id.btnPlayPause)
         btnClose = findViewById(R.id.btnClose)
+        seekBar = findViewById(R.id.seekBar)
+        tvCurrentTime = findViewById(R.id.tvCurrentTime)
+        tvTotalTime = findViewById(R.id.tvTotalTime)
         
         val filePath = intent.getStringExtra("file_path") ?: run {
             Toast.makeText(this, "Error: No file path provided", Toast.LENGTH_SHORT).show()
@@ -54,6 +69,61 @@ class MediaViewerActivity : AppCompatActivity() {
         btnClose.setOnClickListener {
             finish()
         }
+        
+        setupSeekBar()
+    }
+    
+    private fun setupSeekBar() {
+        seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    tvCurrentTime.text = formatTime(progress)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {
+                isTrackingTouch = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {
+                isTrackingTouch = false
+                seekBar?.let {
+                    if (videoView.visibility == View.VISIBLE) {
+                        videoView.seekTo(it.progress)
+                    } else if (mediaPlayer != null) {
+                        mediaPlayer?.seekTo(it.progress)
+                    }
+                }
+            }
+        })
+    }
+    
+    private fun updateProgress() {
+        if (isTrackingTouch) return
+        
+        var current = 0
+        var total = 0
+        
+        if (videoView.visibility == View.VISIBLE) {
+            current = videoView.currentPosition
+            total = videoView.duration
+        } else if (mediaPlayer != null) {
+            current = mediaPlayer?.currentPosition ?: 0
+            total = mediaPlayer?.duration ?: 0
+        }
+        
+        if (total > 0) {
+            seekBar.max = total
+            seekBar.progress = current
+            tvCurrentTime.text = formatTime(current)
+            tvTotalTime.text = formatTime(total)
+        }
+    }
+    
+    private fun formatTime(millis: Int): String {
+        val seconds = (millis / 1000) % 60
+        val minutes = (millis / (1000 * 60)) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
     
     private fun setupVideoPlayback(filePath: String) {
@@ -61,20 +131,42 @@ class MediaViewerActivity : AppCompatActivity() {
         videoContainer.visibility = View.VISIBLE
         videoView.visibility = View.VISIBLE
         audioIcon.visibility = View.GONE
-        audioControls.visibility = View.GONE
+        mediaControls.visibility = View.VISIBLE
         
         val uri = Uri.parse(filePath)
         videoView.setVideoURI(uri)
-        videoView.setOnPreparedListener {
-            it.start()
+        
+        videoView.setOnPreparedListener { mp ->
+            mp.start()
+            isPlaying = true
+            updatePlayPauseButton()
+            handler.post(updateProgressAction)
+            
+            // Fix for video view not updating duration immediately
+            tvTotalTime.text = formatTime(videoView.duration)
         }
+        
         videoView.setOnCompletionListener {
-            finish()
+            isPlaying = false
+            updatePlayPauseButton()
+            videoView.seekTo(0)
         }
+        
         videoView.setOnErrorListener { _, what, extra ->
             Toast.makeText(this, "Error playing video: $what, $extra", Toast.LENGTH_SHORT).show()
             finish()
             true
+        }
+        
+        btnPlayPause.setOnClickListener {
+            if (videoView.isPlaying) {
+                videoView.pause()
+                isPlaying = false
+            } else {
+                videoView.start()
+                isPlaying = true
+            }
+            updatePlayPauseButton()
         }
     }
     
@@ -82,29 +174,33 @@ class MediaViewerActivity : AppCompatActivity() {
         findViewById<View>(R.id.videoContainer).visibility = View.GONE
         videoView.visibility = View.GONE
         audioIcon.visibility = View.VISIBLE
-        audioControls.visibility = View.VISIBLE
+        mediaControls.visibility = View.VISIBLE
         
         try {
             mediaPlayer = MediaPlayer().apply {
                 setDataSource(filePath)
                 prepare()
+                start()
             }
-            
-            btnPlayPause.setOnClickListener {
-                if (isPlaying) {
-                    mediaPlayer?.pause()
-                    isPlaying = false
-                    btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
-                } else {
-                    mediaPlayer?.start()
-                    isPlaying = true
-                    btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-                }
-            }
+            isPlaying = true
+            updatePlayPauseButton()
+            handler.post(updateProgressAction)
             
             mediaPlayer?.setOnCompletionListener {
                 isPlaying = false
-                btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+                updatePlayPauseButton()
+                mediaPlayer?.seekTo(0)
+            }
+            
+            btnPlayPause.setOnClickListener {
+                if (mediaPlayer?.isPlaying == true) {
+                    mediaPlayer?.pause()
+                    isPlaying = false
+                } else {
+                    mediaPlayer?.start()
+                    isPlaying = true
+                }
+                updatePlayPauseButton()
             }
             
         } catch (e: Exception) {
@@ -113,18 +209,38 @@ class MediaViewerActivity : AppCompatActivity() {
         }
     }
     
+    private fun updatePlayPauseButton() {
+        btnPlayPause.setImageResource(
+            if (isPlaying) android.R.drawable.ic_media_pause 
+            else android.R.drawable.ic_media_play
+        )
+    }
+    
     override fun onPause() {
         super.onPause()
-        mediaPlayer?.pause()
+        if (videoView.visibility == View.VISIBLE && videoView.isPlaying) {
+            videoView.pause()
+        }
+        mediaPlayer?.let {
+            if (it.isPlaying) it.pause()
+        }
         isPlaying = false
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+        updatePlayPauseButton()
+        handler.removeCallbacks(updateProgressAction)
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        if (videoView.visibility == View.VISIBLE || mediaPlayer != null) {
+            handler.post(updateProgressAction)
+        }
     }
     
     private fun setupPhotoViewing(filePath: String) {
         findViewById<View>(R.id.videoContainer).visibility = View.GONE
         videoView.visibility = View.GONE
         audioIcon.visibility = View.GONE
-        audioControls.visibility = View.GONE
+        mediaControls.visibility = View.GONE
         photoView.visibility = View.VISIBLE
         
         try {
@@ -160,6 +276,7 @@ class MediaViewerActivity : AppCompatActivity() {
     
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(updateProgressAction)
         mediaPlayer?.release()
         mediaPlayer = null
     }
