@@ -11,6 +11,8 @@ import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 
+import java.io.File
+
 class MediaViewerActivity : AppCompatActivity() {
     private lateinit var videoView: VideoView
     private lateinit var photoView: ImageView
@@ -18,6 +20,7 @@ class MediaViewerActivity : AppCompatActivity() {
     private lateinit var mediaControls: View
     private lateinit var btnPlayPause: ImageButton
     private lateinit var btnClose: ImageButton
+    private lateinit var btnInfo: ImageButton
     private lateinit var seekBar: android.widget.SeekBar
     private lateinit var tvCurrentTime: android.widget.TextView
     private lateinit var tvTotalTime: android.widget.TextView
@@ -26,6 +29,7 @@ class MediaViewerActivity : AppCompatActivity() {
     private var isPlaying = false
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private var isTrackingTouch = false
+    private var currentFilePath: String? = null
     
     private val updateProgressAction = object : Runnable {
         override fun run() {
@@ -44,6 +48,7 @@ class MediaViewerActivity : AppCompatActivity() {
         mediaControls = findViewById(R.id.mediaControls)
         btnPlayPause = findViewById(R.id.btnPlayPause)
         btnClose = findViewById(R.id.btnClose)
+        btnInfo = findViewById(R.id.btnInfo)
         seekBar = findViewById(R.id.seekBar)
         tvCurrentTime = findViewById(R.id.tvCurrentTime)
         tvTotalTime = findViewById(R.id.tvTotalTime)
@@ -53,6 +58,7 @@ class MediaViewerActivity : AppCompatActivity() {
             finish()
             return
         }
+        currentFilePath = filePath
         
         val fileType = intent.getStringExtra("file_type") ?: "unknown"
         
@@ -66,13 +72,68 @@ class MediaViewerActivity : AppCompatActivity() {
             }
         }
         
+        setupSeekBar()
+        applyMaxZoom()
+        setupMediaControls()
+    }
+    
+    private fun setupMediaControls() {
         btnClose.setOnClickListener {
             finish()
         }
         
-        setupSeekBar()
-        applyMaxZoom()
+        btnInfo.setOnClickListener {
+            showExifEditorDialog()
+        }
     }
+    
+    private fun showExifEditorDialog() {
+        val filePath = currentFilePath ?: return
+        val currentFile = File(filePath)
+        
+        // Only allow editing for JPEG images
+        if (!currentFile.extension.equals("jpg", ignoreCase = true) && !currentFile.extension.equals("jpeg", ignoreCase = true)) {
+            android.widget.Toast.makeText(this, "EXIF editing is only supported for JPEG images", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        try {
+            val exif = androidx.exifinterface.media.ExifInterface(currentFile.absolutePath)
+            val currentDesc = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION) ?: ""
+            val currentComment = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT) ?: ""
+            
+            val dialogView = layoutInflater.inflate(R.layout.dialog_exif_editor, null)
+            val etDescription = dialogView.findViewById<android.widget.EditText>(R.id.etDescription)
+            val etUserComment = dialogView.findViewById<android.widget.EditText>(R.id.etUserComment)
+            val tvFileInfo = dialogView.findViewById<android.widget.TextView>(R.id.tvFileInfo)
+            
+            etDescription.setText(currentDesc)
+            etUserComment.setText(currentComment)
+            tvFileInfo.text = "File: ${currentFile.name}\nSize: ${currentFile.length()}" // Assuming StorageManager.formatStorageSize is not available here
+            
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Edit Image Info")
+                .setView(dialogView)
+                .setPositiveButton("Save") { _, _ ->
+                    val newDesc = etDescription.text.toString()
+                    val newComment = etUserComment.text.toString()
+                    
+                    try {
+                        exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION, newDesc)
+                        exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, newComment)
+                        exif.saveAttributes()
+                        android.widget.Toast.makeText(this, "Info saved successfully", android.widget.Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        android.widget.Toast.makeText(this, "Failed to save info: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+                
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, "Failed to read EXIF data: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }    
     
     private fun applyMaxZoom() {
         val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
