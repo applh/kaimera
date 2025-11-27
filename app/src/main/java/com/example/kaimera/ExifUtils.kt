@@ -20,7 +20,14 @@ object ExifUtils {
         try {
             val exif = androidx.exifinterface.media.ExifInterface(file.absolutePath)
             val currentDesc = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION) ?: ""
-            val currentComment = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT) ?: ""
+            var currentComment = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT) ?: ""
+            
+            // Handle UserComment prefix if present (ExifInterface might not strip it in all cases, or if we added it manually)
+            if (currentComment.startsWith("ASCII\u0000\u0000\u0000")) {
+                currentComment = currentComment.substring(7)
+            } else if (currentComment.startsWith("UNICODE\u0000")) {
+                currentComment = currentComment.substring(8)
+            }
 
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_exif_editor, null)
             val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
@@ -40,7 +47,12 @@ object ExifUtils {
 
                     try {
                         exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION, newDesc)
-                        exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, newComment)
+                        
+                        // Add ASCII prefix to UserComment to ensure better compatibility
+                        // "ASCII\0\0\0"
+                        val commentWithPrefix = "ASCII\u0000\u0000\u0000" + newComment
+                        exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, commentWithPrefix)
+                        
                         exif.saveAttributes()
                         Toast.makeText(context, "Info saved successfully", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
