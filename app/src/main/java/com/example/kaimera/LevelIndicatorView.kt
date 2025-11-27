@@ -17,7 +17,7 @@ class LevelIndicatorView @JvmOverloads constructor(
     private var pitch = 0f  // Forward/backward tilt (vertical)
     private var roll = 0f   // Left/right tilt (horizontal)
     
-    private val levelThreshold = 2f  // Degrees to consider "level"
+    private val levelThreshold = 5f  // Degrees to consider "level" (increased for easier achievement)
     
     private val bubblePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL

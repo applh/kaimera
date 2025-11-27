@@ -145,7 +145,7 @@
         <Preference
             app:key="version"
             app:title="Version"
-            app:summary="23.0.0" />
+            app:summary="23.0.1" />
         
         <Preference
             app:key="debug_logs"
