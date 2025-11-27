@@ -46,16 +46,19 @@ class GalleryAdapter(
             isVideo -> {
                 // Load video thumbnail
                 holder.videoIndicator.visibility = View.VISIBLE
+                holder.btnInfo.visibility = View.GONE
                 loadVideoThumbnail(file, holder.imageView)
             }
             isAudio -> {
                 // Show audio icon
                 holder.videoIndicator.visibility = View.VISIBLE
+                holder.btnInfo.visibility = View.GONE
                 holder.imageView.setImageResource(android.R.drawable.ic_btn_speak_now)
             }
             else -> {
                 // Load image respecting EXIF orientation
                 holder.videoIndicator.visibility = View.GONE
+                holder.btnInfo.visibility = View.VISIBLE
                 loadImageWithOrientation(file, holder.imageView)
             }
         }
