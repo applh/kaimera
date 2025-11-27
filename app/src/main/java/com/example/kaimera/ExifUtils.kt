@@ -48,9 +48,9 @@ object ExifUtils {
                     try {
                         exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION, newDesc)
                         
-                        // Add ASCII prefix to UserComment to ensure better compatibility
-                        // "ASCII\0\0\0"
-                        val commentWithPrefix = "ASCII\u0000\u0000\u0000" + newComment
+                        // Use UNICODE prefix for better character support including newlines
+                        // "UNICODE\0"
+                        val commentWithPrefix = "UNICODE\u0000" + newComment
                         exif.setAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT, commentWithPrefix)
                         
                         exif.saveAttributes()
