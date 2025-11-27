@@ -139,7 +139,7 @@
         <Preference
             app:key="version"
             app:title="Version"
-            app:summary="22.0.0" />
+            app:summary="22.1.0" />
         
         <Preference
             app:key="debug_logs"
