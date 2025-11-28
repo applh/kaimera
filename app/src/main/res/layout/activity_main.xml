@@ -193,7 +193,7 @@
         android:layout_margin="8dp"
         android:background="#CC000000"
         android:orientation="horizontal"
-        android:padding="6dp"
+        android:padding="8dp"
         android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@+id/settingsButton"
         app:layout_constraintTop_toTopOf="parent">
