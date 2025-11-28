@@ -63,16 +63,16 @@
         app:tint="@android:color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/galleryButton"
+        android:id="@+id/switchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginStart="16dp"
-        android:contentDescription="@string/gallery"
+        android:contentDescription="@string/switch_camera"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_gallery" />
+        app:srcCompat="@android:drawable/ic_menu_rotate" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/modeButton"
@@ -83,20 +83,20 @@
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/captureButton"
-        app:layout_constraintStart_toEndOf="@+id/galleryButton"
+        app:layout_constraintStart_toEndOf="@+id/switchButton"
         app:srcCompat="@android:drawable/ic_menu_camera" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/switchButton"
+        android:id="@+id/galleryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="16dp"
-        android:contentDescription="@string/switch_camera"
+        android:contentDescription="@string/gallery"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_rotate" />
+        app:srcCompat="@android:drawable/ic_menu_gallery" />
 
         
 
