@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.kaimera"
         minSdk = 24
         targetSdk = 35
-        versionCode = 47
-        versionName = "23.3.1"
+        versionCode = 48
+        versionName = "24.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
