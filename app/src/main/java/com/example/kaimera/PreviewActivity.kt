@@ -162,6 +162,26 @@ class PreviewActivity : AppCompatActivity() {
             Toast.makeText(this, "Photo saved", Toast.LENGTH_SHORT).show()
             finish()
         }
+        
+        val shareButton = findViewById<MaterialButton>(R.id.shareButton)
+        shareButton.setOnClickListener {
+            cancelCountdown()
+            shareImage(imageUri)
+        }
+    }
+
+    private fun shareImage(uri: Uri) {
+        try {
+            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "image/*" // Or video/* if we support video preview sharing here
+                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(android.content.Intent.createChooser(shareIntent, "Share via"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not share image", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("PreviewActivity", "Share failed", e)
+        }
     }
 
     private fun startCountdown(countdownText: TextView) {

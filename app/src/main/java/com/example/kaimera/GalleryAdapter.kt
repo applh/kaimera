@@ -1,11 +1,6 @@
 package com.example.kaimera
 
 import android.app.AlertDialog
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.MediaMetadataRetriever
-import androidx.exifinterface.media.ExifInterface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,12 +9,12 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import java.io.File
-
 import android.widget.TextView
 
 class GalleryAdapter(
     private var files: MutableList<File>,
-    private val onFileDeleted: () -> Unit
+    private val onFileDeleted: () -> Unit,
+    private val onFileShared: (File) -> Unit
 ) : RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -96,6 +91,22 @@ class GalleryAdapter(
                 }
             }
         }
+        
+        // Set up long click listener for sharing
+        holder.itemView.setOnLongClickListener {
+            // Show options dialog (Share / Delete)
+            val context = holder.itemView.context
+            val options = arrayOf("Share", "Delete")
+            AlertDialog.Builder(context)
+                .setItems(options) { _, which ->
+                    when (which) {
+                        0 -> onFileShared(file) // Share
+                        1 -> holder.deleteButton.performClick() // Trigger delete logic
+                    }
+                }
+                .show()
+            true
+        }
 
         // Set up delete button
         holder.deleteButton.setOnClickListener {
@@ -125,42 +136,19 @@ class GalleryAdapter(
     }
 
     private fun loadVideoThumbnail(file: File, imageView: ImageView) {
-        try {
-            val retriever = MediaMetadataRetriever()
-            retriever.setDataSource(file.absolutePath)
-            val bitmap = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-            retriever.release()
-            
-            if (bitmap != null) {
-                imageView.setImageBitmap(bitmap)
-            } else {
-                imageView.setImageResource(android.R.drawable.ic_media_play)
-            }
-        } catch (e: Exception) {
-            imageView.setImageResource(android.R.drawable.ic_media_play)
+        // Use Coil to load video - it will automatically extract a frame
+        imageView.load(file) {
+            crossfade(true)
+            placeholder(android.R.drawable.ic_media_play)
+            error(android.R.drawable.ic_media_play)
         }
     }
 
     // Helper to load image respecting EXIF orientation
     private fun loadImageWithOrientation(file: File, imageView: ImageView) {
-        try {
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return
-            val exif = ExifInterface(file.absolutePath)
-            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-            val matrix = Matrix()
-            when (orientation) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
-                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
-                else -> {}
-            }
-            val rotatedBitmap = if (matrix.isIdentity) bitmap else Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-            imageView.setImageBitmap(rotatedBitmap)
-        } catch (e: Exception) {
-            // Fallback to Coil loading
-            imageView.load(file) {
-                crossfade(true)
-            }
+        // Use Coil which automatically handles EXIF orientation
+        imageView.load(file) {
+            crossfade(true)
         }
     }
 
