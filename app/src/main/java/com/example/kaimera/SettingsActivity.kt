@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
 import java.io.File
@@ -28,6 +29,10 @@ class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFrag
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Disable edge-to-edge for this activity to properly support ActionBar
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        
         setContentView(R.layout.activity_settings)
         
         if (savedInstanceState == null) {
