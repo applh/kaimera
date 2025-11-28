@@ -172,14 +172,28 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun shareImage(uri: Uri) {
         try {
+            // Convert file URI to content URI if needed
+            val shareUri = if (uri.scheme == "file") {
+                // File URI - convert to content URI using FileProvider
+                val file = java.io.File(uri.path!!)
+                androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    "${applicationContext.packageName}.provider",
+                    file
+                )
+            } else {
+                // Already a content URI (e.g., from DCIM)
+                uri
+            }
+            
             val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                type = "image/*" // Or video/* if we support video preview sharing here
-                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                type = "image/*"
+                putExtra(android.content.Intent.EXTRA_STREAM, shareUri)
                 addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivity(android.content.Intent.createChooser(shareIntent, "Share via"))
         } catch (e: Exception) {
-            Toast.makeText(this, "Could not share image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Could not share image: ${e.message}", Toast.LENGTH_SHORT).show()
             android.util.Log.e("PreviewActivity", "Share failed", e)
         }
     }
