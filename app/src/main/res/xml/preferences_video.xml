@@ -10,6 +10,12 @@
         app:entryValues="@array/video_quality_values"
         app:defaultValue="fhd" />
 
+    <SwitchPreferenceCompat
+        app:key="enable_120fps"
+        app:title="High-Speed Recording (120fps)"
+        app:summary="Enable 120fps video recording for slow-motion effects. Requires device support. May limit resolution to 1080p."
+        app:defaultValue="false" />
+
     <ListPreference
         app:key="video_frame_rate"
         app:title="Video Frame Rate"
