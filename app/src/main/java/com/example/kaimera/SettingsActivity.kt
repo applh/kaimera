@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import java.io.File
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private var chronometerRunning = false
     private var chronometerSeconds = 0
@@ -34,8 +34,39 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Settings"
         
         setupChronometer()
+        
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                supportActionBar?.title = "Settings"
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh chronometer visibility in case it was changed in sub-screen
+        setupChronometer()
+    }
+
+    override fun onPreferenceStartFragment(caller: androidx.preference.PreferenceFragmentCompat, pref: androidx.preference.Preference): Boolean {
+        val args = pref.extras
+        val fragment = supportFragmentManager.fragmentFactory.instantiate(
+            classLoader,
+            pref.fragment!!
+        )
+        fragment.arguments = args
+        fragment.setTargetFragment(caller, 0)
+        
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.settings, fragment)
+            .addToBackStack(null)
+            .commit()
+            
+        supportActionBar?.title = pref.title
+        return true
     }
 
     private fun setupChronometer() {
@@ -155,8 +186,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
+        if (supportFragmentManager.popBackStackImmediate()) {
+            return true
+        }
+        return super.onSupportNavigateUp()
     }
     
     override fun onDestroy() {

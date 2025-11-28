@@ -222,6 +222,11 @@ class MainActivity : AppCompatActivity() {
         val gridOverlay = findViewById<GridOverlayView>(R.id.gridOverlay)
         gridOverlay.visibility = if (showGrid) android.view.View.VISIBLE else android.view.View.GONE
         
+        // Apply Grid nb of rows and columns
+        val rows = sharedPreferences.getInt("grid_rows", 3)
+        val columns = sharedPreferences.getInt("grid_columns", 3)
+        gridOverlay.setGridSize(rows, columns)
+        
         // Apply Photo Quality
         val quality = sharedPreferences.getString("photo_quality", "high")
         photoQuality = when (quality) {

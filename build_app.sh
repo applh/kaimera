@@ -5,11 +5,23 @@ echo "Building Kaimera APK..."
 chmod +x gradlew
 
 # Run build
-./gradlew assembleRelease --info
+./gradlew assembleDebug --info
+code1=$?
 
-if [ $? -eq 0 ]; then
+
+./gradlew assembleRelease --info
+code2=$?
+
+if [ $code2 -eq 0 ]; then
     echo "Build Successful!"
     echo "APK location: app/build/outputs/apk/release/app-release.apk"
+else
+    echo "Build Failed. Please check the output above."
+fi
+
+if [ $code1 -eq 0 ]; then
+    echo "Build Successful!"
+    echo "APK location: app/build/outputs/apk/debug/app-debug.apk"
 else
     echo "Build Failed. Please check the output above."
 fi

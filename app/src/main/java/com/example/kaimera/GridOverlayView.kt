@@ -19,6 +19,15 @@ class GridOverlayView @JvmOverloads constructor(
         alpha = 150 // Semi-transparent
         style = Paint.Style.STROKE
     }
+    
+    private var rows = 3
+    private var columns = 3
+    
+    fun setGridSize(rows: Int, columns: Int) {
+        this.rows = rows.coerceIn(1, 10)
+        this.columns = columns.coerceIn(1, 10)
+        invalidate()
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -26,16 +35,16 @@ class GridOverlayView @JvmOverloads constructor(
         val width = width.toFloat()
         val height = height.toFloat()
 
-        // Vertical lines
-        val x1 = width / 3
-        val x2 = width * 2 / 3
-        canvas.drawLine(x1, 0f, x1, height, paint)
-        canvas.drawLine(x2, 0f, x2, height, paint)
+        // Draw vertical lines
+        for (i in 1 until columns) {
+            val x = width * i / columns
+            canvas.drawLine(x, 0f, x, height, paint)
+        }
 
-        // Horizontal lines
-        val y1 = height / 3
-        val y2 = height * 2 / 3
-        canvas.drawLine(0f, y1, width, y1, paint)
-        canvas.drawLine(0f, y2, width, y2, paint)
+        // Draw horizontal lines
+        for (i in 1 until rows) {
+            val y = height * i / rows
+            canvas.drawLine(0f, y, width, y, paint)
+        }
     }
 }

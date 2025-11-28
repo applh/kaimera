@@ -5,8 +5,28 @@
     <SwitchPreferenceCompat
         app:key="grid_overlay"
         app:title="Grid Overlay"
-        app:summary="Show rule of thirds grid"
+        app:summary="Show grid overlay on camera"
         app:defaultValue="false" />
+
+    <SeekBarPreference
+        app:key="grid_rows"
+        app:title="Grid Rows"
+        app:summary="Number of horizontal lines"
+        app:defaultValue="3"
+        android:min="1"
+        android:max="10"
+        app:showSeekBarValue="true"
+        app:dependency="grid_overlay" />
+
+    <SeekBarPreference
+        app:key="grid_columns"
+        app:title="Grid Columns"
+        app:summary="Number of vertical lines"
+        app:defaultValue="3"
+        android:min="1"
+        android:max="10"
+        app:showSeekBarValue="true"
+        app:dependency="grid_overlay" />
 
     <SwitchPreferenceCompat
         app:key="enable_chronometer"

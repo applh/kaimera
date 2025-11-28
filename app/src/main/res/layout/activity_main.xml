@@ -84,19 +84,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_menu_rotate" />
 
-    <com.example.kaimera.GridOverlayView
-        android:id="@+id/gridOverlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/previewView"
-        app:layout_constraintEnd_toEndOf="@+id/previewView"
-        app:layout_constraintStart_toStartOf="@+id/previewView"
-        app:layout_constraintTop_toTopOf="@+id/previewView" />
-
-
-
-
+        
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/timerButton"
