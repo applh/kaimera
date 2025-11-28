@@ -395,12 +395,13 @@ class MainActivity : AppCompatActivity() {
         // Set up filter button and selector
         val filterButton = findViewById<FloatingActionButton>(R.id.filterButton)
         val filterSelector = findViewById<RecyclerView>(R.id.filterSelector)
+        val filterContainer = findViewById<android.widget.LinearLayout>(R.id.filterContainer)
         
         val filters = createFilters()
         val filterAdapter = FilterAdapter(filters) { filter ->
             currentFilter = filter
             filterButton.contentDescription = filter.name
-            filterSelector.visibility = android.view.View.GONE
+            filterContainer.visibility = android.view.View.GONE
             Toast.makeText(this, "Filter: ${filter.name}", Toast.LENGTH_SHORT).show()
         }
         
@@ -427,7 +428,7 @@ class MainActivity : AppCompatActivity() {
         }
     
         filterButton.setOnClickListener {
-            filterSelector.visibility = if (filterSelector.visibility == android.view.View.VISIBLE) {
+            filterContainer.visibility = if (filterContainer.visibility == android.view.View.VISIBLE) {
                 android.view.View.GONE
             } else {
                 android.view.View.VISIBLE

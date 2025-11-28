@@ -168,7 +168,7 @@ class ZoomableImageView @JvmOverloads constructor(
     override fun onShowPress(e: MotionEvent) {}
     override fun onSingleTapUp(e: MotionEvent): Boolean = false
     
-    override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+    override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
         if (!isZooming) { // Only scroll if not currently multi-touch zooming
              // Check if we can scroll
             matrixCurrent.getValues(matrixValues)
@@ -195,7 +195,7 @@ class ZoomableImageView @JvmOverloads constructor(
     }
 
     override fun onLongPress(e: MotionEvent) {}
-    override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
+    override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
     
     fun setMaxZoom(maxZoom: Float) {
         maxScale = maxZoom

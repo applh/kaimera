@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.kaimera"
-    compileSdk = 33
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.kaimera"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 35
         versionCode = 47
         versionName = "23.3.1"
 
@@ -38,6 +38,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -47,7 +51,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     
     // CameraX dependencies (prepared for future use)
-    val cameraxVersion = "1.2.2"
+    val cameraxVersion = "1.5.1"
     implementation("androidx.camera:camera-core:${cameraxVersion}")
     implementation("androidx.camera:camera-camera2:${cameraxVersion}")
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
