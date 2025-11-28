@@ -29,10 +29,6 @@ class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFrag
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Disable edge-to-edge for this activity to properly support ActionBar
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        
         setContentView(R.layout.activity_settings)
         
         if (savedInstanceState == null) {
@@ -41,16 +37,8 @@ class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFrag
                 .replace(R.id.settings, SettingsFragment())
                 .commit()
         }
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Settings"
         
         setupChronometer()
-        
-        supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                supportActionBar?.title = "Settings"
-            }
-        }
     }
     
     override fun onResume() {
@@ -72,8 +60,7 @@ class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFrag
             .replace(R.id.settings, fragment)
             .addToBackStack(null)
             .commit()
-            
-        supportActionBar?.title = pref.title
+        
         return true
     }
 
