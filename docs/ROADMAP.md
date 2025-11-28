@@ -42,7 +42,8 @@
 - **Watermarking** - Custom text/logo, timestamp, GPS location stamp
 
 ### 🎥 Video Enhancements
-- **Video Features** - Stabilization toggle, slow motion
+- ✅ **High-Speed Recording** - 120fps video recording for slow-motion (device-dependent)
+- **Video Features** - Stabilization toggle, advanced slow motion controls
 
 ### 📱 Usability & Organization
 - **Gallery Improvements** - Sort/filter by date/type, search, batch operations
