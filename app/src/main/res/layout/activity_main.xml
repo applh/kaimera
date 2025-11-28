@@ -101,17 +101,27 @@
         
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/hdrButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:contentDescription="HDR Mode"
+        app:fabSize="mini"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_view"
+        app:backgroundTint="@android:color/darker_gray" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/timerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:contentDescription="@string/timer_off"
         app:fabSize="mini"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/hdrButton"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_recent_history" />
-
-
 
 
 
@@ -184,21 +194,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/hdrIndicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="#CC000000"
-        android:padding="6dp"
-        android:text="HDR"
-        android:textColor="@android:color/holo_orange_light"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/switchButton" />
 
     <!-- Chronometer Panel -->
     <LinearLayout

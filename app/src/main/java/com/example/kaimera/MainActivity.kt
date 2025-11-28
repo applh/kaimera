@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var levelIndicator: LevelIndicatorView
     private lateinit var sensorManager: SensorManager
     private var gravitySensor: Sensor? = null
-    private lateinit var hdrIndicator: TextView
+    private lateinit var hdrButton: FloatingActionButton
     
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
@@ -254,12 +254,17 @@ class MainActivity : AppCompatActivity() {
         val chronometerPanel = findViewById<android.widget.LinearLayout>(R.id.chronometerPanel)
         chronometerPanel?.visibility = if (showChronometer) android.view.View.VISIBLE else android.view.View.GONE
         
-        // Apply HDR indicator visibility
+        // Apply HDR button state
         val hdrEnabled = sharedPreferences.getBoolean("hdr_enabled", false)
-        hdrIndicator.visibility = if (hdrEnabled && captureMode == CaptureMode.PHOTO) {
-            android.view.View.VISIBLE
+        if (captureMode == CaptureMode.PHOTO) {
+            hdrButton.visibility = android.view.View.VISIBLE
+            hdrButton.backgroundTintList = if (hdrEnabled) {
+                android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_orange_light))
+            } else {
+                android.content.res.ColorStateList.valueOf(getColor(android.R.color.darker_gray))
+            }
         } else {
-            android.view.View.GONE
+            hdrButton.visibility = android.view.View.GONE
         }
         
         // Shutter sound is handled during capture
@@ -272,7 +277,7 @@ class MainActivity : AppCompatActivity() {
         previewView = findViewById(R.id.previewView)
         captureButton = findViewById(R.id.captureButton)
         levelIndicator = findViewById(R.id.levelIndicator)
-        hdrIndicator = findViewById(R.id.hdrIndicator)
+        hdrButton = findViewById(R.id.hdrButton)
         
         // Initialize sensor manager
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
@@ -387,7 +392,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-     // Set up filter button and selector
+        // Set up filter button and selector
         val filterButton = findViewById<FloatingActionButton>(R.id.filterButton)
         val filterSelector = findViewById<RecyclerView>(R.id.filterSelector)
         
@@ -427,6 +432,30 @@ class MainActivity : AppCompatActivity() {
             } else {
                 android.view.View.VISIBLE
             }
+        }
+
+        // Set up HDR button click listener
+        hdrButton.setOnClickListener {
+            val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+            val currentHdrEnabled = sharedPreferences.getBoolean("hdr_enabled", false)
+            val newHdrEnabled = !currentHdrEnabled
+            
+            // Save the new HDR setting
+            sharedPreferences.edit().putBoolean("hdr_enabled", newHdrEnabled).apply()
+            
+            // Update button appearance
+            hdrButton.backgroundTintList = if (newHdrEnabled) {
+                android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_orange_light))
+            } else {
+                android.content.res.ColorStateList.valueOf(getColor(android.R.color.darker_gray))
+            }
+            
+            // Show toast
+            val message = if (newHdrEnabled) "HDR Enabled" else "HDR Disabled"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            
+            // Restart camera to apply HDR setting
+            startCamera()
         }
 
         // Set up chronometer controls
