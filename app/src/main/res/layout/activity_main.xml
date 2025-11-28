@@ -185,6 +185,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/hdrIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="#CC000000"
+        android:padding="6dp"
+        android:text="HDR"
+        android:textColor="@android:color/holo_orange_light"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/switchButton" />
+
     <!-- Chronometer Panel -->
     <LinearLayout
         android:id="@+id/chronometerPanel"

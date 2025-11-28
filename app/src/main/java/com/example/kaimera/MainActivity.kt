@@ -32,12 +32,15 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.extensions.ExtensionMode
+import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -98,6 +101,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var levelIndicator: LevelIndicatorView
     private lateinit var sensorManager: SensorManager
     private var gravitySensor: Sensor? = null
+    private lateinit var hdrIndicator: TextView
     
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
@@ -250,6 +254,14 @@ class MainActivity : AppCompatActivity() {
         val chronometerPanel = findViewById<android.widget.LinearLayout>(R.id.chronometerPanel)
         chronometerPanel?.visibility = if (showChronometer) android.view.View.VISIBLE else android.view.View.GONE
         
+        // Apply HDR indicator visibility
+        val hdrEnabled = sharedPreferences.getBoolean("hdr_enabled", false)
+        hdrIndicator.visibility = if (hdrEnabled && captureMode == CaptureMode.PHOTO) {
+            android.view.View.VISIBLE
+        } else {
+            android.view.View.GONE
+        }
+        
         // Shutter sound is handled during capture
     }
 
@@ -260,6 +272,7 @@ class MainActivity : AppCompatActivity() {
         previewView = findViewById(R.id.previewView)
         captureButton = findViewById(R.id.captureButton)
         levelIndicator = findViewById(R.id.levelIndicator)
+        hdrIndicator = findViewById(R.id.hdrIndicator)
         
         // Initialize sensor manager
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager

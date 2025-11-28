@@ -34,4 +34,10 @@
         app:entryValues="@array/flash_mode_values"
         app:defaultValue="auto" />
 
+    <SwitchPreferenceCompat
+        app:key="hdr_enabled"
+        app:title="HDR (High Dynamic Range)"
+        app:summary="Capture multiple exposures for better detail in highlights and shadows. May not be available on all devices."
+        app:defaultValue="false" />
+
 </PreferenceScreen>
