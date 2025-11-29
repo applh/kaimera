@@ -60,8 +60,9 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import com.example.kaimera.managers.IntervalometerManager
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
 
 
     enum class TimerDelay(val seconds: Int) {
@@ -117,19 +118,8 @@ class MainActivity : AppCompatActivity() {
     private var gravitySensor: Sensor? = null
     private lateinit var hdrButton: FloatingActionButton
     
-    // Intervalometer state
-    data class IntervalometerConfig(
-        val startDelaySeconds: Int,
-        val intervalSeconds: Double,
-        val totalCount: Int, // 0 for infinite
-        val lowPowerMode: Boolean
-    )
-    
-    private var isIntervalometerRunning = false
-    private var isSleeping = false
-    private var intervalometerConfig: IntervalometerConfig? = null
-    private var intervalometerCount = 0
-    private var intervalometerRunnable: Runnable? = null
+    // Intervalometer manager
+    private lateinit var intervalometerManager: IntervalometerManager
     
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
@@ -326,6 +316,15 @@ class MainActivity : AppCompatActivity() {
         val modeButton = findViewById<FloatingActionButton>(R.id.modeButton)
         val recordingIndicator = findViewById<TextView>(R.id.recordingIndicator)
         cameraExecutor = Executors.newSingleThreadExecutor()
+        
+        // Initialize intervalometer manager
+        intervalometerManager = IntervalometerManager(
+            context = this,
+            getCameraProvider = { cameraProvider },
+            getImageCapture = { imageCapture },
+            restartCamera = { startCamera() },
+            handler = handler
+        )
 
         // Request camera and audio permissions
         val permissionsNeeded = mutableListOf<String>()
@@ -939,12 +938,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showIntervalometerDialog() {
-        if (isIntervalometerRunning) {
+        if (intervalometerManager.isRunning()) {
             // If running, ask to stop
             androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Intervalometer Running")
                 .setMessage("Stop current intervalometer session?")
-                .setPositiveButton("Stop") { _, _ -> stopIntervalometer() }
+                .setPositiveButton("Stop") { _, _ -> intervalometerManager.stop() }
                 .setNegativeButton("Continue", null)
                 .show()
             return
@@ -1028,8 +1027,12 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val lowPower = checkLowPower.isChecked
-                val config = IntervalometerConfig(startDelay, interval, count, lowPower)
-                startIntervalometer(config)
+                val config = IntervalometerManager.Config(startDelay, interval, count, lowPower)
+                
+                // Keep screen on during intervalometer
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                
+                intervalometerManager.start(config, this)
                 dialog.dismiss()
             } catch (e: Exception) {
                 Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show()
@@ -1038,223 +1041,7 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
-    private fun startIntervalometer(config: IntervalometerConfig) {
-        isIntervalometerRunning = true
-        intervalometerConfig = config
-        intervalometerCount = 0
-        
-        // Keep screen on
-        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        
-        val startDelayMs = config.startDelaySeconds * 1000L
-        
-        // Initial sleep check for long start delay
-        if (config.lowPowerMode && config.startDelaySeconds > 5) {
-             enterSleepMode(System.currentTimeMillis() + startDelayMs)
-             return
-        }
-        
-        if (startDelayMs > 0) {
-            val countdownText = findViewById<TextView>(R.id.countdownText)
-            countdownText.visibility = android.view.View.VISIBLE
-            countdownText.text = "Starting in ${config.startDelaySeconds}s..."
-            
-            // Simple countdown update
-            val startTime = System.currentTimeMillis()
-            val endTime = startTime + startDelayMs
-            
-            intervalometerRunnable = object : Runnable {
-                override fun run() {
-                    if (!isIntervalometerRunning) return
-                    
-                    val remaining = endTime - System.currentTimeMillis()
-                    if (remaining <= 0) {
-                        countdownText.visibility = android.view.View.GONE
-                        captureIntervalPhoto()
-                    } else {
-                        val seconds = (remaining / 1000) + 1
-                        countdownText.text = "Starting in ${seconds}s..."
-                        handler.postDelayed(this, 200)
-                    }
-                }
-            }
-            handler.post(intervalometerRunnable!!)
-        } else {
-            captureIntervalPhoto()
-        }
-        
-        Toast.makeText(this, "Intervalometer Started", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun enterSleepMode(wakeUpTime: Long) {
-        if (!isIntervalometerRunning) return
-        isSleeping = true
-        
-        cameraProvider?.unbindAll()
-        
-        val sleepOverlay = findViewById<RelativeLayout>(R.id.sleepOverlay)
-        val sleepCountdownText = findViewById<TextView>(R.id.sleepCountdownText)
-        val btnWakeUp = findViewById<Button>(R.id.btnWakeUp)
-        
-        sleepOverlay.visibility = android.view.View.VISIBLE
-        
-        btnWakeUp.setOnClickListener {
-            stopIntervalometer()
-        }
-        
-        val wakeUpLeadTime = 3000L
-        
-        intervalometerRunnable = object : Runnable {
-            override fun run() {
-                if (!isIntervalometerRunning) return
-                
-                val now = System.currentTimeMillis()
-                val remaining = wakeUpTime - now
-                
-                if (remaining <= wakeUpLeadTime) {
-                    wakeUpCamera(wakeUpTime)
-                } else {
-                    val seconds = (remaining / 1000)
-                    val hours = seconds / 3600
-                    val minutes = (seconds % 3600) / 60
-                    val secs = seconds % 60
-                    
-                    sleepCountdownText.text = String.format("%02d:%02d:%02d", hours, minutes, secs)
-                    handler.postDelayed(this, 1000)
-                }
-            }
-        }
-        handler.post(intervalometerRunnable!!)
-    }
     
-    private fun wakeUpCamera(captureTime: Long) {
-        isSleeping = false
-        val sleepOverlay = findViewById<RelativeLayout>(R.id.sleepOverlay)
-        sleepOverlay.visibility = android.view.View.GONE
-        
-        startCamera()
-        
-        val now = System.currentTimeMillis()
-        val remaining = captureTime - now
-        
-        if (remaining > 0) {
-            handler.postDelayed({
-                captureIntervalPhoto()
-            }, remaining)
-        } else {
-            captureIntervalPhoto()
-        }
-    }
-
-    private fun stopIntervalometer() {
-        isIntervalometerRunning = false
-        isSleeping = false
-        intervalometerConfig = null
-        handler.removeCallbacksAndMessages(null) // Be careful, this removes ALL callbacks including burst/timer
-        
-        // Clear screen on flag
-        window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        
-        val countdownText = findViewById<TextView>(R.id.countdownText)
-        countdownText.visibility = android.view.View.GONE
-        
-        val burstCounter = findViewById<TextView>(R.id.burstCounter)
-        burstCounter.visibility = android.view.View.GONE
-        
-        findViewById<android.widget.RelativeLayout>(R.id.sleepOverlay).visibility = android.view.View.GONE
-        
-        // Ensure camera is bound if we stopped during sleep
-        if (cameraProvider != null) {
-             // We might need to re-bind if we were sleeping
-             // Simple way: just call startCamera()
-             startCamera()
-        }
-        
-        Toast.makeText(this, "Intervalometer Stopped. Captured $intervalometerCount photos.", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun captureIntervalPhoto() {
-        if (!isIntervalometerRunning) return
-        
-        val config = intervalometerConfig ?: return
-        
-        // Check stop condition (Moved to after capture to allow the last photo to count)
-        // Actually, we check before capture usually, but if we want to stop AFTER the count is reached:
-        // If count is 5, we take 5th photo, increment to 5.
-        // Then we check.
-        
-        val imageCapture = imageCapture ?: return
-
-        // Create output file
-        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
-        val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
-        
-        val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
-        
-        val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis())
-        val fileName = "${customPrefix ?: "IMG"}_INT_${timestamp}.jpg"
-        val photoFile = File(outputDirectory, fileName)
-
-        val outputOptions = StorageManager.createOutputFileOptions(
-            this,
-            photoFile,
-            saveLocationPref ?: "app_storage",
-            fileName
-        )
-
-        // Capture image
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    intervalometerCount++
-                    
-                    val counterView = findViewById<TextView>(R.id.burstCounter)
-                    counterView.visibility = android.view.View.VISIBLE
-                    counterView.text = "INT: $intervalometerCount / ${if(config.totalCount > 0) config.totalCount else "∞"}"
-                    
-                    // Check if we reached the limit
-                    if (config.totalCount > 0 && intervalometerCount >= config.totalCount) {
-                        // Wait one more interval then hide/stop
-                        val intervalMs = (config.intervalSeconds * 1000).toLong()
-                        handler.postDelayed({
-                            stopIntervalometer()
-                        }, intervalMs)
-                        return
-                    }
-                    
-                    // Schedule next shot
-                    if (isIntervalometerRunning) {
-                        val intervalMs = (config.intervalSeconds * 1000).toLong()
-                        val nextShotTime = System.currentTimeMillis() + intervalMs
-                        
-                        // Check for sleep mode
-                        if (config.lowPowerMode && config.intervalSeconds > 5) {
-                            enterSleepMode(nextShotTime)
-                        } else {
-                            handler.postDelayed({
-                                captureIntervalPhoto()
-                            }, intervalMs)
-                        }
-                    }
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Interval photo capture failed", exception)
-                    // Retry or skip?
-                    if (isIntervalometerRunning) {
-                        val intervalMs = (config.intervalSeconds * 1000).toLong()
-                        handler.postDelayed({
-                            captureIntervalPhoto()
-                        }, intervalMs)
-                    }
-                }
-            }
-        )
-    }
     private fun toggleVideoRecording(recordingIndicator: TextView) {
         val videoCapture = this.videoCapture ?: return
 
@@ -1515,5 +1302,51 @@ class MainActivity : AppCompatActivity() {
                 setRotate(1, -10f)
             })
         )
+    }
+    
+    // IntervalometerManager.Callback implementations
+    override fun onCounterUpdate(current: Int, total: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.burstCounter).apply {
+                visibility = android.view.View.VISIBLE
+                text = "INT: $current / ${if(total > 0) total else "∞"}"
+            }
+        }
+    }
+    
+    override fun onCountdownUpdate(secondsRemaining: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.countdownText).apply {
+                visibility = android.view.View.VISIBLE
+                text = "Starting in ${secondsRemaining}s..."
+            }
+        }
+    }
+    
+    override fun onSleepOverlayVisibility(visible: Boolean) {
+        runOnUiThread {
+            findViewById<RelativeLayout>(R.id.sleepOverlay).visibility = 
+                if (visible) android.view.View.VISIBLE else android.view.View.GONE
+        }
+    }
+    
+    override fun onSleepCountdownUpdate(hours: Int, minutes: Int, seconds: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.sleepCountdownText).text = 
+                String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        }
+    }
+    
+    override fun onComplete(photoCount: Int) {
+        runOnUiThread {
+            // Hide all overlays
+            findViewById<TextView>(R.id.countdownText).visibility = android.view.View.GONE
+            findViewById<TextView>(R.id.burstCounter).visibility = android.view.View.GONE
+            findViewById<RelativeLayout>(R.id.sleepOverlay).visibility = android.view.View.GONE
+            
+            Toast.makeText(this, 
+                "Intervalometer Stopped. Captured $photoCount photos.", 
+                Toast.LENGTH_LONG).show()
+        }
     }
 }
