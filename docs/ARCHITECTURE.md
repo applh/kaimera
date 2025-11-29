@@ -31,16 +31,29 @@ kaimera/
 ├── app/
 │   ├── src/main/
 │   │   ├── java/com/example/kaimera/
-│   │   │   ├── MainActivity.kt          # Main camera implementation
+│   │   │   ├── managers/                # Manager classes (business logic)
+│   │   │   │   ├── CameraManager.kt
+│   │   │   │   ├── PermissionManager.kt
+│   │   │   │   ├── OrientationManager.kt
+│   │   │   │   ├── VideoRecordingManager.kt
+│   │   │   │   ├── BurstModeManager.kt
+│   │   │   │   ├── IntervalometerManager.kt
+│   │   │   │   ├── ChronometerManager.kt
+│   │   │   │   ├── PreferencesManager.kt
+│   │   │   │   └── StorageManager.kt
+│   │   │   ├── MainActivity.kt          # Main camera UI coordinator
 │   │   │   ├── GalleryActivity.kt       # Photo/video gallery
 │   │   │   ├── GalleryAdapter.kt        # Gallery RecyclerView adapter
 │   │   │   ├── PreviewActivity.kt       # Photo preview after capture
 │   │   │   ├── SettingsActivity.kt      # Settings screen host
 │   │   │   ├── SettingsFragment.kt      # Settings preferences
+│   │   │   ├── StorageSettingsFragment.kt # Storage preferences
 │   │   │   ├── FilterAdapter.kt         # Filter selection adapter
 │   │   │   ├── GridOverlayView.kt       # Custom grid overlay view
+│   │   │   ├── LevelIndicatorView.kt    # Custom level indicator view
 │   │   │   ├── ZoomableImageView.kt     # Custom zoomable image view
-│   │   │   └── ZoomableVideoLayout.kt   # Custom zoomable video container
+│   │   │   ├── ZoomableVideoLayout.kt   # Custom zoomable video container
+│   │   │   └── ExifUtils.kt             # EXIF metadata utilities
 │   │   ├── res/
 │   │   │   ├── layout/
 │   │   │   │   ├── activity_main.xml    # Main camera UI
@@ -51,6 +64,7 @@ kaimera/
 │   │   │   │   └── item_filter.xml      # Filter item
 │   │   │   ├── xml/
 │   │   │   │   ├── root_preferences.xml # Settings preferences
+│   │   │   │   ├── storage_preferences.xml # Storage settings
 │   │   │   │   ├── backup_rules.xml
 │   │   │   │   └── data_extraction_rules.xml
 │   │   │   ├── values/
@@ -61,6 +75,12 @@ kaimera/
 │   │   └── AndroidManifest.xml
 │   ├── build.gradle.kts                 # App module config
 │   └── release.keystore                 # Signing key
+├── docs/                                # Documentation
+│   ├── ARCHITECTURE.md                  # This file
+│   ├── MANAGERS.md                      # Manager pattern guide
+│   ├── BUILDING.md
+│   ├── CAMERAX_UPGRADE.md
+│   └── ...
 ├── gradle/wrapper/                      # Gradle wrapper
 ├── build.gradle.kts                     # Root config
 ├── settings.gradle.kts
@@ -72,6 +92,44 @@ kaimera/
 └── README.md
 ```
 
+## Architecture Pattern
+
+### Manager Pattern
+
+Kaimera uses a **Manager Pattern** to organize complex functionality into focused, reusable components. This architecture provides:
+
+- **Separation of Concerns** - Each manager handles a specific domain
+- **Testability** - Managers can be unit tested independently
+- **Maintainability** - Changes are isolated to relevant managers
+- **Reusability** - Managers can be used across multiple activities
+
+#### Manager Catalog
+
+| Manager | Responsibility |
+|---------|---------------|
+| **CameraManager** | Camera initialization, mode switching, capture configuration |
+| **PermissionManager** | Runtime permission requests and status checking |
+| **OrientationManager** | Device orientation tracking and sensor management |
+| **VideoRecordingManager** | Video recording lifecycle and timer |
+| **BurstModeManager** | Rapid photo capture (long-press) |
+| **IntervalometerManager** | Time-lapse photography scheduling |
+| **ChronometerManager** | Stopwatch with optional audio recording |
+| **PreferencesManager** | Centralized settings access |
+| **StorageManager** | File I/O and storage location management |
+
+For detailed information about each manager, see [Manager Architecture Guide](MANAGERS.md).
+
+#### MainActivity Role
+
+`MainActivity` acts as a **coordinator** that:
+- Initializes and manages manager instances
+- Implements manager callback interfaces
+- Handles UI updates based on manager events
+- Delegates business logic to appropriate managers
+
+**Before Refactoring**: ~1,180 lines  
+**After Refactoring**: ~875 lines (26% reduction)
+
 ## Permissions
 
 The app requires the following permissions:
@@ -79,37 +137,101 @@ The app requires the following permissions:
 ```xml
 <uses-permission android:name="android.permission.CAMERA" />
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+    android:maxSdkVersion="28" />
 ```
 
-Both permissions are requested at runtime when the app launches. RECORD_AUDIO is required for video recording with audio.
+All permissions are requested at runtime via `PermissionManager`.
 
 ## Development
 
 ### Code Overview
 
-**MainActivity.kt** implements:
-- Runtime permission handling using `ActivityResultContracts`
-- CameraX initialization with `ProcessCameraProvider`
-- Camera preview binding to `PreviewView`
-- Photo capture using `ImageCapture` use case
-- File I/O for saving captured images
-
-### Key Components
-
+**MainActivity.kt** coordinates managers and handles UI:
 ```kotlin
-// Permission launcher
-private val requestPermissionLauncher = registerForActivityResult(
-    ActivityResultContracts.RequestPermission()
-) { isGranted -> ... }
-
-// Camera initialization
-private fun startCamera() {
-    val cameraProvider = ProcessCameraProvider.getInstance(this)
-    // Bind preview and image capture use cases
-}
-
-// Photo capture
-private fun takePhoto() {
-    imageCapture.takePicture(outputOptions, executor, callback)
+class MainActivity : AppCompatActivity(),
+    IntervalometerManager.Callback,
+    BurstModeManager.Callback,
+    ChronometerManager.Callback,
+    VideoRecordingManager.Callback {
+    
+    // Manager instances
+    private lateinit var cameraManager: CameraManager
+    private lateinit var permissionManager: PermissionManager
+    private lateinit var orientationManager: OrientationManager
+    // ... other managers
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Initialize managers
+        preferencesManager = PreferencesManager(this)
+        cameraManager = CameraManager(this, this, previewView, preferencesManager)
+        permissionManager = PermissionManager(this) { cameraManager.startCamera() }
+        
+        // Request permissions
+        permissionManager.checkAndRequestPermissions()
+    }
 }
 ```
+
+**CameraManager.kt** handles camera operations:
+```kotlin
+class CameraManager(
+    private val context: Context,
+    private val lifecycleOwner: LifecycleOwner,
+    private val previewView: PreviewView,
+    private val preferencesManager: PreferencesManager
+) {
+    fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        cameraProviderFuture.addListener({
+            val provider = cameraProviderFuture.get()
+            // Bind preview and capture use cases
+        }, ContextCompat.getMainExecutor(context))
+    }
+    
+    fun toggleCamera() { /* Switch front/back */ }
+    fun getImageCapture(): ImageCapture? { /* Return instance */ }
+}
+```
+
+### Adding New Features
+
+1. **Create a new manager** if the feature is complex enough
+2. **Add callback interface** for communication with MainActivity
+3. **Inject dependencies** through constructor
+4. **Implement lifecycle methods** if needed (start/stop)
+5. **Update MainActivity** to initialize and use the manager
+
+Example:
+```kotlin
+// 1. Create FilterManager.kt
+class FilterManager(
+    private val context: Context,
+    private val callback: Callback
+) {
+    interface Callback {
+        fun onFilterApplied(filter: Filter)
+    }
+    
+    fun applyFilter(filter: Filter) {
+        // Apply filter logic
+        callback.onFilterApplied(filter)
+    }
+}
+
+// 2. Update MainActivity
+class MainActivity : AppCompatActivity(), FilterManager.Callback {
+    private lateinit var filterManager: FilterManager
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        filterManager = FilterManager(this, this)
+    }
+    
+    override fun onFilterApplied(filter: Filter) {
+        // Update UI
+    }
+}
+```
+

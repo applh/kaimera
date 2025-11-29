@@ -61,6 +61,7 @@ For detailed build instructions, see [Building & Installation](docs/BUILDING.md)
 We have detailed documentation available in the `docs/` directory:
 
 - 🏗️ **[Architecture & Development](docs/ARCHITECTURE.md)** - Technical details, project structure, and code overview.
+- 🎯 **[Manager Architecture](docs/MANAGERS.md)** - Detailed guide to the manager pattern and all manager classes.
 - 🛠️ **[Building & Installation](docs/BUILDING.md)** - How to build, install, and customize the app.
 - 📹 **[CameraX 1.5.1 Upgrade & 120fps](docs/CAMERAX_UPGRADE.md)** - Details on the CameraX upgrade and high-speed video feature.
 - 🚀 **[Deployment](docs/DEPLOYMENT.md)** - Deploying to GitHub and publishing to Google Play.
