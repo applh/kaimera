@@ -134,6 +134,8 @@ class IntervalometerManager(
 
                 val remaining = endTime - System.currentTimeMillis()
                 if (remaining <= 0) {
+                    // Clear the runnable before capturing to prevent re-posting
+                    runnable = null
                     capturePhoto()
                 } else {
                     val seconds = (remaining / 1000) + 1
