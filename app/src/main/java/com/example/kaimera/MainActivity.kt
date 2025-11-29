@@ -62,6 +62,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import com.example.kaimera.managers.IntervalometerManager
 import com.example.kaimera.managers.BurstModeManager
+import com.example.kaimera.managers.PreferencesManager
 
 class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback {
 
@@ -119,6 +120,9 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     
     // Intervalometer manager
     private lateinit var intervalometerManager: IntervalometerManager
+    
+    // Preferences manager
+    private lateinit var preferencesManager: PreferencesManager
     
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
@@ -333,6 +337,9 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             maxCount = 20,
             interval = 200
         )
+        
+        // Initialize preferences manager
+        preferencesManager = PreferencesManager(this)
 
         // Request camera and audio permissions
         val permissionsNeeded = mutableListOf<String>()

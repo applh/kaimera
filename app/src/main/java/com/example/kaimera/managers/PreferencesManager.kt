@@ -1,0 +1,107 @@
+package com.example.kaimera.managers
+
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+
+/**
+ * Centralized manager for all app preferences.
+ * 
+ * Provides type-safe access to SharedPreferences with default values.
+ */
+class PreferencesManager(context: Context) {
+    
+    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    
+    // Photo Settings
+    fun getPhotoQuality(): String = prefs.getString("photo_quality", "high") ?: "high"
+    
+    fun getCaptureMode(): String = prefs.getString("capture_mode_preference", "latency") ?: "latency"
+    
+    fun getTargetResolution(): String = prefs.getString("target_resolution", "max") ?: "max"
+    
+    // Video Settings
+    fun getVideoQuality(): String = prefs.getString("video_quality", "fhd") ?: "fhd"
+    
+    fun getVideoFrameRate(): String = prefs.getString("video_frame_rate", "30") ?: "30"
+    
+    fun is120fpsEnabled(): Boolean = prefs.getBoolean("enable_120fps", false)
+    
+    // Storage Settings
+    fun getSaveLocation(): String = prefs.getString("save_location", "app_storage") ?: "app_storage"
+    
+    fun getFileNamingPattern(): String = prefs.getString("file_naming_pattern", "timestamp") ?: "timestamp"
+    
+    fun getCustomFilePrefix(): String = prefs.getString("custom_file_prefix", "IMG") ?: "IMG"
+    
+    fun getAutoDeleteDays(): Int = prefs.getString("auto_delete_days", "0")?.toIntOrNull() ?: 0
+    
+    // Overlay Settings
+    fun isGridEnabled(): Boolean = prefs.getBoolean("enable_grid", false)
+    
+    fun isLevelIndicatorEnabled(): Boolean = prefs.getBoolean("enable_level_indicator", true)
+    
+    fun getLevelIndicatorSensitivity(): Int = prefs.getInt("level_indicator_sensitivity", 5)
+    
+    fun getLevelIndicatorCrosshairSize(): Int = prefs.getInt("level_indicator_crosshair_size", 20)
+    
+    fun getLevelIndicatorCircleSize(): Int = prefs.getInt("level_indicator_circle_size", 10)
+    
+    // Preview Settings
+    fun getAutoSaveDelay(): Int = prefs.getString("auto_save_delay", "3")?.toIntOrNull() ?: 3
+    
+    // Helper method to get all preferences at once for a specific category
+    data class PhotoSettings(
+        val quality: String,
+        val captureMode: String,
+        val targetResolution: String
+    )
+    
+    data class VideoSettings(
+        val quality: String,
+        val frameRate: String,
+        val enable120fps: Boolean
+    )
+    
+    data class StorageSettings(
+        val saveLocation: String,
+        val namingPattern: String,
+        val customPrefix: String,
+        val autoDeleteDays: Int
+    )
+    
+    data class OverlaySettings(
+        val gridEnabled: Boolean,
+        val levelIndicatorEnabled: Boolean,
+        val levelSensitivity: Int,
+        val crosshairSize: Int,
+        val circleSize: Int
+    )
+    
+    fun getPhotoSettings(): PhotoSettings = PhotoSettings(
+        quality = getPhotoQuality(),
+        captureMode = getCaptureMode(),
+        targetResolution = getTargetResolution()
+    )
+    
+    fun getVideoSettings(): VideoSettings = VideoSettings(
+        quality = getVideoQuality(),
+        frameRate = getVideoFrameRate(),
+        enable120fps = is120fpsEnabled()
+    )
+    
+    fun getStorageSettings(): StorageSettings = StorageSettings(
+        saveLocation = getSaveLocation(),
+        namingPattern = getFileNamingPattern(),
+        customPrefix = getCustomFilePrefix(),
+        autoDeleteDays = getAutoDeleteDays()
+    )
+    
+    fun getOverlaySettings(): OverlaySettings = OverlaySettings(
+        gridEnabled = isGridEnabled(),
+        levelIndicatorEnabled = isLevelIndicatorEnabled(),
+        levelSensitivity = getLevelIndicatorSensitivity(),
+        crosshairSize = getLevelIndicatorCrosshairSize(),
+        circleSize = getLevelIndicatorCircleSize()
+    )
+}
