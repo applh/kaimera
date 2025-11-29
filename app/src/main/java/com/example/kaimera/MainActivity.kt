@@ -63,8 +63,9 @@ import java.util.concurrent.Executors
 import com.example.kaimera.managers.IntervalometerManager
 import com.example.kaimera.managers.BurstModeManager
 import com.example.kaimera.managers.PreferencesManager
+import com.example.kaimera.managers.ChronometerManager
 
-class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback {
+class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback, ChronometerManager.Callback {
 
 
     enum class TimerDelay(val seconds: Int) {
@@ -99,13 +100,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     private var currentFilter: CameraFilter? = null
     private val handler = Handler(Looper.getMainLooper())
 
-    // Chronometer state
-    private var chronometerRunning = false
-    private var chronometerSeconds = 0
-    private var chronometerRunnable: Runnable? = null
-    private var audioRecorder: android.media.MediaRecorder? = null
-    private var isRecordingAudio = false
-    private var audioFilePath: String? = null
+    // Chronometer manager
+    private lateinit var chronometerManager: ChronometerManager
     private var orientationEventListener: OrientationEventListener? = null
     
     // Recording timer state
@@ -340,6 +336,12 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         
         // Initialize preferences manager
         preferencesManager = PreferencesManager(this)
+        
+        // Initialize chronometer manager
+        chronometerManager = ChronometerManager(
+            context = this,
+            handler = handler
+        )
 
         // Request camera and audio permissions
         val permissionsNeeded = mutableListOf<String>()
@@ -522,19 +524,32 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         val chronoResetButton = findViewById<MaterialButton>(R.id.chronoResetButton)
 
         chronoStartButton.setOnClickListener {
-            startChronometer(chronometerDisplay, chronoStartButton, chronoStartWithAudioButton, chronoStopButton, false)
+            chronoStartButton.visibility = android.view.View.GONE
+            chronoStartWithAudioButton.visibility = android.view.View.GONE
+            chronoStopButton.visibility = android.view.View.VISIBLE
+            chronometerManager.start(false, this)
         }
 
         chronoStartWithAudioButton.setOnClickListener {
-            startChronometer(chronometerDisplay, chronoStartButton, chronoStartWithAudioButton, chronoStopButton, true)
+            chronoStartButton.visibility = android.view.View.GONE
+            chronoStartWithAudioButton.visibility = android.view.View.GONE
+            chronoStopButton.visibility = android.view.View.VISIBLE
+            chronometerManager.start(true, this)
         }
 
         chronoStopButton.setOnClickListener {
-            stopChronometer(chronoStartButton, chronoStartWithAudioButton, chronoStopButton)
+            chronoStartButton.visibility = android.view.View.VISIBLE
+            chronoStartWithAudioButton.visibility = android.view.View.VISIBLE
+            chronoStopButton.visibility = android.view.View.GONE
+            chronometerManager.stop()
         }
 
         chronoResetButton.setOnClickListener {
-            resetChronometer(chronometerDisplay, chronoStartButton, chronoStartWithAudioButton, chronoStopButton)
+            chronoStartButton.visibility = android.view.View.VISIBLE
+            chronoStartWithAudioButton.visibility = android.view.View.VISIBLE
+            chronoStopButton.visibility = android.view.View.GONE
+            chronometerManager.reset()
+            chronometerDisplay.text = "00:00"
         }
     }
 
@@ -1076,125 +1091,6 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             }
     }
 
-    private fun startChronometer(
-        display: TextView,
-        startButton: MaterialButton,
-        startWithAudioButton: MaterialButton,
-        stopButton: MaterialButton,
-        withAudio: Boolean
-    ) {
-        chronometerRunning = true
-        
-        // Hide start buttons, show stop button
-        startButton.visibility = android.view.View.GONE
-        startWithAudioButton.visibility = android.view.View.GONE
-        stopButton.visibility = android.view.View.VISIBLE
-        
-        // Start audio recording if requested
-        if (withAudio) {
-            startAudioRecording()
-        }
-        
-        chronometerRunnable = object : Runnable {
-            override fun run() {
-                chronometerSeconds++
-                val minutes = chronometerSeconds / 60
-                val seconds = chronometerSeconds % 60
-                display.text = String.format("%02d:%02d", minutes, seconds)
-                handler.postDelayed(this, 1000)
-            }
-        }
-        handler.post(chronometerRunnable!!)
-    }
-
-    private fun stopChronometer(
-        startButton: MaterialButton,
-        startWithAudioButton: MaterialButton,
-        stopButton: MaterialButton
-    ) {
-        chronometerRunning = false
-        
-        // Show start buttons, hide stop button
-        startButton.visibility = android.view.View.VISIBLE
-        startWithAudioButton.visibility = android.view.View.VISIBLE
-        stopButton.visibility = android.view.View.GONE
-        
-        chronometerRunnable?.let {
-            handler.removeCallbacks(it)
-        }
-        
-        // Stop audio recording if active
-        if (isRecordingAudio) {
-            stopAudioRecording()
-        }
-    }
-
-    private fun resetChronometer(
-        display: TextView,
-        startButton: MaterialButton,
-        startWithAudioButton: MaterialButton,
-        stopButton: MaterialButton
-    ) {
-        stopChronometer(startButton, startWithAudioButton, stopButton)
-        chronometerSeconds = 0
-        display.text = "00:00"
-    }
-
-    private fun startAudioRecording() {
-        try {
-            val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-            val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
-            val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
-            val customPrefix = sharedPreferences.getString("custom_file_prefix", "AUDIO")
-            
-            val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
-            val fileName = if (namingPattern == "sequential") {
-                StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "AUDIO", "m4a")
-            } else {
-                StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "AUDIO", "m4a")
-            }
-            
-            audioFilePath = File(outputDirectory, fileName).absolutePath
-            
-            audioRecorder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                android.media.MediaRecorder(this)
-            } else {
-                @Suppress("DEPRECATION")
-                android.media.MediaRecorder()
-            }
-            
-            audioRecorder?.apply {
-                setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
-                setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
-                setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
-                setOutputFile(audioFilePath)
-                prepare()
-                start()
-            }
-            
-            isRecordingAudio = true
-            Toast.makeText(this, "Audio recording started", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Failed to start audio recording", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun stopAudioRecording() {
-        try {
-            audioRecorder?.apply {
-                stop()
-                release()
-            }
-            audioRecorder = null
-            isRecordingAudio = false
-            Toast.makeText(this, "Audio saved: ${audioFilePath?.substringAfterLast("/")}", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Failed to stop audio recording", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         orientationEventListener?.enable()
@@ -1208,13 +1104,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     override fun onDestroy() {
         super.onDestroy()
         // Clean up chronometer
-        chronometerRunnable?.let {
-            handler.removeCallbacks(it)
-        }
-        // Clean up audio recorder
-        if (isRecordingAudio) {
-            stopAudioRecording()
-        }
+        chronometerManager.cleanup()
         cameraExecutor.shutdown()
     }
     // Helper to create list of available filters
@@ -1301,5 +1191,25 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             findViewById<TextView>(R.id.burstCounter).visibility = android.view.View.GONE
             Toast.makeText(this, "Burst complete: $totalCount photos", Toast.LENGTH_SHORT).show()
         }
+    }
+    
+    // ChronometerManager.Callback implementations
+    override fun onTimeUpdate(minutes: Int, seconds: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.chronometerDisplay).text = 
+                String.format("%02d:%02d", minutes, seconds)
+        }
+    }
+    
+    override fun onStateChanged(running: Boolean) {
+        // State changes are handled by button visibility in click listeners
+    }
+    
+    override fun onAudioRecordingStarted() {
+        // Already handled by Toast in manager
+    }
+    
+    override fun onAudioRecordingStopped(fileName: String) {
+        // Already handled by Toast in manager
     }
 }
