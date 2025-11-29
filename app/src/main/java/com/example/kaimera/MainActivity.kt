@@ -66,6 +66,9 @@ import com.example.kaimera.managers.PreferencesManager
 import com.example.kaimera.managers.ChronometerManager
 import com.example.kaimera.managers.VideoRecordingManager
 import com.example.kaimera.managers.StorageManager
+import com.example.kaimera.managers.CameraManager
+import com.example.kaimera.managers.PermissionManager
+import com.example.kaimera.managers.OrientationManager
 
 class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback, ChronometerManager.Callback, VideoRecordingManager.Callback {
 
@@ -84,14 +87,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
 
     private lateinit var previewView: PreviewView
     private lateinit var captureButton: FloatingActionButton
-    private var imageCapture: ImageCapture? = null
-    private var videoCapture: VideoCapture<Recorder>? = null
     private lateinit var cameraExecutor: ExecutorService
-    private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-    private var cameraProvider: ProcessCameraProvider? = null
-    private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
     private var timerDelay: TimerDelay = TimerDelay.OFF
-    private var photoQuality: PhotoQuality = PhotoQuality.HIGH
     private var captureMode: CaptureMode = CaptureMode.PHOTO
     // Data class representing a filter
     data class CameraFilter(val name: String, val matrix: ColorMatrix?)
@@ -103,15 +100,22 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
 
     // Chronometer manager
     private lateinit var chronometerManager: ChronometerManager
-    private var orientationEventListener: OrientationEventListener? = null
+
     
     // Video recording manager
     private lateinit var videoRecordingManager: VideoRecordingManager
     
+    // Camera manager
+    private lateinit var cameraManager: CameraManager
+    
+    // Permission manager
+    private lateinit var permissionManager: PermissionManager
+    
+    // Orientation manager
+    private lateinit var orientationManager: OrientationManager
+    
     // Level indicator
     private lateinit var levelIndicator: LevelIndicatorView
-    private lateinit var sensorManager: SensorManager
-    private var gravitySensor: Sensor? = null
     private lateinit var hdrButton: FloatingActionButton
     
     // Intervalometer manager
@@ -120,97 +124,28 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     // Preferences manager
     private lateinit var preferencesManager: PreferencesManager
     
-    private val sensorListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            event?.let {
-                val x = it.values[0]
-                val y = it.values[1]
 
-                
-                // Calculate orientation angle
-                val angle = Math.toDegrees(kotlin.math.atan2(x.toDouble(), y.toDouble())).toFloat()
-                
-                levelIndicator.updateAngle(angle)
-            }
-        }
-        
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-            // Not needed
-        }
-    }
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-        val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
-        
-        if (cameraGranted) {
-            startCamera()
-        } else {
-            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
-            finish()
-        }
-        
-        if (!audioGranted) {
-            Toast.makeText(this, "Audio permission required for video recording", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onResume() {
         super.onResume()
         applyPreferences()
         checkAutoDelete()
         
-        // Register sensor listener if level indicator is enabled
-        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        val levelIndicatorEnabled = sharedPreferences.getBoolean("enable_level_indicator", true)
-        if (levelIndicatorEnabled) {
-            gravitySensor?.let {
-                sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI)
-            }
-            
-            // Apply sensitivity preference
-            val sensitivity = sharedPreferences.getInt("level_indicator_sensitivity", 5)
-            levelIndicator.setThreshold(sensitivity.toFloat())
-            
-            // Apply crosshair size preference
-            val crosshairSize = sharedPreferences.getInt("level_indicator_crosshair_size", 20)
-            levelIndicator.setCrosshairSizePercentage(crosshairSize)
-            
-            // Apply circle size preference
-            val circleSize = sharedPreferences.getInt("level_indicator_circle_size", 10)
-            levelIndicator.setCircleSizePercentage(circleSize)
-            
-            levelIndicator.visibility = android.view.View.VISIBLE
-        } else {
-            levelIndicator.visibility = android.view.View.GONE
-        }
+        orientationManager.start()
         
-        if (allPermissionsGranted()) {
-            startCamera()
+        if (permissionManager.allPermissionsGranted()) {
+            cameraManager.startCamera()
         }
     }
     
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(sensorListener)
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+        orientationManager.stop()
     }
 
     companion object {
         private const val TAG = "Kaimera"
-        private val REQUIRED_PERMISSIONS = mutableListOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
-        ).apply {
-            if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.P) {
-                add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-        }.toTypedArray()
     }
 
     private fun checkAutoDelete() {
@@ -248,23 +183,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         val columns = sharedPreferences.getInt("grid_columns", 3)
         gridOverlay.setGridSize(rows, columns)
         
-        // Apply Photo Quality
-        val quality = sharedPreferences.getString("photo_quality", "high")
-        photoQuality = when (quality) {
-            "high" -> PhotoQuality.HIGH
-            "medium" -> PhotoQuality.MEDIUM
-            "low" -> PhotoQuality.LOW
-            else -> PhotoQuality.HIGH
-        }
-        
-        // Apply Flash Mode
-        val flashModePref = sharedPreferences.getString("flash_mode", "auto")
-        flashMode = when (flashModePref) {
-            "auto" -> ImageCapture.FLASH_MODE_AUTO
-            "on" -> ImageCapture.FLASH_MODE_ON
-            "off" -> ImageCapture.FLASH_MODE_OFF
-            else -> ImageCapture.FLASH_MODE_AUTO
-        }
+
         
         // Apply Chronometer visibility
         val showChronometer = sharedPreferences.getBoolean("enable_chronometer", false)
@@ -285,6 +204,20 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         }
         
         // Shutter sound is handled during capture
+        
+        // Apply Level Indicator settings
+        val showLevelIndicator = preferencesManager.isLevelIndicatorEnabled()
+        if (showLevelIndicator) {
+            val sensitivity = preferencesManager.getLevelIndicatorSensitivity()
+            levelIndicator.setThreshold(sensitivity.toFloat())
+            
+            val crosshairSize = preferencesManager.getLevelIndicatorCrosshairSize()
+            levelIndicator.setCrosshairSizePercentage(crosshairSize)
+            
+            val circleSize = preferencesManager.getLevelIndicatorCircleSize()
+            levelIndicator.setCircleSizePercentage(circleSize)
+        }
+        orientationManager.refreshLevelIndicatorVisibility()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -303,10 +236,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         levelIndicator = findViewById(R.id.levelIndicator)
         hdrButton = findViewById(R.id.hdrButton)
         
-        // Initialize sensor manager
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
-            ?: sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        
 
         val galleryButton = findViewById<FloatingActionButton>(R.id.galleryButton)
         val switchButton = findViewById<FloatingActionButton>(R.id.switchButton)
@@ -319,16 +249,16 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         // Initialize intervalometer manager
         intervalometerManager = IntervalometerManager(
             context = this,
-            getCameraProvider = { cameraProvider },
-            getImageCapture = { imageCapture },
-            restartCamera = { startCamera() },
+            getCameraProvider = { cameraManager.getCameraProvider() },
+            getImageCapture = { cameraManager.getImageCapture() },
+            restartCamera = { cameraManager.startCamera() },
             handler = handler
         )
         
         // Initialize burst mode manager
         burstModeManager = BurstModeManager(
             context = this,
-            getImageCapture = { imageCapture },
+            getImageCapture = { cameraManager.getImageCapture() },
             handler = handler,
             maxCount = 20,
             interval = 200
@@ -346,22 +276,35 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         // Initialize video recording manager
         videoRecordingManager = VideoRecordingManager(
             context = this,
-            getVideoCapture = { videoCapture },
+            getVideoCapture = { cameraManager.getVideoCapture() },
             handler = handler
         )
+        
+        // Initialize camera manager
+        cameraManager = CameraManager(
+            context = this,
+            lifecycleOwner = this,
+            previewView = previewView,
+            preferencesManager = preferencesManager
+        )
 
-        // Request camera and audio permissions
-        val permissionsNeeded = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            permissionsNeeded.add(Manifest.permission.CAMERA)
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            permissionsNeeded.add(Manifest.permission.RECORD_AUDIO)
+        // Initialize permission manager
+        permissionManager = PermissionManager(this) {
+            cameraManager.startCamera()
         }
         
-        if (permissionsNeeded.isNotEmpty()) {
-            requestPermissionLauncher.launch(permissionsNeeded.toTypedArray())
+        // Initialize orientation manager
+        orientationManager = OrientationManager(
+            context = this,
+            levelIndicator = levelIndicator,
+            preferencesManager = preferencesManager
+        ) { rotation ->
+            cameraManager.getImageCapture()?.targetRotation = rotation
+            cameraManager.getVideoCapture()?.targetRotation = rotation
         }
+        
+        // Request permissions
+        permissionManager.checkAndRequestPermissions()
 
         // Set up capture button click and long-press listeners
         val burstCounter = findViewById<TextView>(R.id.burstCounter)
@@ -407,7 +350,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
 
         // Set up switch button click listener
         switchButton.setOnClickListener {
-            toggleCamera()
+            cameraManager.toggleCamera()
         }
 
 
@@ -435,6 +378,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         // Set up mode button click listener
         modeButton.setOnClickListener {
             captureMode = if (captureMode == CaptureMode.PHOTO) CaptureMode.VIDEO else CaptureMode.PHOTO
+            cameraManager.setCaptureMode(captureMode)
             
             val (stringRes, icon, toastMsg) = when (captureMode) {
                 CaptureMode.PHOTO -> Triple(R.string.mode_photo, android.R.drawable.ic_menu_camera, "Photo Mode")
@@ -446,7 +390,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show()
             
             // Restart camera to switch use cases
-            startCamera()
+            cameraManager.startCamera()
         }
 
 
@@ -466,25 +410,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         filterSelector.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         filterSelector.adapter = filterAdapter
         
-        // Initialize OrientationEventListener
-        orientationEventListener = object : OrientationEventListener(this) {
-            override fun onOrientationChanged(orientation: Int) {
-                if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
-                    return
-                }
-
-                val rotation = when (orientation) {
-                    in 45..134 -> Surface.ROTATION_270
-                    in 135..224 -> Surface.ROTATION_180
-                    in 225..314 -> Surface.ROTATION_90
-                    else -> Surface.ROTATION_0
-                }
-
-                imageCapture?.targetRotation = rotation
-                videoCapture?.targetRotation = rotation
-            }
-        }
-    
+        
         filterButton.setOnClickListener {
             filterContainer.visibility = if (filterContainer.visibility == android.view.View.VISIBLE) {
                 android.view.View.GONE
@@ -520,7 +446,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             
             // Restart camera to apply HDR setting
-            startCamera()
+            cameraManager.startCamera()
         }
 
         // Set up chronometer controls
@@ -561,216 +487,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     }
 
 
-    private fun toggleCamera() {
-        cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-            CameraSelector.DEFAULT_FRONT_CAMERA
-        } else {
-            CameraSelector.DEFAULT_BACK_CAMERA
-        }
-        startCamera()
-    }
 
-    @kotlin.OptIn(androidx.camera.video.ExperimentalHighSpeedVideo::class)
-    private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
-        cameraProviderFuture.addListener({
-            val provider = cameraProviderFuture.get()
-            this.cameraProvider = provider
-
-            // Preview use case
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
-
-            try {
-                // Unbind all use cases before rebinding
-                provider.unbindAll()
-
-                if (captureMode == CaptureMode.PHOTO) {
-                    // ImageCapture use case for photos
-                    val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-                    
-                    // Capture Mode
-                    val captureModePref = sharedPreferences.getString("capture_mode_preference", "latency")
-                    val captureModeValue = if (captureModePref == "quality") {
-                        ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
-                    } else {
-                        ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
-                    }
-                    
-                    // Target Resolution
-                    val resolutionPref = sharedPreferences.getString("target_resolution", "max")
-                    val targetResolution = when (resolutionPref) {
-                        "12mp" -> android.util.Size(4000, 3000)
-                        "fhd" -> android.util.Size(1920, 1080)
-                        "hd" -> android.util.Size(1280, 720)
-                        else -> null // Max/Default
-                    }
-
-                    val imageCaptureBuilder = ImageCapture.Builder()
-                        .setFlashMode(flashMode)
-                        .setJpegQuality(photoQuality.jpegQuality)
-                        .setCaptureMode(captureModeValue)
-                        .setTargetRotation(windowManager.defaultDisplay.rotation)
-                        
-                    if (targetResolution != null) {
-                        imageCaptureBuilder.setTargetResolution(targetResolution)
-                    }
-                    
-                    imageCapture = imageCaptureBuilder.build()
-
-                    // Bind use cases to camera
-                    val camera = provider.bindToLifecycle(
-                        this, cameraSelector, preview, imageCapture
-                    )
-
-                    // Set up pinch-to-zoom
-                    setupPinchToZoom(camera)
-                } else {
-                    // VideoCapture use case for videos
-                    val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-                    val enable120fps = sharedPreferences.getBoolean("enable_120fps", false)
-                    
-                    if (enable120fps) {
-                        // Try to setup high-speed recording
-                        val highSpeedSupported = setupHighSpeedRecording(provider, cameraSelector, preview)
-                        if (!highSpeedSupported) {
-                            // Fallback to standard recording
-                            Toast.makeText(this, "120fps not supported on this device, using standard recording", Toast.LENGTH_SHORT).show()
-                            setupStandardRecording(provider, cameraSelector, preview)
-                        }
-                    } else {
-                        // Standard recording
-                        setupStandardRecording(provider, cameraSelector, preview)
-                    }
-                }
-
-            } catch (e: Exception) {
-                Toast.makeText(this, "Failed to start camera: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e(TAG, "Camera binding failed", e)
-            }
-
-        }, ContextCompat.getMainExecutor(this))
-    }
-
-    private fun getVideoQuality(): androidx.camera.video.Quality {
-        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        val qualityString = sharedPreferences.getString("video_quality", "fhd")
-        return when (qualityString) {
-            "uhd" -> androidx.camera.video.Quality.UHD
-            "hd" -> androidx.camera.video.Quality.HD
-            else -> androidx.camera.video.Quality.FHD
-        }
-    }
-
-    private fun setupStandardRecording(
-        cameraProvider: ProcessCameraProvider,
-        cameraSelector: CameraSelector,
-        preview: Preview
-    ) {
-        val quality = getVideoQuality()
-        val fallback = FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
-        val recorder = Recorder.Builder()
-            .setQualitySelector(QualitySelector.from(quality, fallback))
-            .build()
-        videoCapture = VideoCapture.withOutput(recorder)
-
-        // Bind use cases to camera
-        val camera = cameraProvider.bindToLifecycle(
-            this, cameraSelector, preview, videoCapture
-        )
-        // Set up pinch-to-zoom
-        setupPinchToZoom(camera)
-    }
-
-    @androidx.camera.video.ExperimentalHighSpeedVideo
-    private fun setupHighSpeedRecording(
-        cameraProvider: ProcessCameraProvider,
-        cameraSelector: CameraSelector,
-        preview: Preview
-    ): Boolean {
-        try {
-            Log.d(TAG, "Setting up HighSpeedVideoSession for 120fps using Camera2Interop...")
-            
-            // Get camera info
-            val cameraInfo = cameraProvider.getCameraInfo(cameraSelector)
-            
-            // Check high-speed capabilities
-            val highSpeedCapabilities = Recorder.getHighSpeedVideoCapabilities(cameraInfo)
-            
-            if (highSpeedCapabilities == null) {
-                Log.d(TAG, "No high-speed capabilities available on this device")
-                return false
-            }
-            
-            // We can't easily use HighSpeedVideoSessionConfig due to API complexity/changes.
-            // Fallback: Use Camera2Interop to force the FPS range on the Preview.
-            // This often forces the sensor into high-speed mode for the whole session.
-            
-            Log.d(TAG, "Attempting to force 120fps via Camera2Interop")
-            
-            // Note: This requires the Preview to be built with Camera2Interop
-            // We need to modify the Preview passed in, but it's already built.
-            // We should ideally pass the builder or rebuild it.
-            // Since we can't easily rebuild it here without changing the call site,
-            // we'll assume the caller (startCamera) can be modified or we create a new Preview.
-            
-            // However, startCamera passes a built Preview.
-            // Let's create a NEW Preview with the intercept.
-            
-            val previewBuilder = Preview.Builder()
-            val extender = androidx.camera.camera2.interop.Camera2Interop.Extender(previewBuilder)
-            extender.setCaptureRequestOption(
-                android.hardware.camera2.CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-                android.util.Range(120, 120)
-            )
-            
-            val newPreview = previewBuilder.build()
-            newPreview.setSurfaceProvider(previewView.surfaceProvider)
-            
-            // Use standard recorder
-            val quality = getVideoQuality()
-            val fallback = FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
-            val recorder = Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(quality, fallback))
-                .build()
-            videoCapture = VideoCapture.withOutput(recorder)
-            
-            // Bind use cases
-            val camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, newPreview, videoCapture
-            )
-            
-            setupPinchToZoom(camera)
-            
-            Toast.makeText(this, "120fps Mode Active (Forced)", Toast.LENGTH_SHORT).show()
-            return true
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to setup high-speed recording", e)
-            return false
-        }
-    }
-
-
-    private fun setupPinchToZoom(camera: androidx.camera.core.Camera) {
-        val scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                val currentZoomRatio = camera.cameraInfo.zoomState.value?.zoomRatio ?: 1f
-                val delta = detector.scaleFactor
-                camera.cameraControl.setZoomRatio(currentZoomRatio * delta)
-                return true
-            }
-        })
-
-        previewView.setOnTouchListener { _, event ->
-            scaleGestureDetector.onTouchEvent(event)
-            true
-        }
-    }
 
     private fun takePhoto(countdownText: TextView) {
         if (timerDelay == TimerDelay.OFF) {
@@ -801,7 +518,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     }
 
     private fun capturePhoto() {
-        val imageCapture = imageCapture ?: return
+        val imageCapture = cameraManager.getImageCapture() ?: return
 
         // Create output file
         // Create output file
@@ -858,7 +575,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
                             canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
                             // Overwrite file
                             val out = java.io.FileOutputStream(photoFile)
-                            filteredBitmap.compress(Bitmap.CompressFormat.JPEG, photoQuality.jpegQuality, out)
+                            filteredBitmap.compress(Bitmap.CompressFormat.JPEG, cameraManager.photoQuality.jpegQuality, out)
                             out.flush()
                             out.close()
                         } catch (e: Exception) {
@@ -1019,15 +736,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         videoRecordingManager.startRecording(this)
     }
 
-    override fun onStart() {
-        super.onStart()
-        orientationEventListener?.enable()
-    }
 
-    override fun onStop() {
-        super.onStop()
-        orientationEventListener?.disable()
-    }
 
     override fun onDestroy() {
         super.onDestroy()

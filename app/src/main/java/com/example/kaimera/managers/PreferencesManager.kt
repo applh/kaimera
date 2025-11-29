@@ -12,9 +12,14 @@ import androidx.preference.PreferenceManager
 class PreferencesManager(context: Context) {
     
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    fun getString(key: String, defValue: String): String? = prefs.getString(key, defValue)
+    fun getBoolean(key: String, defValue: Boolean): Boolean = prefs.getBoolean(key, defValue)
     
     // Photo Settings
     fun getPhotoQuality(): String = prefs.getString("photo_quality", "high") ?: "high"
+    
+    fun getFlashMode(): String = prefs.getString("flash_mode", "auto") ?: "auto"
     
     fun getCaptureMode(): String = prefs.getString("capture_mode_preference", "latency") ?: "latency"
     
