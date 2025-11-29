@@ -126,6 +126,17 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_edit" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/intervalometerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:contentDescription="Intervalometer"
+        app:fabSize="mini"
+        app:layout_constraintStart_toEndOf="@+id/filterButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_agenda" />
+
     <LinearLayout
         android:id="@+id/filterContainer"
         android:layout_width="0dp"
@@ -196,7 +207,7 @@
         android:layout_height="wrap_content"
         android:text="3"
         android:textColor="@android:color/white"
-        android:textSize="72sp"
+        android:textSize="48sp"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -277,5 +288,62 @@
             android:textSize="10sp"
             android:textColor="@android:color/white" />
     </LinearLayout>
+
+
+
+    <!-- Sleep Overlay -->
+    <RelativeLayout
+        android:id="@+id/sleepOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/sleepStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sleeping..."
+                android:textColor="#888888"
+                android:textSize="24sp"/>
+
+            <TextView
+                android:id="@+id/sleepCountdownText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00:00"
+                android:textColor="#FFFFFF"
+                android:textSize="64sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"/>
+
+            <ProgressBar
+                android:id="@+id/sleepProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:max="100"
+                android:progress="100"/>
+
+            <Button
+                android:id="@+id/btnWakeUp"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wake Up"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="48dp"/>
+        </LinearLayout>
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

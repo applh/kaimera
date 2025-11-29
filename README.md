@@ -20,6 +20,7 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 - ⚙️ **Photo Quality Settings** - High/Medium/Low JPEG quality options
 - 🎥 **Video Recording** - Record videos with audio, configurable quality (4K/1080p/720p) and frame rate (24/30/60fps). Optional high-speed 120fps mode for slow-motion effects (device-dependent). Recording duration is displayed with a transparent overlay above the capture button. Supports pinch-to-zoom playback.
 - 📸 **Burst Mode** - Rapid photo capture with long-press (up to 20 photos)
+- ⏲️ **Intervalometer** - Scheduled time-lapse photography with configurable start delay/alarm time, interval (0.5s+), and photo count. Optional low-power sleep mode conserves battery by unbinding camera between shots with countdown overlay.
 - 🔄 **Camera Switch** - Toggle between front and back cameras
 - ⏱️ **Chronometer** - Compact stopwatch overlay integrated into the top bar with optional audio recording. Also available in Settings screen with large two-row layout.
 - 💡 **Flash Control** - Toggle between Auto, On, and Off modes

@@ -1,0 +1,89 @@
+# Kaimera Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [1.5.0] - 2025-11-29
+
+### Added
+- **Intervalometer Feature** - Scheduled time-lapse photography with advanced controls
+  - Configurable start delay (seconds) or specific alarm time (HH:MM)
+  - Adjustable interval between shots (minimum 0.5 seconds)
+  - Set total photo count or run indefinitely
+  - Real-time counter display showing progress (e.g., "INT: 5 / 20")
+  - Low Power Mode option for battery conservation
+    - Camera unbinds between shots to save power
+    - Black sleep overlay with countdown timer (HH:MM:SS format)
+    - Progress bar for visual feedback
+    - Auto wake-up 3 seconds before next scheduled shot
+    - Manual "Wake Up" button to stop early
+  - Automatic file naming with millisecond timestamps for uniqueness
+  - Screen stays on during active capture phases
+  - Graceful stop with final photo count notification
+
+### Technical
+- Added `IntervalometerConfig` data class with `lowPowerMode` boolean
+- Implemented `enterSleepMode()` and `wakeUpCamera()` methods
+- Added `cameraProvider` class variable for lifecycle management
+- Created sleep overlay layout with countdown and controls
+- Enhanced dialog with checkbox for Low Power Mode option
+
+## [1.4.0] - 2025-11-28
+
+### Added
+- **120fps High-Speed Video Recording** - Slow-motion video capture (device-dependent)
+  - Configurable via Settings → Video Quality → Enable 120fps
+  - Automatic fallback to standard recording if unsupported
+  - CameraX 1.5.1 upgrade for high-speed video support
+
+### Changed
+- Upgraded CameraX from 1.3.4 to 1.5.1
+- Updated Kotlin from 1.9.0 to 2.1.0
+- Updated Material Components to 1.12.0
+
+## [1.3.0] - 2025-11-27
+
+### Added
+- **Settings Organization** - Reorganized settings into collapsible groups
+  - Photo Settings sub-screen
+  - Video Settings sub-screen
+  - Overlays sub-screen (including Level Indicator)
+  - Storage Options sub-screen
+
+## [1.2.0] - 2025-11-24
+
+### Added
+- **Level Indicator** - Spirit level overlay with dual bubbles
+  - Configurable sensitivity in Settings
+  - Helps align horizontal and vertical shots
+  - Static centered crosshair with dynamic level circle
+
+## [1.1.0] - 2025-11-23
+
+### Added
+- **EXIF Editor** - View and edit image metadata
+- **Media Controls** - Unified playback for video and audio
+- **Debug Logs** - On-device log viewer in Settings
+
+## [1.0.0] - 2025-11-22
+
+### Added
+- Initial release with core camera functionality
+- Real-time camera preview
+- Photo and video capture
+- Burst mode
+- Filters and effects
+- In-app gallery
+- Material Design UI
+
+[Unreleased]: https://github.com/yourusername/kaimera/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/yourusername/kaimera/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/yourusername/kaimera/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/yourusername/kaimera/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/yourusername/kaimera/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/yourusername/kaimera/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/yourusername/kaimera/releases/tag/v1.0.0
