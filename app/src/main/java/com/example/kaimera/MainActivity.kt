@@ -61,8 +61,9 @@ import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import com.example.kaimera.managers.IntervalometerManager
+import com.example.kaimera.managers.BurstModeManager
 
-class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
+class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback {
 
 
     enum class TimerDelay(val seconds: Int) {
@@ -92,10 +93,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
     // Data class representing a filter
     data class CameraFilter(val name: String, val matrix: ColorMatrix?)
 
-    private var isBurstMode: Boolean = false
-    private var burstCount: Int = 0
-    private val burstInterval: Long = 200 // milliseconds between burst shots
-    private val maxBurstCount: Int = 20
+    // Burst mode manager
+    private lateinit var burstModeManager: BurstModeManager
     private var currentFilter: CameraFilter? = null
     private val handler = Handler(Looper.getMainLooper())
 
@@ -325,6 +324,15 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
             restartCamera = { startCamera() },
             handler = handler
         )
+        
+        // Initialize burst mode manager
+        burstModeManager = BurstModeManager(
+            context = this,
+            getImageCapture = { imageCapture },
+            handler = handler,
+            maxCount = 20,
+            interval = 200
+        )
 
         // Request camera and audio permissions
         val permissionsNeeded = mutableListOf<String>()
@@ -352,8 +360,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
 
         // Long-press for burst mode (Photo mode only)
         captureButton.setOnLongClickListener {
-            if (captureMode == CaptureMode.PHOTO && !isBurstMode) {
-                startBurstMode(burstCounter)
+            if (captureMode == CaptureMode.PHOTO && !burstModeManager.isRunning()) {
+                burstModeManager.start(this)
                 true
             } else {
                 false
@@ -362,8 +370,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
 
         // Stop burst on release
         captureButton.setOnTouchListener { _, event ->
-            if (event.action == android.view.MotionEvent.ACTION_UP && isBurstMode) {
-                stopBurstMode(burstCounter)
+            if (event.action == android.view.MotionEvent.ACTION_UP && burstModeManager.isRunning()) {
+                burstModeManager.stop()
             }
             false // Return false to allow other listeners to process
         }
@@ -858,85 +866,6 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
         )
     }
 
-    private fun startBurstMode(burstCounter: TextView) {
-        isBurstMode = true
-        burstCount = 0
-        burstCounter.visibility = android.view.View.VISIBLE
-        burstCounter.text = getString(R.string.burst_counter, burstCount)
-        
-        // Start capturing burst photos
-        captureBurstPhoto(burstCounter)
-    }
-
-    private fun stopBurstMode(burstCounter: TextView) {
-        isBurstMode = false
-        burstCounter.visibility = android.view.View.GONE
-        handler.removeCallbacksAndMessages(null)
-        Toast.makeText(this, "Burst complete: $burstCount photos", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun captureBurstPhoto(burstCounter: TextView) {
-        if (!isBurstMode || burstCount >= maxBurstCount) {
-            if (burstCount >= maxBurstCount) {
-                stopBurstMode(burstCounter)
-            }
-            return
-        }
-
-        val imageCapture = imageCapture ?: return
-
-        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
-        val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
-        val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
-        
-        val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
-        val baseFileName = if (namingPattern == "sequential") {
-            "${customPrefix ?: "IMG"}_BURST"
-        } else {
-            val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US).format(System.currentTimeMillis())
-            "${customPrefix ?: "IMG"}_${timestamp}"
-        }
-        
-        val fileName = "${baseFileName}-${String.format("%03d", burstCount + 1)}.jpg"
-        val photoFile = File(outputDirectory, fileName)
-
-        val outputOptions = StorageManager.createOutputFileOptions(
-            this,
-            photoFile,
-            saveLocationPref ?: "app_storage",
-            fileName
-        )
-
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    burstCount++
-                    runOnUiThread {
-                        burstCounter.text = getString(R.string.burst_counter, burstCount)
-                    }
-                    
-                    if (isBurstMode && burstCount < maxBurstCount) {
-                        handler.postDelayed({
-                            captureBurstPhoto(burstCounter)
-                        }, burstInterval)
-                    }
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Burst photo capture failed", exception)
-                    if (isBurstMode && burstCount < maxBurstCount) {
-                        handler.postDelayed({
-                            captureBurstPhoto(burstCounter)
-                        }, burstInterval)
-                    }
-                }
-            }
-        )
-    }
-
     private fun showIntervalometerDialog() {
         if (intervalometerManager.isRunning()) {
             // If running, ask to stop
@@ -1347,6 +1276,23 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback {
             Toast.makeText(this, 
                 "Intervalometer Stopped. Captured $photoCount photos.", 
                 Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    // BurstModeManager.Callback implementations
+    override fun onBurstCounterUpdate(current: Int, max: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.burstCounter).apply {
+                visibility = android.view.View.VISIBLE
+                text = getString(R.string.burst_counter, current)
+            }
+        }
+    }
+    
+    override fun onBurstComplete(totalCount: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.burstCounter).visibility = android.view.View.GONE
+            Toast.makeText(this, "Burst complete: $totalCount photos", Toast.LENGTH_SHORT).show()
         }
     }
 }
