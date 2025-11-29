@@ -64,8 +64,9 @@ import com.example.kaimera.managers.IntervalometerManager
 import com.example.kaimera.managers.BurstModeManager
 import com.example.kaimera.managers.PreferencesManager
 import com.example.kaimera.managers.ChronometerManager
+import com.example.kaimera.managers.VideoRecordingManager
 
-class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback, ChronometerManager.Callback {
+class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback, ChronometerManager.Callback, VideoRecordingManager.Callback {
 
 
     enum class TimerDelay(val seconds: Int) {
@@ -84,7 +85,6 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     private lateinit var captureButton: FloatingActionButton
     private var imageCapture: ImageCapture? = null
     private var videoCapture: VideoCapture<Recorder>? = null
-    private var recording: Recording? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var cameraProvider: ProcessCameraProvider? = null
@@ -104,9 +104,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     private lateinit var chronometerManager: ChronometerManager
     private var orientationEventListener: OrientationEventListener? = null
     
-    // Recording timer state
-    private var recordingSeconds = 0
-    private var recordingTimerRunnable: Runnable? = null
+    // Video recording manager
+    private lateinit var videoRecordingManager: VideoRecordingManager
     
     // Level indicator
     private lateinit var levelIndicator: LevelIndicatorView
@@ -340,6 +339,13 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         // Initialize chronometer manager
         chronometerManager = ChronometerManager(
             context = this,
+            handler = handler
+        )
+        
+        // Initialize video recording manager
+        videoRecordingManager = VideoRecordingManager(
+            context = this,
+            getVideoCapture = { videoCapture },
             handler = handler
         )
 
@@ -994,19 +1000,10 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     }
     
     private fun toggleVideoRecording(recordingIndicator: TextView) {
-        val videoCapture = this.videoCapture ?: return
-
-        if (recording != null) {
+        if (videoRecordingManager.isRecording()) {
             // Stop recording
-            recording?.stop()
-            recording = null
+            videoRecordingManager.stopRecording()
             recordingIndicator.visibility = android.view.View.GONE
-            
-            // Stop recording timer
-            recordingTimerRunnable?.let { handler.removeCallbacks(it) }
-            recordingSeconds = 0
-            
-            Toast.makeText(this, "Recording stopped", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -1017,78 +1014,8 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         }
 
         // Start recording
-        // Start recording
-        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
-        val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
-        val customPrefix = sharedPreferences.getString("custom_file_prefix", "VID")
-        
-        val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
-        val fileName = if (namingPattern == "sequential") {
-            StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "VID", "mp4")
-        } else {
-            StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "VID", "mp4")
-        }
-        
-        val videoFile = File(outputDirectory, fileName)
-
-        val outputOptions = StorageManager.createVideoOutputOptions(
-            this,
-            videoFile,
-            saveLocationPref ?: "app_storage",
-            fileName
-        )
-
-        val pendingRecording = if (outputOptions is FileOutputOptions) {
-            videoCapture.output.prepareRecording(this, outputOptions)
-        } else {
-            videoCapture.output.prepareRecording(this, outputOptions as MediaStoreOutputOptions)
-        }
-
-        recording = pendingRecording
-            .withAudioEnabled()
-            .start(ContextCompat.getMainExecutor(this)) { recordEvent ->
-                when (recordEvent) {
-                    is VideoRecordEvent.Start -> {
-                        runOnUiThread {
-                            recordingIndicator.visibility = android.view.View.VISIBLE
-                            
-                            // Start recording timer
-                            recordingSeconds = 0
-                            recordingTimerRunnable = object : Runnable {
-                                override fun run() {
-                                    recordingSeconds++
-                                    val minutes = recordingSeconds / 60
-                                    val seconds = recordingSeconds % 60
-                                    recordingIndicator.text = String.format("⏺ %02d:%02d", minutes, seconds)
-                                    handler.postDelayed(this, 1000)
-                                }
-                            }
-                            handler.post(recordingTimerRunnable!!)
-                            
-                            Toast.makeText(this, "Recording started", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    is VideoRecordEvent.Finalize -> {
-                        runOnUiThread {
-                            recordingIndicator.visibility = android.view.View.GONE
-                            
-                            // Stop recording timer
-                            recordingTimerRunnable?.let { handler.removeCallbacks(it) }
-                            recordingSeconds = 0
-                            
-                            if (!recordEvent.hasError()) {
-                                val savedUri = Uri.fromFile(videoFile)
-                                Toast.makeText(this, "Video saved: ${videoFile.name}", Toast.LENGTH_SHORT).show()
-                                Log.d(TAG, "Video saved: $savedUri")
-                            } else {
-                                Toast.makeText(this, "Video capture failed: ${recordEvent.error}", Toast.LENGTH_SHORT).show()
-                                Log.e(TAG, "Video capture failed", recordEvent.cause)
-                            }
-                        }
-                    }
-                }
-            }
+        recordingIndicator.visibility = android.view.View.VISIBLE
+        videoRecordingManager.startRecording(this)
     }
 
     override fun onStart() {
@@ -1210,6 +1137,28 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     }
     
     override fun onAudioRecordingStopped(fileName: String) {
+        // Already handled by Toast in manager
+    }
+    
+    // VideoRecordingManager.Callback implementations
+    override fun onRecordingStarted() {
+        // Visibility already handled in toggleVideoRecording
+    }
+    
+    override fun onRecordingStopped(fileName: String, success: Boolean) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.recordingIndicator).visibility = android.view.View.GONE
+        }
+    }
+    
+    override fun onTimerUpdate(minutes: Int, seconds: Int) {
+        runOnUiThread {
+            findViewById<TextView>(R.id.recordingIndicator).text = 
+                String.format("⏺ %02d:%02d", minutes, seconds)
+        }
+    }
+    
+    override fun onError(message: String) {
         // Already handled by Toast in manager
     }
 }
