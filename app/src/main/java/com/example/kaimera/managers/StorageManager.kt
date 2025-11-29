@@ -1,4 +1,4 @@
-package com.example.kaimera
+package com.example.kaimera.managers
 
 import android.content.Context
 import android.os.Environment

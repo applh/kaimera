@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
-import com.example.kaimera.StorageManager
+import com.example.kaimera.managers.StorageManager
 import java.io.File
 
 /**

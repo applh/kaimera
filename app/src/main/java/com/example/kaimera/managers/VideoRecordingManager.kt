@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.video.*
 import androidx.core.content.ContextCompat
-import com.example.kaimera.StorageManager
+import com.example.kaimera.managers.StorageManager
 import java.io.File
 
 /**

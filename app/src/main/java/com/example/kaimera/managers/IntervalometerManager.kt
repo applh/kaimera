@@ -8,7 +8,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import com.example.kaimera.StorageManager
+import com.example.kaimera.managers.StorageManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale

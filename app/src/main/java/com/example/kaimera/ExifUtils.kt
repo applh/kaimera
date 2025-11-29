@@ -6,6 +6,8 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.exifinterface.media.ExifInterface
+import com.example.kaimera.managers.StorageManager
 import java.io.File
 
 object ExifUtils {
@@ -18,9 +20,9 @@ object ExifUtils {
         }
 
         try {
-            val exif = androidx.exifinterface.media.ExifInterface(file.absolutePath)
-            val currentDesc = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_IMAGE_DESCRIPTION) ?: ""
-            var currentComment = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_USER_COMMENT) ?: ""
+            val exif = ExifInterface(file.absolutePath)
+            val currentDesc = exif.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION) ?: ""
+            var currentComment = exif.getAttribute(ExifInterface.TAG_USER_COMMENT) ?: ""
             
             // Handle UserComment prefix. Standard EXIF header is 8 bytes.
             // If we see "UNICODE" or "ASCII" at the start, we strip the first 8 chars.

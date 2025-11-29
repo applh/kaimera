@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
+import com.example.kaimera.managers.StorageManager
 import java.io.File
 
 class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {

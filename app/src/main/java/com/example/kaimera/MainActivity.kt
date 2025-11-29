@@ -65,6 +65,7 @@ import com.example.kaimera.managers.BurstModeManager
 import com.example.kaimera.managers.PreferencesManager
 import com.example.kaimera.managers.ChronometerManager
 import com.example.kaimera.managers.VideoRecordingManager
+import com.example.kaimera.managers.StorageManager
 
 class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback, ChronometerManager.Callback, VideoRecordingManager.Callback {
 

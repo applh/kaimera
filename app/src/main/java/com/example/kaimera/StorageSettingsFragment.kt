@@ -1,7 +1,9 @@
 package com.example.kaimera
 
 import android.os.Bundle
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.example.kaimera.managers.StorageManager
 
 class StorageSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
