@@ -2,13 +2,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ListPreference
-        app:key="photo_quality"
+    <SeekBarPreference
+        app:key="photo_quality_int"
         app:title="Photo Quality"
-        app:summary="%s"
-        app:entries="@array/photo_quality_entries"
-        app:entryValues="@array/photo_quality_values"
-        app:defaultValue="high" />
+        app:summary="Compression quality (1-100)"
+        android:max="100"
+        android:min="1"
+        app:defaultValue="95"
+        app:showSeekBarValue="true"
+        app:updatesContinuously="true" />
 
     <ListPreference
         app:key="image_format"

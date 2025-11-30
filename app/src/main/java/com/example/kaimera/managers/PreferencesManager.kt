@@ -17,16 +17,7 @@ class PreferencesManager(context: Context) {
     fun getBoolean(key: String, defValue: Boolean): Boolean = prefs.getBoolean(key, defValue)
     
     // Photo Settings
-    fun getPhotoQuality(): String = prefs.getString("photo_quality", "high") ?: "high"
-
-    fun getPhotoQualityInt(): Int {
-        return when (getPhotoQuality()) {
-            "high" -> 95
-            "medium" -> 75
-            "low" -> 50
-            else -> 95
-        }
-    }
+    fun getPhotoQualityInt(): Int = prefs.getInt("photo_quality_int", 95)
     
     fun getFlashMode(): String = prefs.getString("flash_mode", "auto") ?: "auto"
     
@@ -68,7 +59,7 @@ class PreferencesManager(context: Context) {
     
     // Helper method to get all preferences at once for a specific category
     data class PhotoSettings(
-        val quality: String,
+        val quality: Int,
         val captureMode: String,
         val targetResolution: String
     )
@@ -95,7 +86,7 @@ class PreferencesManager(context: Context) {
     )
     
     fun getPhotoSettings(): PhotoSettings = PhotoSettings(
-        quality = getPhotoQuality(),
+        quality = getPhotoQualityInt(),
         captureMode = getCaptureMode(),
         targetResolution = getTargetResolution()
     )

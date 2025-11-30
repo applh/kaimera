@@ -44,7 +44,6 @@ class CameraManager(
     var captureMode: MainActivity.CaptureMode = MainActivity.CaptureMode.PHOTO
         private set
     var flashMode: Int = ImageCapture.FLASH_MODE_OFF
-    var photoQuality: MainActivity.PhotoQuality = MainActivity.PhotoQuality.HIGH
 
     fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -80,13 +79,7 @@ class CameraManager(
 
     private fun setupPhotoCapture(provider: ProcessCameraProvider, preview: Preview) {
         // Update settings from preferences
-        val quality = preferencesManager.getPhotoQuality()
-        photoQuality = when (quality) {
-            "high" -> MainActivity.PhotoQuality.HIGH
-            "medium" -> MainActivity.PhotoQuality.MEDIUM
-            "low" -> MainActivity.PhotoQuality.LOW
-            else -> MainActivity.PhotoQuality.HIGH
-        }
+        val photoQuality = preferencesManager.getPhotoQualityInt()
         
         val flashModePref = preferencesManager.getFlashMode()
         flashMode = when (flashModePref) {
@@ -115,7 +108,7 @@ class CameraManager(
 
         val imageCaptureBuilder = ImageCapture.Builder()
             .setFlashMode(flashMode)
-            .setJpegQuality(photoQuality.jpegQuality)
+            .setJpegQuality(photoQuality)
             .setCaptureMode(captureModeValue)
             
         // Handle rotation if context is Activity

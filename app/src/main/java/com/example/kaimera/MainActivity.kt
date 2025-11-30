@@ -78,9 +78,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         OFF(0), THREE_SEC(3), TEN_SEC(10)
     }
 
-    enum class PhotoQuality(val jpegQuality: Int) {
-        HIGH(95), MEDIUM(75), LOW(50)
-    }
+
 
     enum class CaptureMode {
         PHOTO, VIDEO
@@ -553,7 +551,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             imageCapture = imageCapture,
             outputFile = photoFile,
             format = imageFormat,
-            quality = cameraManager.photoQuality.jpegQuality,
+            quality = preferencesManager.getPhotoQualityInt(),
             executor = ContextCompat.getMainExecutor(this),
             onSuccess = { savedFile ->
                 // Get the saved URI
@@ -587,7 +585,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
                         } else {
                             Bitmap.CompressFormat.JPEG
                         }
-                        filteredBitmap.compress(compressFormat, cameraManager.photoQuality.jpegQuality, out)
+                        filteredBitmap.compress(compressFormat, preferencesManager.getPhotoQualityInt(), out)
                         out.flush()
                         out.close()
                         originalBitmap.recycle()

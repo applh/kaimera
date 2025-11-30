@@ -26,16 +26,7 @@
     <string name="filter_sepia">Sepia</string>
     <string name="filter_vivid">Vivid</string>
     <string name="filter_cool">Cool</string>
-    <string-array name="photo_quality_entries">
-        <item>High</item>
-        <item>Medium</item>
-        <item>Low</item>
-    </string-array>
-    <string-array name="photo_quality_values">
-        <item>high</item>
-        <item>medium</item>
-        <item>low</item>
-    </string-array>
+
     <string-array name="flash_mode_entries">
         <item>Auto</item>
         <item>On</item>
