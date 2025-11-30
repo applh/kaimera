@@ -41,6 +41,8 @@ kaimera/
 │   │   │   │   ├── ChronometerManager.kt
 │   │   │   │   ├── PreferencesManager.kt
 │   │   │   │   └── StorageManager.kt
+│   │   │   ├── utils/                   # Utility classes
+│   │   │   │   └── ImageCaptureHelper.kt # Image format conversion (JPEG/WebP)
 │   │   │   ├── MainActivity.kt          # Main camera UI coordinator
 │   │   │   ├── GalleryActivity.kt       # Photo/video gallery
 │   │   │   ├── GalleryAdapter.kt        # Gallery RecyclerView adapter
@@ -53,7 +55,7 @@ kaimera/
 │   │   │   ├── LevelIndicatorView.kt    # Custom level indicator view
 │   │   │   ├── ZoomableImageView.kt     # Custom zoomable image view
 │   │   │   ├── ZoomableVideoLayout.kt   # Custom zoomable video container
-│   │   │   └── ExifUtils.kt             # EXIF metadata utilities
+│   │   │   └── ExifUtils.kt             # EXIF metadata utilities (JPEG/WebP)
 │   │   ├── res/
 │   │   │   ├── layout/
 │   │   │   │   ├── activity_main.xml    # Main camera UI

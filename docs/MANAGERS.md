@@ -300,7 +300,8 @@ PreferencesManager(context: Context)
 **Available Settings**:
 ```kotlin
 // Photo Settings
-getPhotoQuality(): String          // "high", "medium", "low"
+getPhotoQualityInt(): Int           // 1-100 (custom quality slider)
+getImageFormat(): String            // "jpeg", "webp"
 getFlashMode(): String              // "auto", "on", "off"
 getCaptureMode(): String            // "quality", "latency"
 getTargetResolution(): String       // "max", "12mp", "fhd", "hd"
@@ -363,6 +364,64 @@ isSDCardAvailable(context: Context): Boolean
 **File Naming Patterns**:
 - `timestamp` - `PREFIX_yyyyMMdd_HHmmss.ext`
 - `sequential` - `PREFIX_0001.ext`, `PREFIX_0002.ext`, etc.
+
+## Utilities
+
+### ImageCaptureHelper
+
+**Location**: `app/src/main/java/com/example/kaimera/utils/ImageCaptureHelper.kt`
+
+**Purpose**: Handles image capture in different formats (JPEG, WebP) with automatic EXIF preservation.
+
+**Key Functions**:
+```kotlin
+captureImage(
+    imageCapture: ImageCapture,
+    outputFile: File,
+    format: String,              // "jpeg" or "webp"
+    quality: Int,                // 1-100
+    executor: Executor,
+    onSuccess: (File) -> Unit,
+    onError: (ImageCaptureException) -> Unit
+)
+
+getFileExtension(format: String): String  // Returns "jpg" or "webp"
+```
+
+**Features**:
+- Automatic format detection and conversion
+- EXIF metadata preservation for WebP images
+- API level-aware WebP compression (WEBP_LOSSY on API 30+)
+- Handles both JPEG and YUV input from ImageProxy
+
+---
+
+### ExifUtils
+
+**Location**: `app/src/main/java/com/example/kaimera/ExifUtils.kt`
+
+**Purpose**: EXIF metadata viewing and editing for JPEG and WebP images.
+
+**Key Functions**:
+```kotlin
+showExifEditorDialog(context: Context, file: File)
+copyExif(source: ExifInterface, target: ExifInterface)
+```
+
+**Supported Formats**: JPEG, WebP
+
+**Editable Fields**:
+- Image Description
+- User Comment (with newline preservation)
+
+**Preserved Metadata**:
+- Date/Time (Original, Digitized, Modified)
+- GPS Location (Latitude, Longitude, Altitude)
+- Camera Info (Make, Model, Focal Length, Flash)
+- Orientation
+- White Balance
+
+---
 
 ## Integration Pattern
 
