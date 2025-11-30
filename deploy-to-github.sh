@@ -15,6 +15,7 @@ echo "Repository: ${GITHUB_REPO}"
 echo ""
 
 docker run -it --rm \
+  -v "$(pwd):/repo" \
   -e GITHUB_REPO="${GITHUB_REPO}" \
   -e GIT_EMAIL="${GIT_EMAIL:-deploy@kaimera.local}" \
   -e GIT_NAME="${GIT_NAME:-Kaimera Deploy}" \
@@ -23,4 +24,4 @@ docker run -it --rm \
 
 echo ""
 echo "✨ Deployment complete!"
-echo "🧹 Container and SSH key have been removed."
+echo "🧹 Container removed. SSH key saved to .github-deploy-key"
