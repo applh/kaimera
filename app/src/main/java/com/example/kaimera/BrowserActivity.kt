@@ -174,6 +174,12 @@ class BrowserActivity : AppCompatActivity() {
         val etHomeUrl = dialogView.findViewById<EditText>(R.id.etHomeUrl)
         etHomeUrl.setText(getHomeUrl())
 
+        // Initialize download folder
+        val etDownloadFolder = dialogView.findViewById<EditText>(R.id.etDownloadFolder)
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val currentDownloadFolder = prefs.getString("download_folder", "downloads") ?: "downloads"
+        etDownloadFolder.setText(currentDownloadFolder)
+
         // Initialize checkboxes with current settings
         val cbJavaScript = dialogView.findViewById<android.widget.CheckBox>(R.id.cbJavaScript)
         val cbDomStorage = dialogView.findViewById<android.widget.CheckBox>(R.id.cbDomStorage)
@@ -257,6 +263,13 @@ class BrowserActivity : AppCompatActivity() {
             if (homeUrl.isNotEmpty()) {
                 setHomeUrl(homeUrl)
             }
+            
+            // Save download folder
+            val downloadFolder = etDownloadFolder.text.toString().trim()
+            if (downloadFolder.isNotEmpty()) {
+                prefs.edit().putString("download_folder", downloadFolder).apply()
+            }
+            
             dialog.dismiss()
         }
 
@@ -320,8 +333,12 @@ class BrowserActivity : AppCompatActivity() {
 
     private fun handleDownload(url: String, userAgent: String, contentDisposition: String, mimetype: String, contentLength: Long) {
         try {
+            // Get download folder name from preferences
+            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            val downloadFolderName = prefs.getString("download_folder", "downloads") ?: "downloads"
+            
             // Create downloads directory if it doesn't exist
-            val downloadsDir = java.io.File(filesDir, "downloads")
+            val downloadsDir = java.io.File(filesDir, downloadFolderName)
             if (!downloadsDir.exists()) {
                 downloadsDir.mkdirs()
             }
