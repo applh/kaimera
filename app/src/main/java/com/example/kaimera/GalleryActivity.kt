@@ -86,7 +86,7 @@ class GalleryActivity : AppCompatActivity() {
                     
                     val files = directory.listFiles { file ->
                         val ext = file.extension.lowercase()
-                        ext == "jpg" || ext == "mp4" || ext == "m4a"
+                        ext == "jpg" || ext == "webp" || ext == "mp4" || ext == "m4a"
                     }?.sortedByDescending { it.lastModified() }?.toMutableList() ?: mutableListOf()
 
                     val totalSize = StorageManager.calculateStorageUsage(directory)
@@ -166,6 +166,7 @@ class GalleryActivity : AppCompatActivity() {
             val mimeType = when (file.extension.lowercase()) {
                 "mp4" -> "video/mp4"
                 "m4a" -> "audio/mp4"
+                "webp" -> "image/webp"
                 else -> "image/jpeg"
             }
             
