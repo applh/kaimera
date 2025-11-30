@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -22,10 +25,19 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.create("release") {
-                storeFile = file("release.keystore")
-                storePassword = "password"
-                keyAlias = "key0"
-                keyPassword = "password"
+                val keystoreFile = file("release.keystore")
+                storeFile = keystoreFile
+                
+                val properties = Properties()
+                val localPropertiesFile = rootProject.file("local.properties")
+                if (localPropertiesFile.exists()) {
+                    properties.load(FileInputStream(localPropertiesFile))
+                }
+                
+                storePassword = properties.getProperty("store.password")
+                keyAlias = properties.getProperty("key.alias")
+                keyPassword = properties.getProperty("key.password")
+                
                 enableV1Signing = true
                 enableV2Signing = true
             }

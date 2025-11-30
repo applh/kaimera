@@ -27,9 +27,9 @@ bin/
 gen/
 out/
 
-# Keystore files (keep release.keystore for this demo, but normally exclude)
-# *.jks
-# *.keystore
+# Keystore files
+*.jks
+*.keystore
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild/
