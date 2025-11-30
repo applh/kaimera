@@ -58,6 +58,9 @@ class BrowserActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         
+        // Register for context menu (long press)
+        registerForContextMenu(webView)
+        
         // Set up download listener
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
             handleDownload(url, userAgent, contentDisposition, mimetype, contentLength)
@@ -91,6 +94,42 @@ class BrowserActivity : AppCompatActivity() {
                     progressBar.visibility = View.GONE
                 } else {
                     progressBar.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+    
+    override fun onCreateContextMenu(menu: android.view.ContextMenu?, v: View?, menuInfo: android.view.ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        
+        val result = webView.hitTestResult
+        when (result.type) {
+            WebView.HitTestResult.SRC_ANCHOR_TYPE, 
+            WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE -> {
+                val url = result.extra ?: return
+                menu?.setHeaderTitle("Link Options")
+                menu?.add(0, 1, 0, "Open Link")?.setOnMenuItemClickListener {
+                    webView.loadUrl(url)
+                    true
+                }
+                menu?.add(0, 2, 0, "Download Link")?.setOnMenuItemClickListener {
+                    handleDownload(url, webView.settings.userAgentString ?: "", "", "", 0)
+                    true
+                }
+                menu?.add(0, 3, 0, "Copy Link")?.setOnMenuItemClickListener {
+                    val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    val clip = android.content.ClipData.newPlainText("URL", url)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(this, "Link copied", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+            WebView.HitTestResult.IMAGE_TYPE -> {
+                val url = result.extra ?: return
+                menu?.setHeaderTitle("Image Options")
+                menu?.add(0, 4, 0, "Download Image")?.setOnMenuItemClickListener {
+                    handleDownload(url, webView.settings.userAgentString ?: "", "", "image/*", 0)
+                    true
                 }
             }
         }
