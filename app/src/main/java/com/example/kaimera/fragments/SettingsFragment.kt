@@ -1,7 +1,11 @@
-package com.example.kaimera
+package com.example.kaimera.fragments
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.Preference
+import com.example.kaimera.R
+import com.example.kaimera.BuildConfig
+import com.example.kaimera.DebugLogActivity
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

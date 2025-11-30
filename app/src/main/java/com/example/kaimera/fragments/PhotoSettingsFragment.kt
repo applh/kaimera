@@ -1,7 +1,8 @@
-package com.example.kaimera
+package com.example.kaimera.fragments
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat
+import com.example.kaimera.R
 
 class PhotoSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

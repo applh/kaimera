@@ -1,8 +1,9 @@
-package com.example.kaimera
+package com.example.kaimera.fragments
 
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.example.kaimera.R
 import com.example.kaimera.managers.StorageManager
 
 class StorageSettingsFragment : PreferenceFragmentCompat() {
