@@ -239,17 +239,7 @@ class BrowserActivity : AppCompatActivity() {
                 .setTitle("Clear All Data")
                 .setMessage("This will clear cache, cookies, history, and all stored data. Continue?")
                 .setPositiveButton("Clear All") { _, _ ->
-                    webView.clearCache(true)
-                    webView.clearHistory()
-                    webView.clearFormData()
-                    android.webkit.CookieManager.getInstance().removeAllCookies { success ->
-                        if (success) {
-                            Toast.makeText(this, "All browsing data cleared", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    // Clear WebView storage
-                    webView.clearSslPreferences()
-                    android.webkit.WebStorage.getInstance().deleteAllData()
+                    clearAllBrowsingData()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -266,6 +256,61 @@ class BrowserActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun clearAllBrowsingData() {
+        try {
+            // Clear WebView in-memory data
+            webView.clearCache(true)
+            webView.clearHistory()
+            webView.clearFormData()
+            webView.clearSslPreferences()
+            
+            // Clear cookies
+            android.webkit.CookieManager.getInstance().removeAllCookies(null)
+            android.webkit.CookieManager.getInstance().flush()
+            
+            // Clear WebStorage (localStorage, sessionStorage, WebSQL)
+            android.webkit.WebStorage.getInstance().deleteAllData()
+            
+            // Clear WebView databases
+            val databasePath = applicationContext.getDatabasePath("webview.db")?.parent
+            databasePath?.let { path ->
+                val dir = java.io.File(path)
+                if (dir.exists() && dir.isDirectory) {
+                    dir.listFiles()?.forEach { file ->
+                        if (file.name.startsWith("webview")) {
+                            file.delete()
+                        }
+                    }
+                }
+            }
+            
+            // Clear app_webview directory (main WebView data storage)
+            val webviewDir = java.io.File(applicationContext.dataDir, "app_webview")
+            if (webviewDir.exists()) {
+                deleteRecursive(webviewDir)
+            }
+            
+            // Clear cache directory
+            cacheDir.deleteRecursively()
+            
+            Toast.makeText(this, "All browsing data cleared completely", Toast.LENGTH_LONG).show()
+            
+            // Reload home page
+            loadUrl(getHomeUrl())
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error clearing data: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun deleteRecursive(fileOrDirectory: java.io.File) {
+        if (fileOrDirectory.isDirectory) {
+            fileOrDirectory.listFiles()?.forEach { child ->
+                deleteRecursive(child)
+            }
+        }
+        fileOrDirectory.delete()
     }
 
     override fun onBackPressed() {
