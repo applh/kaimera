@@ -247,22 +247,24 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         val recordingIndicator = findViewById<TextView>(R.id.recordingIndicator)
         cameraExecutor = Executors.newSingleThreadExecutor()
         
-        // Initialize intervalometer manager
+        // Initialize preferences manager
+        preferencesManager = PreferencesManager(this)
+
+        // Initialize managers
+        burstModeManager = BurstModeManager(
+            context = this,
+            getImageCapture = { cameraManager.getImageCapture() },
+            preferencesManager = preferencesManager,
+            handler = android.os.Handler(android.os.Looper.getMainLooper())
+        )
+
         intervalometerManager = IntervalometerManager(
             context = this,
             getCameraProvider = { cameraManager.getCameraProvider() },
             getImageCapture = { cameraManager.getImageCapture() },
             restartCamera = { cameraManager.startCamera() },
+            preferencesManager = preferencesManager,
             handler = handler
-        )
-        
-        // Initialize burst mode manager
-        burstModeManager = BurstModeManager(
-            context = this,
-            getImageCapture = { cameraManager.getImageCapture() },
-            handler = handler,
-            maxCount = 20,
-            interval = 200
         )
         
         // Initialize preferences manager

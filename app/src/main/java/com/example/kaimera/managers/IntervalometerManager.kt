@@ -3,7 +3,6 @@ package com.example.kaimera.managers
 import android.content.Context
 import android.os.Handler
 import android.util.Log
-import android.widget.Toast
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -12,6 +11,7 @@ import com.example.kaimera.managers.StorageManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.math.roundToLong
 
 /**
  * Manages intervalometer (time-lapse) photography functionality.
@@ -24,6 +24,7 @@ class IntervalometerManager(
     private val getCameraProvider: () -> ProcessCameraProvider?,
     private val getImageCapture: () -> ImageCapture?,
     private val restartCamera: () -> Unit,
+    private val preferencesManager: PreferencesManager,
     private val handler: Handler
 ) {
     companion object {
@@ -228,53 +229,50 @@ class IntervalometerManager(
         val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
         val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
 
+        // Get image format
+        val imageFormat = preferencesManager.getImageFormat()
+        val fileExtension = com.example.kaimera.utils.ImageCaptureHelper.getFileExtension(imageFormat)
+
         val outputDirectory = StorageManager.getStorageLocation(context, saveLocationPref ?: "app_storage")
         val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis())
-        val fileName = "${customPrefix ?: "IMG"}_INT_${timestamp}.jpg"
+        val fileName = "${customPrefix ?: "IMG"}_INT_${timestamp}.$fileExtension"
         val photoFile = File(outputDirectory, fileName)
 
-        val outputOptions = StorageManager.createOutputFileOptions(
-            context,
-            photoFile,
-            saveLocationPref ?: "app_storage",
-            fileName
-        )
+        // Capture image using ImageCaptureHelper
+        com.example.kaimera.utils.ImageCaptureHelper.captureImage(
+            imageCapture = imageCapture,
+            outputFile = photoFile,
+            format = imageFormat,
+            quality = preferencesManager.getPhotoQualityInt(),
+            executor = ContextCompat.getMainExecutor(context),
+            onSuccess = {
+                photoCount++
+                callback?.onCounterUpdate(photoCount, currentConfig.totalCount)
 
-        // Capture image
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(context),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    photoCount++
-                    callback?.onCounterUpdate(photoCount, currentConfig.totalCount)
-
-                    // Check if we reached the limit
-                    if (currentConfig.totalCount > 0 && photoCount >= currentConfig.totalCount) {
-                        // Wait one more interval then stop
-                        val intervalMs = (currentConfig.intervalSeconds * 1000).toLong()
-                        handler.postDelayed({
-                            stop()
-                        }, intervalMs)
-                        return
-                    }
-
-                    // Schedule next shot
-                    if (isRunning) {
-                        scheduleNextCapture(currentConfig)
-                    }
+                // Check if we reached the limit
+                if (currentConfig.totalCount > 0 && photoCount >= currentConfig.totalCount) {
+                    // Wait one more interval then stop
+                    val intervalMs = (currentConfig.intervalSeconds * 1000).roundToLong()
+                    handler.postDelayed({
+                        stop()
+                    }, intervalMs)
+                    return@captureImage
                 }
 
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Interval photo capture failed", exception)
-                    
-                    // Retry after interval
-                    if (isRunning) {
-                        val intervalMs = (currentConfig.intervalSeconds * 1000).toLong()
-                        handler.postDelayed({
-                            capturePhoto()
-                        }, intervalMs)
-                    }
+                // Schedule next shot
+                if (isRunning) {
+                    scheduleNextCapture(currentConfig)
+                }
+            },
+            onError = { exception ->
+                Log.e(TAG, "Interval photo capture failed", exception)
+                
+                // Retry after interval
+                if (isRunning) {
+                    val intervalMs = (currentConfig.intervalSeconds * 1000).roundToLong()
+                    handler.postDelayed({
+                        capturePhoto()
+                    }, intervalMs)
                 }
             }
         )
@@ -284,7 +282,7 @@ class IntervalometerManager(
      * Schedule the next photo capture
      */
     private fun scheduleNextCapture(currentConfig: Config) {
-        val intervalMs = (currentConfig.intervalSeconds * 1000).toLong()
+        val intervalMs = (currentConfig.intervalSeconds * 1000).roundToLong()
         val nextShotTime = System.currentTimeMillis() + intervalMs
 
         // Check for sleep mode

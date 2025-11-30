@@ -19,6 +19,7 @@ import java.util.Locale
 class BurstModeManager(
     private val context: Context,
     private val getImageCapture: () -> ImageCapture?,
+    private val preferencesManager: PreferencesManager,
     private val handler: Handler,
     private val maxCount: Int = 20,
     private val interval: Long = 200 // milliseconds between shots
@@ -103,6 +104,10 @@ class BurstModeManager(
         val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
         val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
         val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
+        
+        // Get image format
+        val imageFormat = preferencesManager.getImageFormat()
+        val fileExtension = com.example.kaimera.utils.ImageCaptureHelper.getFileExtension(imageFormat)
 
         // Create output file
         val outputDirectory = StorageManager.getStorageLocation(context, saveLocationPref ?: "app_storage")
@@ -113,44 +118,37 @@ class BurstModeManager(
             "${customPrefix ?: "IMG"}_${timestamp}"
         }
 
-        val fileName = "${baseFileName}-${String.format("%03d", photoCount + 1)}.jpg"
+        val fileName = "${baseFileName}-${String.format("%03d", photoCount + 1)}.$fileExtension"
         val photoFile = File(outputDirectory, fileName)
 
-        val outputOptions = StorageManager.createOutputFileOptions(
-            context,
-            photoFile,
-            saveLocationPref ?: "app_storage",
-            fileName
-        )
+        // Capture image using ImageCaptureHelper
+        com.example.kaimera.utils.ImageCaptureHelper.captureImage(
+            imageCapture = imageCapture,
+            outputFile = photoFile,
+            format = imageFormat,
+            quality = preferencesManager.getPhotoQualityInt(),
+            executor = ContextCompat.getMainExecutor(context),
+            onSuccess = {
+                photoCount++
+                callback?.onBurstCounterUpdate(photoCount, maxCount)
 
-        // Capture image
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(context),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    photoCount++
-                    callback?.onBurstCounterUpdate(photoCount, maxCount)
-
-                    // Schedule next capture if still running
-                    if (isRunning && photoCount < maxCount) {
-                        handler.postDelayed({
-                            capturePhoto()
-                        }, interval)
-                    } else if (photoCount >= maxCount) {
-                        stop()
-                    }
+                // Schedule next capture if still running
+                if (isRunning && photoCount < maxCount) {
+                    handler.postDelayed({
+                        capturePhoto()
+                    }, interval)
+                } else if (photoCount >= maxCount) {
+                    stop()
                 }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Burst photo capture failed", exception)
-                    
-                    // Retry if still running
-                    if (isRunning && photoCount < maxCount) {
-                        handler.postDelayed({
-                            capturePhoto()
-                        }, interval)
-                    }
+            },
+            onError = { exception ->
+                Log.e(TAG, "Burst photo capture failed", exception)
+                
+                // Retry if still running
+                if (isRunning && photoCount < maxCount) {
+                    handler.postDelayed({
+                        capturePhoto()
+                    }, interval)
                 }
             }
         )

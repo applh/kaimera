@@ -18,6 +18,15 @@ class PreferencesManager(context: Context) {
     
     // Photo Settings
     fun getPhotoQuality(): String = prefs.getString("photo_quality", "high") ?: "high"
+
+    fun getPhotoQualityInt(): Int {
+        return when (getPhotoQuality()) {
+            "high" -> 95
+            "medium" -> 75
+            "low" -> 50
+            else -> 95
+        }
+    }
     
     fun getFlashMode(): String = prefs.getString("flash_mode", "auto") ?: "auto"
     
