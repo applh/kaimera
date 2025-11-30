@@ -24,6 +24,11 @@ class LauncherActivity : AppCompatActivity() {
         findViewById<ImageButton>(R.id.btnLaunchCamera).setOnClickListener {
             startMainActivity()
         }
+
+        findViewById<ImageButton>(R.id.btnLaunchBrowser).setOnClickListener {
+            val intent = Intent(this, BrowserActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun startMainActivity() {

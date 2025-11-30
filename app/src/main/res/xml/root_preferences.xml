@@ -8,6 +8,12 @@
             app:title="Show Launch Screen"
             app:summary="Show app icon on startup before entering camera"
             app:defaultValue="true" />
+
+        <Preference
+            app:key="return_to_launcher"
+            app:title="Return to Launch Screen"
+            app:summary="Go back to the main app selection screen"
+            app:icon="@android:drawable/ic_menu_revert" />
             
         <SwitchPreferenceCompat
             app:key="shutter_sound"

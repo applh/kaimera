@@ -30,5 +30,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
             startActivity(intent)
             true
         }
+
+        val returnToLauncherPref = findPreference<androidx.preference.Preference>("return_to_launcher")
+        returnToLauncherPref?.setOnPreferenceClickListener {
+            val intent = android.content.Intent(requireContext(), com.example.kaimera.LauncherActivity::class.java)
+            intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            true
+        }
     }
 }
