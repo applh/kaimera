@@ -73,19 +73,54 @@
             android:text="Extra Large" />
     </RadioGroup>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clear Data"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnClearCache"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear Cache"
+            android:layout_marginBottom="4dp" />
+
+        <Button
+            android:id="@+id/btnClearCookies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear Cookies"
+            android:layout_marginBottom="4dp" />
+
+        <Button
+            android:id="@+id/btnClearHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear History"
+            android:layout_marginBottom="4dp" />
+
+        <Button
+            android:id="@+id/btnClearAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear All Data"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
         android:layout_marginTop="16dp">
-
-        <Button
-            android:id="@+id/btnClearCache"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Clear Cache"
-            android:layout_marginEnd="8dp" />
 
         <Button
             android:id="@+id/btnClose"

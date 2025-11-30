@@ -193,6 +193,44 @@ class BrowserActivity : AppCompatActivity() {
             Toast.makeText(this, "Cache cleared", Toast.LENGTH_SHORT).show()
         }
 
+        // Handle clear cookies button
+        dialogView.findViewById<Button>(R.id.btnClearCookies).setOnClickListener {
+            android.webkit.CookieManager.getInstance().removeAllCookies { success ->
+                if (success) {
+                    Toast.makeText(this, "Cookies cleared", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // Handle clear history button
+        dialogView.findViewById<Button>(R.id.btnClearHistory).setOnClickListener {
+            webView.clearHistory()
+            Toast.makeText(this, "History cleared", Toast.LENGTH_SHORT).show()
+        }
+
+        // Handle clear all data button
+        dialogView.findViewById<Button>(R.id.btnClearAll).setOnClickListener {
+            // Show confirmation dialog
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Clear All Data")
+                .setMessage("This will clear cache, cookies, history, and all stored data. Continue?")
+                .setPositiveButton("Clear All") { _, _ ->
+                    webView.clearCache(true)
+                    webView.clearHistory()
+                    webView.clearFormData()
+                    android.webkit.CookieManager.getInstance().removeAllCookies { success ->
+                        if (success) {
+                            Toast.makeText(this, "All browsing data cleared", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    // Clear WebView storage
+                    webView.clearSslPreferences()
+                    android.webkit.WebStorage.getInstance().deleteAllData()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
         // Handle close button
         dialogView.findViewById<Button>(R.id.btnClose).setOnClickListener {
             dialog.dismiss()
