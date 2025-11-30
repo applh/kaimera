@@ -7,6 +7,7 @@ SSH_PUB_FILE="/repo/.github-deploy-key.pub"
 # Check if key already exists
 if [ -f "$SSH_KEY_FILE" ] && [ -f "$SSH_PUB_FILE" ]; then
     echo "🔑 Using existing SSH key..."
+    mkdir -p /root/.ssh
     cp "$SSH_KEY_FILE" /root/.ssh/id_ed25519
     cp "$SSH_PUB_FILE" /root/.ssh/id_ed25519.pub
     chmod 600 /root/.ssh/id_ed25519
