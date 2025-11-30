@@ -172,14 +172,10 @@ class ZoomableImageView @JvmOverloads constructor(
         if (!isZooming) { // Only scroll if not currently multi-touch zooming
              // Check if we can scroll
             matrixCurrent.getValues(matrixValues)
-            val transX = matrixValues[Matrix.MTRANS_X]
-            val transY = matrixValues[Matrix.MTRANS_Y]
-            val scaleX = matrixValues[Matrix.MSCALE_X]
-            val scaleY = matrixValues[Matrix.MSCALE_Y]
+            // transX, transY, scaleX, scaleY were here but unused variables removed
             
-            val drawable = drawable ?: return false
-            val width = drawable.intrinsicWidth * scaleX
-            val height = drawable.intrinsicHeight * scaleY
+            if (drawable == null) return false
+            // width and height calculations removed as they were unused
             
             // Only allow scrolling if the image is larger than the view
             var scrollX = -distanceX

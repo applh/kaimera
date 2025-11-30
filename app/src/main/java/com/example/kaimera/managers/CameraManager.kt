@@ -136,7 +136,7 @@ class CameraManager(
         
         if (enable120fps) {
             // Try to setup high-speed recording
-            val highSpeedSupported = setupHighSpeedRecording(provider, cameraSelector, preview)
+            val highSpeedSupported = setupHighSpeedRecording(provider, cameraSelector)
             if (!highSpeedSupported) {
                 // Fallback to standard recording
                 Toast.makeText(context, "120fps not supported on this device, using standard recording", Toast.LENGTH_SHORT).show()
@@ -170,8 +170,7 @@ class CameraManager(
     @androidx.camera.video.ExperimentalHighSpeedVideo
     private fun setupHighSpeedRecording(
         cameraProvider: ProcessCameraProvider,
-        cameraSelector: CameraSelector,
-        preview: Preview
+        cameraSelector: CameraSelector
     ): Boolean {
         try {
             Log.d(TAG, "Setting up HighSpeedVideoSession for 120fps using Camera2Interop...")

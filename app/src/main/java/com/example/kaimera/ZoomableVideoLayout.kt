@@ -79,7 +79,6 @@ class ZoomableVideoLayout @JvmOverloads constructor(
 
     override fun onScale(detector: ScaleGestureDetector): Boolean {
         val scaleFactor = detector.scaleFactor
-        val prevScale = scale
         scale *= scaleFactor
         
         if (scale < minScale) {

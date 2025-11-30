@@ -61,7 +61,7 @@ class GalleryAdapter(
         }
 
         // Display file size
-        val fileSize = file.length()
+        // Display file size
         holder.fileSizeText.text = StorageManager.formatStorageSize(file.length())
         
         holder.btnInfo.setOnClickListener {

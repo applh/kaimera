@@ -103,8 +103,9 @@ class OrientationManager(
         // orientationAngles[2] is roll (y-axis tilt)
         // Values are in radians
 
-        val pitch = Math.toDegrees(orientationAngles[1].toDouble()).toFloat()
-        val roll = Math.toDegrees(orientationAngles[2].toDouble()).toFloat()
+        // orientationAngles[1] is pitch (x-axis tilt)
+        // orientationAngles[2] is roll (y-axis tilt)
+        // Values are in radians
 
         // Calculate angle for the level indicator (simplified)
         val angle = Math.toDegrees(Math.atan2(accelerometerReading[0].toDouble(), accelerometerReading[1].toDouble())).toFloat()
