@@ -4,6 +4,12 @@
 
     <PreferenceCategory app:title="General">
         <SwitchPreferenceCompat
+            app:key="launch_screen_enabled"
+            app:title="Show Launch Screen"
+            app:summary="Show app icon on startup before entering camera"
+            app:defaultValue="true" />
+            
+        <SwitchPreferenceCompat
             app:key="shutter_sound"
             app:title="Shutter Sound"
             app:summary="Play a sound when taking a photo"

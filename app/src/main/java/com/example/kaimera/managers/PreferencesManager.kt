@@ -111,4 +111,8 @@ class PreferencesManager(context: Context) {
         crosshairSize = getLevelIndicatorCrosshairSize(),
         circleSize = getLevelIndicatorCircleSize()
     )
+    
+    fun isLaunchScreenEnabled(): Boolean {
+        return prefs.getBoolean("launch_screen_enabled", true)
+    }
 }
