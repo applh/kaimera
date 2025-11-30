@@ -1,148 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Browser Settings"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Home URL"
-        android:textStyle="bold"
-        android:layout_marginBottom="4dp" />
-
-    <EditText
-        android:id="@+id/etHomeUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="https://www.google.com"
-        android:inputType="textUri"
-        android:singleLine="true"
-        android:layout_marginBottom="16dp" />
-
-    <CheckBox
-        android:id="@+id/cbJavaScript"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Enable JavaScript"
-        android:checked="true" />
-
-    <CheckBox
-        android:id="@+id/cbDomStorage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Enable DOM Storage"
-        android:checked="true" />
-
-    <CheckBox
-        android:id="@+id/cbLoadImages"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Load Images"
-        android:checked="true" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Text Size"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp" />
-
-    <RadioGroup
-        android:id="@+id/rgTextSize"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <RadioButton
-            android:id="@+id/rbTextSmall"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Small" />
+            android:text="Browser Settings"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
 
-        <RadioButton
-            android:id="@+id/rbTextNormal"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Normal"
+            android:text="Home URL"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/etHomeUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://www.google.com"
+            android:inputType="textUri"
+            android:singleLine="true"
+            android:layout_marginBottom="16dp" />
+
+        <CheckBox
+            android:id="@+id/cbJavaScript"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enable JavaScript"
             android:checked="true" />
 
-        <RadioButton
-            android:id="@+id/rbTextLarge"
+        <CheckBox
+            android:id="@+id/cbDomStorage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Large" />
+            android:text="Enable DOM Storage"
+            android:checked="true" />
 
-        <RadioButton
-            android:id="@+id/rbTextExtraLarge"
+        <CheckBox
+            android:id="@+id/cbLoadImages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Extra Large" />
-    </RadioGroup>
+            android:text="Load Images"
+            android:checked="true" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Clear Data"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/btnClearCache"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clear Cache"
-            android:layout_marginBottom="4dp" />
+            android:text="Text Size"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btnClearCookies"
+        <RadioGroup
+            android:id="@+id/rgTextSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/rbTextSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Small" />
+
+            <RadioButton
+                android:id="@+id/rbTextNormal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Normal"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/rbTextLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Large" />
+
+            <RadioButton
+                android:id="@+id/rbTextExtraLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Extra Large" />
+        </RadioGroup>
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clear Cookies"
-            android:layout_marginBottom="4dp" />
+            android:text="Clear Data"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btnClearHistory"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clear History"
-            android:layout_marginBottom="4dp" />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnClearAll"
+            <Button
+                android:id="@+id/btnClearCache"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear Cache"
+                android:layout_marginBottom="4dp" />
+
+            <Button
+                android:id="@+id/btnClearCookies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear Cookies"
+                android:layout_marginBottom="4dp" />
+
+            <Button
+                android:id="@+id/btnClearHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear History"
+                android:layout_marginBottom="4dp" />
+
+            <Button
+                android:id="@+id/btnClearAll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear All Data"
+                android:textColor="@android:color/holo_red_dark" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clear All Data"
-            android:textColor="@android:color/holo_red_dark" />
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Close" />
+        </LinearLayout>
+
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end"
-        android:layout_marginTop="16dp">
-
-        <Button
-            android:id="@+id/btnClose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Close" />
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
