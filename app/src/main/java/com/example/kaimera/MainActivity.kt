@@ -70,6 +70,7 @@ import com.example.kaimera.managers.StorageManager
 import com.example.kaimera.managers.CameraManager
 import com.example.kaimera.managers.PermissionManager
 import com.example.kaimera.managers.OrientationManager
+import com.example.kaimera.managers.LocationManager
 
 class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstModeManager.Callback, ChronometerManager.Callback, VideoRecordingManager.Callback {
 
@@ -123,7 +124,27 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     // Preferences manager
     private lateinit var preferencesManager: PreferencesManager
     
-
+    // Location manager
+    private lateinit var locationManager: LocationManager
+    
+    private var imageCapture: ImageCapture? = null
+    private var videoCapture: VideoCapture<Recorder>? = null
+    private var recording: Recording? = null
+    
+    private var isFlashOn = false
+    
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        // Handle permissions
+        if (permissions[Manifest.permission.CAMERA] == true && 
+            permissions[Manifest.permission.RECORD_AUDIO] == true) {
+            cameraManager.startCamera() // Assuming cameraManager.startCamera() is the correct method to call
+        } else {
+            Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
 
 
     override fun onResume() {
@@ -521,6 +542,17 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     private fun capturePhoto() {
         val imageCapture = cameraManager.getImageCapture() ?: return
 
+        // Check if location tagging is enabled
+        if (preferencesManager.isLocationTaggingEnabled()) {
+            locationManager.getCurrentLocation { location ->
+                performCapture(imageCapture, location)
+            }
+        } else {
+            performCapture(imageCapture, null)
+        }
+    }
+
+    private fun performCapture(imageCapture: ImageCapture, location: android.location.Location?) {
         // Get image format preference
         val imageFormat = preferencesManager.getImageFormat()
         val fileExtension = com.example.kaimera.utils.ImageCaptureHelper.getFileExtension(imageFormat)
@@ -552,6 +584,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             outputFile = photoFile,
             format = imageFormat,
             quality = preferencesManager.getPhotoQualityInt(),
+            location = location,
             executor = ContextCompat.getMainExecutor(this),
             onSuccess = { savedFile ->
                 // Get the saved URI

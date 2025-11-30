@@ -33,13 +33,14 @@ object ImageCaptureHelper {
         outputFile: File,
         format: String,
         quality: Int,
+        location: android.location.Location? = null,
         executor: Executor,
         onSuccess: (File) -> Unit,
         onError: (ImageCaptureException) -> Unit
     ) {
         when (format) {
-            "webp" -> captureAsWebP(imageCapture, outputFile, quality, executor, onSuccess, onError)
-            else -> captureAsJPEG(imageCapture, outputFile, executor, onSuccess, onError)
+            "webp" -> captureAsWebP(imageCapture, outputFile, quality, location, executor, onSuccess, onError)
+            else -> captureAsJPEG(imageCapture, outputFile, location, executor, onSuccess, onError)
         }
     }
 
@@ -49,11 +50,17 @@ object ImageCaptureHelper {
     private fun captureAsJPEG(
         imageCapture: ImageCapture,
         outputFile: File,
+        location: android.location.Location?,
         executor: Executor,
         onSuccess: (File) -> Unit,
         onError: (ImageCaptureException) -> Unit
     ) {
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(outputFile).build()
+        val metadata = ImageCapture.Metadata().apply {
+            this.location = location
+        }
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(outputFile)
+            .setMetadata(metadata)
+            .build()
 
         imageCapture.takePicture(
             outputOptions,
@@ -77,6 +84,7 @@ object ImageCaptureHelper {
         imageCapture: ImageCapture,
         outputFile: File,
         quality: Int,
+        location: android.location.Location?,
         executor: Executor,
         onSuccess: (File) -> Unit,
         onError: (ImageCaptureException) -> Unit
@@ -90,11 +98,6 @@ object ImageCaptureHelper {
                         val jpegBytes = imageProxyToBytes(imageProxy)
                         
                         // Create source EXIF from bytes
-                        // We need a temporary file or ByteArrayInputStream, but ExifInterface supports reading from file or stream
-                        // Since we have bytes, we can use a temp file or try to parse manually, 
-                        // but androidx.exifinterface.media.ExifInterface supports reading from a stream.
-                        // However, the constructor taking InputStream is only available in newer versions or specific contexts.
-                        // Let's use a temp file for reliability with the library version we might have.
                         val tempFile = File.createTempFile("temp_exif", ".jpg")
                         FileOutputStream(tempFile).use { it.write(jpegBytes) }
                         
@@ -109,6 +112,12 @@ object ImageCaptureHelper {
                         // Copy EXIF to new WebP file
                         val targetExif = androidx.exifinterface.media.ExifInterface(outputFile.absolutePath)
                         com.example.kaimera.ExifUtils.copyExif(sourceExif, targetExif)
+                        
+                        // Add location if provided
+                        if (location != null) {
+                            targetExif.setGpsInfo(location)
+                            targetExif.saveAttributes()
+                        }
                         
                         // Clean up
                         bitmap.recycle()

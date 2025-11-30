@@ -23,6 +23,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="Camera">
+        <SwitchPreferenceCompat
+            app:key="save_location"
+            app:title="Save Location"
+            app:summary="Save GPS location to photos"
+            app:defaultValue="false" />
+
         <Preference
             app:key="photo_settings"
             app:title="Photo Settings"

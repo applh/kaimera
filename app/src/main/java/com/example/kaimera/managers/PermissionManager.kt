@@ -21,7 +21,9 @@ class PermissionManager(
     companion object {
         private val REQUIRED_PERMISSIONS = mutableListOf(
             Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         ).apply {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -49,27 +51,14 @@ class PermissionManager(
         }
 
     fun checkAndRequestPermissions() {
-        if (allPermissionsGranted()) {
-            onCameraPermissionGranted()
+        val permissionsToRequest = REQUIRED_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(activity, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissionLauncher.launch(permissionsToRequest)
         } else {
-            val permissionsNeeded = mutableListOf<String>()
-            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(Manifest.permission.CAMERA)
-            }
-            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(Manifest.permission.RECORD_AUDIO)
-            }
-            
-            // Add storage permission if needed
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    permissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-            }
-            
-            if (permissionsNeeded.isNotEmpty()) {
-                requestPermissionLauncher.launch(permissionsNeeded.toTypedArray())
-            }
+            onCameraPermissionGranted()
         }
     }
 

@@ -115,4 +115,8 @@ class PreferencesManager(context: Context) {
     fun isLaunchScreenEnabled(): Boolean {
         return prefs.getBoolean("launch_screen_enabled", true)
     }
+
+    fun isLocationTaggingEnabled(): Boolean {
+        return prefs.getBoolean("save_location", false)
+    }
 }
