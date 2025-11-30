@@ -7,7 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.5.0] - 2025-11-29
+## [v27.0.0] - 2025-11-30
+
+### Added
+- **Launch Screen:** Configurable app launcher with multiple apps
+  - Shows Camera and Browser icons on black background
+  - Tap icons to launch respective apps
+  - Toggle "Show Launch Screen" in Settings to skip directly to camera
+  - "Return to Launch Screen" option in Settings
+- **Simple Browser:** Full-featured web browser
+  - URL bar with auto-HTTPS
+  - Navigation controls (Back, Forward, Refresh, Home)
+  - Configurable home URL (saved in preferences)
+  - Settings panel with:
+    - JavaScript toggle
+    - DOM Storage toggle
+    - Image loading toggle
+    - Text size adjustment (Small/Normal/Large/Extra Large)
+    - Granular data clearing (Cache, Cookies, History, or All)
+  - Progress bar for page loading
+  - Confirmation dialog for "Clear All Data"
+
+### Fixed
+- **Browser:** Added missing INTERNET permission
+- **Browser:** Fixed white-on-white text color in URL bar
+
+## [v26.0.0] - 2025-11-30
 
 ### Added
 - **Intervalometer Feature** - Scheduled time-lapse photography with advanced controls
