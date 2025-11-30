@@ -25,6 +25,7 @@ class BrowserActivity : AppCompatActivity() {
     private lateinit var btnForward: ImageButton
     private lateinit var btnRefresh: ImageButton
     private lateinit var btnGo: Button
+    private lateinit var btnSettings: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +39,7 @@ class BrowserActivity : AppCompatActivity() {
         btnForward = findViewById(R.id.btnForward)
         btnRefresh = findViewById(R.id.btnRefresh)
         btnGo = findViewById(R.id.btnGo)
+        btnSettings = findViewById(R.id.btnSettings)
 
         setupWebView()
         setupControls()
@@ -109,6 +111,10 @@ class BrowserActivity : AppCompatActivity() {
         btnRefresh.setOnClickListener {
             webView.reload()
         }
+
+        btnSettings.setOnClickListener {
+            showSettingsDialog()
+        }
     }
 
     private fun loadUrl(url: String) {
@@ -131,6 +137,68 @@ class BrowserActivity : AppCompatActivity() {
         
         btnForward.isEnabled = webView.canGoForward()
         btnForward.alpha = if (webView.canGoForward()) 1.0f else 0.5f
+    }
+
+    private fun showSettingsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_browser_settings, null)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        // Initialize checkboxes with current settings
+        val cbJavaScript = dialogView.findViewById<android.widget.CheckBox>(R.id.cbJavaScript)
+        val cbDomStorage = dialogView.findViewById<android.widget.CheckBox>(R.id.cbDomStorage)
+        val cbLoadImages = dialogView.findViewById<android.widget.CheckBox>(R.id.cbLoadImages)
+        
+        cbJavaScript.isChecked = webView.settings.javaScriptEnabled
+        cbDomStorage.isChecked = webView.settings.domStorageEnabled
+        cbLoadImages.isChecked = webView.settings.loadsImagesAutomatically
+
+        // Initialize text size radio buttons
+        val rgTextSize = dialogView.findViewById<android.widget.RadioGroup>(R.id.rgTextSize)
+        when (webView.settings.textZoom) {
+            75 -> rgTextSize.check(R.id.rbTextSmall)
+            100 -> rgTextSize.check(R.id.rbTextNormal)
+            125 -> rgTextSize.check(R.id.rbTextLarge)
+            150 -> rgTextSize.check(R.id.rbTextExtraLarge)
+        }
+
+        // Handle checkbox changes
+        cbJavaScript.setOnCheckedChangeListener { _, isChecked ->
+            webView.settings.javaScriptEnabled = isChecked
+        }
+
+        cbDomStorage.setOnCheckedChangeListener { _, isChecked ->
+            webView.settings.domStorageEnabled = isChecked
+        }
+
+        cbLoadImages.setOnCheckedChangeListener { _, isChecked ->
+            webView.settings.loadsImagesAutomatically = isChecked
+        }
+
+        // Handle text size changes
+        rgTextSize.setOnCheckedChangeListener { _, checkedId ->
+            webView.settings.textZoom = when (checkedId) {
+                R.id.rbTextSmall -> 75
+                R.id.rbTextNormal -> 100
+                R.id.rbTextLarge -> 125
+                R.id.rbTextExtraLarge -> 150
+                else -> 100
+            }
+        }
+
+        // Handle clear cache button
+        dialogView.findViewById<Button>(R.id.btnClearCache).setOnClickListener {
+            webView.clearCache(true)
+            Toast.makeText(this, "Cache cleared", Toast.LENGTH_SHORT).show()
+        }
+
+        // Handle close button
+        dialogView.findViewById<Button>(R.id.btnClose).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     override fun onBackPressed() {

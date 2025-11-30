@@ -63,6 +63,15 @@
             android:minWidth="0dp"
             android:paddingHorizontal="12dp" />
 
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:contentDescription="Settings" />
+
     </LinearLayout>
 
     <ProgressBar

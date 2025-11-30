@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browser Settings"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <CheckBox
+        android:id="@+id/cbJavaScript"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enable JavaScript"
+        android:checked="true" />
+
+    <CheckBox
+        android:id="@+id/cbDomStorage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enable DOM Storage"
+        android:checked="true" />
+
+    <CheckBox
+        android:id="@+id/cbLoadImages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Load Images"
+        android:checked="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Text Size"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/rgTextSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rbTextSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Small" />
+
+        <RadioButton
+            android:id="@+id/rbTextNormal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Normal"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/rbTextLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Large" />
+
+        <RadioButton
+            android:id="@+id/rbTextExtraLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Extra Large" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btnClearCache"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear Cache"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Close" />
+    </LinearLayout>
+
+</LinearLayout>
