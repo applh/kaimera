@@ -86,14 +86,33 @@ object ImageCaptureHelper {
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     try {
-                        // Convert ImageProxy to Bitmap
-                        val bitmap = imageProxyToBitmap(imageProxy)
+                        // Get JPEG bytes to extract EXIF
+                        val jpegBytes = imageProxyToBytes(imageProxy)
+                        
+                        // Create source EXIF from bytes
+                        // We need a temporary file or ByteArrayInputStream, but ExifInterface supports reading from file or stream
+                        // Since we have bytes, we can use a temp file or try to parse manually, 
+                        // but androidx.exifinterface.media.ExifInterface supports reading from a stream.
+                        // However, the constructor taking InputStream is only available in newer versions or specific contexts.
+                        // Let's use a temp file for reliability with the library version we might have.
+                        val tempFile = File.createTempFile("temp_exif", ".jpg")
+                        FileOutputStream(tempFile).use { it.write(jpegBytes) }
+                        
+                        val sourceExif = androidx.exifinterface.media.ExifInterface(tempFile.absolutePath)
+                        
+                        // Decode Bitmap
+                        val bitmap = BitmapFactory.decodeByteArray(jpegBytes, 0, jpegBytes.size)
                         
                         // Save as WebP
                         saveBitmapAsWebP(bitmap, outputFile, quality)
                         
+                        // Copy EXIF to new WebP file
+                        val targetExif = androidx.exifinterface.media.ExifInterface(outputFile.absolutePath)
+                        com.example.kaimera.ExifUtils.copyExif(sourceExif, targetExif)
+                        
                         // Clean up
                         bitmap.recycle()
+                        tempFile.delete()
                         imageProxy.close()
                         
                         onSuccess(outputFile)
@@ -116,14 +135,14 @@ object ImageCaptureHelper {
     }
 
     /**
-     * Convert ImageProxy to Bitmap
+     * Convert ImageProxy to ByteArray (JPEG)
      */
-    private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
+    private fun imageProxyToBytes(imageProxy: ImageProxy): ByteArray {
         if (imageProxy.format == ImageFormat.JPEG) {
             val buffer = imageProxy.planes[0].buffer
             val bytes = ByteArray(buffer.remaining())
             buffer.get(bytes)
-            return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            return bytes
         }
 
         val image = imageProxy.image ?: throw IllegalStateException("Image is null")
@@ -146,9 +165,7 @@ object ImageCaptureHelper {
         val yuvImage = YuvImage(nv21, ImageFormat.NV21, image.width, image.height, null)
         val out = ByteArrayOutputStream()
         yuvImage.compressToJpeg(Rect(0, 0, image.width, image.height), 100, out)
-        val imageBytes = out.toByteArray()
-        
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        return out.toByteArray()
     }
 
     /**

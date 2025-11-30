@@ -76,4 +76,48 @@ object ExifUtils {
             Toast.makeText(context, "Failed to read EXIF data: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+    /**
+     * Copy EXIF data from source to target
+     */
+    fun copyExif(source: ExifInterface, target: ExifInterface) {
+        val attributes = arrayOf(
+            ExifInterface.TAG_DATETIME,
+            ExifInterface.TAG_DATETIME_DIGITIZED,
+            ExifInterface.TAG_DATETIME_ORIGINAL,
+            ExifInterface.TAG_GPS_LATITUDE,
+            ExifInterface.TAG_GPS_LATITUDE_REF,
+            ExifInterface.TAG_GPS_LONGITUDE,
+            ExifInterface.TAG_GPS_LONGITUDE_REF,
+            ExifInterface.TAG_GPS_ALTITUDE,
+            ExifInterface.TAG_GPS_ALTITUDE_REF,
+            ExifInterface.TAG_GPS_TIMESTAMP,
+            ExifInterface.TAG_GPS_DATESTAMP,
+            ExifInterface.TAG_GPS_PROCESSING_METHOD,
+            ExifInterface.TAG_MAKE,
+            ExifInterface.TAG_MODEL,
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.TAG_SUBSEC_TIME,
+            ExifInterface.TAG_SUBSEC_TIME_DIGITIZED,
+            ExifInterface.TAG_SUBSEC_TIME_ORIGINAL,
+            ExifInterface.TAG_WHITE_BALANCE,
+            ExifInterface.TAG_FOCAL_LENGTH,
+            ExifInterface.TAG_FLASH,
+            ExifInterface.TAG_IMAGE_DESCRIPTION,
+            ExifInterface.TAG_USER_COMMENT
+        )
+
+        for (attribute in attributes) {
+            val value = source.getAttribute(attribute)
+            if (value != null) {
+                target.setAttribute(attribute, value)
+            }
+        }
+        
+        try {
+            target.saveAttributes()
+        } catch (e: Exception) {
+            // Log error but don't crash
+            android.util.Log.e("ExifUtils", "Failed to save EXIF attributes", e)
+        }
+    }
 }
