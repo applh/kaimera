@@ -11,6 +11,14 @@
         app:defaultValue="high" />
 
     <ListPreference
+        app:key="image_format"
+        app:title="Image Format"
+        app:summary="%s"
+        app:entries="@array/image_format_entries"
+        app:entryValues="@array/image_format_values"
+        app:defaultValue="jpeg" />
+
+    <ListPreference
         app:key="capture_mode_preference"
         app:title="Capture Mode"
         app:summary="%s"

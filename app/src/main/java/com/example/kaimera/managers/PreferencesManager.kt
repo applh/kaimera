@@ -21,6 +21,8 @@ class PreferencesManager(context: Context) {
     
     fun getFlashMode(): String = prefs.getString("flash_mode", "auto") ?: "auto"
     
+    fun getImageFormat(): String = prefs.getString("image_format", "jpeg") ?: "jpeg"
+    
     fun getCaptureMode(): String = prefs.getString("capture_mode_preference", "latency") ?: "latency"
     
     fun getTargetResolution(): String = prefs.getString("target_resolution", "max") ?: "max"

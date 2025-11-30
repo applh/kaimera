@@ -13,6 +13,7 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -520,7 +521,10 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     private fun capturePhoto() {
         val imageCapture = cameraManager.getImageCapture() ?: return
 
-        // Create output file
+        // Get image format preference
+        val imageFormat = preferencesManager.getImageFormat()
+        val fileExtension = com.example.kaimera.utils.ImageCaptureHelper.getFileExtension(imageFormat)
+
         // Create output file
         val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
         val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
@@ -529,84 +533,91 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         
         val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
         val fileName = if (namingPattern == "sequential") {
-            StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "IMG", "jpg")
+            StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "IMG", fileExtension)
         } else {
-            StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "IMG", "jpg")
+            StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "IMG", fileExtension)
         }
         
         val photoFile = File(outputDirectory, fileName)
 
-        val outputOptions = StorageManager.createOutputFileOptions(
-            this,
-            photoFile,
-            saveLocationPref ?: "app_storage",
-            fileName
-        )
-
-        // Capture image
+        // Play shutter sound
         val playSound = sharedPreferences.getBoolean("shutter_sound", true)
-        
         if (playSound) {
             android.media.MediaActionSound().play(android.media.MediaActionSound.SHUTTER_CLICK)
         }
 
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    // Get the saved URI (works for both file and MediaStore)
-                    val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                    
-                    // Apply filter to saved image if any (only for file-based storage)
-                    val filter = currentFilter
-                    val matrix = filter?.matrix
-                    if (matrix != null && saveLocationPref != "dcim") {
-                        try {
-                            val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                            val filteredBitmap = Bitmap.createBitmap(
-                                originalBitmap.width,
-                                originalBitmap.height,
-                                Bitmap.Config.ARGB_8888
-                            )
-                            val canvas = android.graphics.Canvas(filteredBitmap)
-                            val paint = android.graphics.Paint()
-                            paint.colorFilter = ColorMatrixColorFilter(matrix)
-                            canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
-                            // Overwrite file
-                            val out = java.io.FileOutputStream(photoFile)
-                            filteredBitmap.compress(Bitmap.CompressFormat.JPEG, cameraManager.photoQuality.jpegQuality, out)
-                            out.flush()
-                            out.close()
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Failed to apply filter", e)
-                        }
-                    }
-                    runOnUiThread {
-                        val fileName = if (saveLocationPref == "dcim") {
-                            "Photo saved to gallery"
-                        } else {
-                            "Photo captured: ${photoFile.name}"
-                        }
-                        Toast.makeText(baseContext, fileName, Toast.LENGTH_SHORT).show()
+        // Capture image using ImageCaptureHelper
+        com.example.kaimera.utils.ImageCaptureHelper.captureImage(
+            imageCapture = imageCapture,
+            outputFile = photoFile,
+            format = imageFormat,
+            quality = cameraManager.photoQuality.jpegQuality,
+            executor = ContextCompat.getMainExecutor(this),
+            onSuccess = { savedFile ->
+                // Get the saved URI
+                val savedUri = Uri.fromFile(savedFile)
+                
+                // Apply filter to saved image if any (only for file-based storage)
+                val filter = currentFilter
+                val matrix = filter?.matrix
+                if (matrix != null && saveLocationPref != "dcim") {
+                    try {
+                        val originalBitmap = BitmapFactory.decodeFile(savedFile.absolutePath)
+                        val filteredBitmap = Bitmap.createBitmap(
+                            originalBitmap.width,
+                            originalBitmap.height,
+                            Bitmap.Config.ARGB_8888
+                        )
+                        val canvas = android.graphics.Canvas(filteredBitmap)
+                        val paint = android.graphics.Paint()
+                        paint.colorFilter = ColorMatrixColorFilter(matrix)
+                        canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
                         
-                        // Launch PreviewActivity
-                        val intent = android.content.Intent(this@MainActivity, PreviewActivity::class.java)
-                        intent.putExtra("image_uri", savedUri.toString())
-                        intent.putExtra("is_dcim", saveLocationPref == "dcim")
-                        startActivity(intent)
+                        // Overwrite file with filtered version
+                        val out = java.io.FileOutputStream(savedFile)
+                        val compressFormat = if (imageFormat == "webp") {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                Bitmap.CompressFormat.WEBP_LOSSY
+                            } else {
+                                @Suppress("DEPRECATION")
+                                Bitmap.CompressFormat.WEBP
+                            }
+                        } else {
+                            Bitmap.CompressFormat.JPEG
+                        }
+                        filteredBitmap.compress(compressFormat, cameraManager.photoQuality.jpegQuality, out)
+                        out.flush()
+                        out.close()
+                        originalBitmap.recycle()
+                        filteredBitmap.recycle()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to apply filter", e)
                     }
                 }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Photo capture failed: ${exception.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                
+                runOnUiThread {
+                    val message = if (saveLocationPref == "dcim") {
+                        "Photo saved to gallery"
+                    } else {
+                        "Photo captured: ${savedFile.name}"
                     }
+                    Toast.makeText(baseContext, message, Toast.LENGTH_SHORT).show()
+                    
+                    // Launch PreviewActivity
+                    val intent = android.content.Intent(this@MainActivity, PreviewActivity::class.java)
+                    intent.putExtra("image_uri", savedUri.toString())
+                    intent.putExtra("is_dcim", saveLocationPref == "dcim")
+                    startActivity(intent)
+                }
+            },
+            onError = { exception ->
+                Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
+                runOnUiThread {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Photo capture failed: ${exception.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         )

@@ -124,4 +124,13 @@
         <item>fhd</item>
         <item>hd</item>
     </string-array>
+
+    <string-array name="image_format_entries">
+        <item>JPEG (Standard, compatible)</item>
+        <item>WebP (Smaller files, modern)</item>
+    </string-array>
+    <string-array name="image_format_values">
+        <item>jpeg</item>
+        <item>webp</item>
+    </string-array>
 </resources>
