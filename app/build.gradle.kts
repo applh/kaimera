@@ -90,4 +90,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.0")
     implementation("io.coil-kt:coil:2.4.0")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
+    
+    // OkHttp for downloads
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }

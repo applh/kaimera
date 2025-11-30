@@ -353,28 +353,52 @@ class BrowserActivity : AppCompatActivity() {
             
             Toast.makeText(this, "Downloading: $filename", Toast.LENGTH_SHORT).show()
             
-            // Download file in background thread
+            // Download file using OkHttp in background thread
             Thread {
                 try {
-                    val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
-                    connection.requestMethod = "GET"
-                    connection.setRequestProperty("User-Agent", userAgent)
-                    connection.connect()
+                    val client = okhttp3.OkHttpClient.Builder()
+                        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                        .build()
                     
-                    val inputStream = connection.inputStream
-                    val outputStream = java.io.FileOutputStream(outputFile)
+                    val request = okhttp3.Request.Builder()
+                        .url(url)
+                        .addHeader("User-Agent", userAgent)
+                        .build()
                     
-                    val buffer = ByteArray(4096)
-                    var bytesRead: Int
-                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                        outputStream.write(buffer, 0, bytesRead)
-                    }
-                    
-                    outputStream.close()
-                    inputStream.close()
-                    
-                    runOnUiThread {
-                        Toast.makeText(this, "Download complete: $filename", Toast.LENGTH_LONG).show()
+                    client.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            runOnUiThread {
+                                Toast.makeText(this, "Download failed: HTTP ${response.code}", Toast.LENGTH_LONG).show()
+                            }
+                            return@Thread
+                        }
+                        
+                        response.body?.let { body ->
+                            val inputStream = body.byteStream()
+                            val outputStream = java.io.FileOutputStream(outputFile)
+                            
+                            val buffer = ByteArray(8192)
+                            var bytesRead: Int
+                            var totalBytesRead = 0L
+                            
+                            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                                outputStream.write(buffer, 0, bytesRead)
+                                totalBytesRead += bytesRead
+                            }
+                            
+                            outputStream.flush()
+                            outputStream.close()
+                            inputStream.close()
+                            
+                            runOnUiThread {
+                                Toast.makeText(this, "Download complete: $filename", Toast.LENGTH_LONG).show()
+                            }
+                        } ?: run {
+                            runOnUiThread {
+                                Toast.makeText(this, "Download failed: Empty response", Toast.LENGTH_LONG).show()
+                            }
+                        }
                     }
                 } catch (e: Exception) {
                     runOnUiThread {
