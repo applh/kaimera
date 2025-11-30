@@ -880,6 +880,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
     }
     
     override fun onError(message: String) {
-        // Already handled by Toast in manager
+        // Error already displayed to user by VideoRecordingManager
+        // No additional handling needed in MainActivity
     }
 }
