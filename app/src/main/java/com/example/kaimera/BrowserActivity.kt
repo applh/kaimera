@@ -24,8 +24,13 @@ class BrowserActivity : AppCompatActivity() {
     private lateinit var btnBack: ImageButton
     private lateinit var btnForward: ImageButton
     private lateinit var btnRefresh: ImageButton
+    private lateinit var btnHome: ImageButton
     private lateinit var btnGo: Button
     private lateinit var btnSettings: ImageButton
+
+    private val PREFS_NAME = "BrowserPrefs"
+    private val KEY_HOME_URL = "home_url"
+    private val DEFAULT_HOME_URL = "https://www.google.com"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,14 +43,15 @@ class BrowserActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
         btnForward = findViewById(R.id.btnForward)
         btnRefresh = findViewById(R.id.btnRefresh)
+        btnHome = findViewById(R.id.btnHome)
         btnGo = findViewById(R.id.btnGo)
         btnSettings = findViewById(R.id.btnSettings)
 
         setupWebView()
         setupControls()
 
-        // Load default page
-        loadUrl("https://www.google.com")
+        // Load home page
+        loadUrl(getHomeUrl())
     }
 
     private fun setupWebView() {
@@ -112,6 +118,10 @@ class BrowserActivity : AppCompatActivity() {
             webView.reload()
         }
 
+        btnHome.setOnClickListener {
+            loadUrl(getHomeUrl())
+        }
+
         btnSettings.setOnClickListener {
             showSettingsDialog()
         }
@@ -139,11 +149,25 @@ class BrowserActivity : AppCompatActivity() {
         btnForward.alpha = if (webView.canGoForward()) 1.0f else 0.5f
     }
 
+    private fun getHomeUrl(): String {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        return prefs.getString(KEY_HOME_URL, DEFAULT_HOME_URL) ?: DEFAULT_HOME_URL
+    }
+
+    private fun setHomeUrl(url: String) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs.edit().putString(KEY_HOME_URL, url).apply()
+    }
+
     private fun showSettingsDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_browser_settings, null)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
+
+        // Initialize home URL
+        val etHomeUrl = dialogView.findViewById<EditText>(R.id.etHomeUrl)
+        etHomeUrl.setText(getHomeUrl())
 
         // Initialize checkboxes with current settings
         val cbJavaScript = dialogView.findViewById<android.widget.CheckBox>(R.id.cbJavaScript)
@@ -233,6 +257,11 @@ class BrowserActivity : AppCompatActivity() {
 
         // Handle close button
         dialogView.findViewById<Button>(R.id.btnClose).setOnClickListener {
+            // Save home URL
+            val homeUrl = etHomeUrl.text.toString().trim()
+            if (homeUrl.isNotEmpty()) {
+                setHomeUrl(homeUrl)
+            }
             dialog.dismiss()
         }
 

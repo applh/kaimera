@@ -39,6 +39,15 @@
             android:src="@android:drawable/ic_menu_rotate"
             android:contentDescription="Refresh" />
 
+        <ImageButton
+            android:id="@+id/btnHome"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_myplaces"
+            android:contentDescription="Home" />
+
         <EditText
             android:id="@+id/etUrl"
             android:layout_width="0dp"

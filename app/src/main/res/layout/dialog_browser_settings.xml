@@ -13,6 +13,22 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Home URL"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/etHomeUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="https://www.google.com"
+        android:inputType="textUri"
+        android:singleLine="true"
+        android:layout_marginBottom="16dp" />
+
     <CheckBox
         android:id="@+id/cbJavaScript"
         android:layout_width="match_parent"
