@@ -284,20 +284,40 @@ class MediaViewerActivity : AppCompatActivity() {
     private fun saveFrameAsImage(bitmap: android.graphics.Bitmap) {
         try {
             val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+            val preferencesManager = com.example.kaimera.managers.PreferencesManager(this)
+            
             val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
             val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
             val customPrefix = sharedPreferences.getString("custom_file_prefix", "FRAME")
             
+            // Get image format and quality from photo settings
+            val imageFormat = preferencesManager.getImageFormat()
+            val quality = preferencesManager.getPhotoQualityInt()
+            val extension = if (imageFormat == "webp") "webp" else "jpg"
+            
             val outputDirectory = com.example.kaimera.managers.StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
             val fileName = if (namingPattern == "sequential") {
-                com.example.kaimera.managers.StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "FRAME", "jpg")
+                com.example.kaimera.managers.StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "FRAME", extension)
             } else {
-                com.example.kaimera.managers.StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "FRAME", "jpg")
+                com.example.kaimera.managers.StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "FRAME", extension)
             }
             
             val imageFile = java.io.File(outputDirectory, fileName)
             val out = java.io.FileOutputStream(imageFile)
-            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 95, out)
+            
+            // Use format and quality from settings
+            val compressFormat = if (imageFormat == "webp") {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    android.graphics.Bitmap.CompressFormat.WEBP_LOSSY
+                } else {
+                    @Suppress("DEPRECATION")
+                    android.graphics.Bitmap.CompressFormat.WEBP
+                }
+            } else {
+                android.graphics.Bitmap.CompressFormat.JPEG
+            }
+            
+            bitmap.compress(compressFormat, quality, out)
             out.flush()
             out.close()
             
