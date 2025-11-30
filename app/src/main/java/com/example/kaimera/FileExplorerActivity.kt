@@ -102,8 +102,15 @@ class FileExplorerActivity : AppCompatActivity() {
     }
 
     private fun openMediaFile(file: File) {
+        val fileType = when {
+            isImageFile(file) -> "photo"
+            isVideoFile(file) -> "video"
+            else -> "unknown"
+        }
+        
         val intent = Intent(this, MediaViewerActivity::class.java).apply {
-            putExtra("media_path", file.absolutePath)
+            putExtra("file_path", file.absolutePath)
+            putExtra("file_type", fileType)
         }
         startActivity(intent)
     }
