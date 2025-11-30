@@ -325,6 +325,9 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             cameraManager.getVideoCapture()?.targetRotation = rotation
         }
         
+        // Initialize location manager
+        locationManager = LocationManager(this)
+        
         // Request permissions
         permissionManager.checkAndRequestPermissions()
 
