@@ -131,6 +131,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
+        android:id="@+id/btnRotate"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_rotate"
+        app:tint="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@id/btnInfo"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
         android:id="@+id/btnInfo"
         android:layout_width="48dp"
         android:layout_height="48dp"

@@ -88,6 +88,21 @@ class MediaViewerActivity : AppCompatActivity() {
         btnInfo.setOnClickListener {
             showExifEditorDialog()
         }
+        
+        findViewById<ImageButton>(R.id.btnRotate).setOnClickListener {
+            rotateMedia()
+        }
+    }
+    
+    private fun rotateMedia() {
+        if (videoView.visibility == View.VISIBLE) {
+            val videoContainer = findViewById<ZoomableVideoLayout>(R.id.videoContainer)
+            val currentRotation = videoContainer.rotation
+            videoContainer.rotation = (currentRotation + 90f) % 360f
+        } else if (photoView.visibility == View.VISIBLE) {
+            val currentRotation = photoView.rotation
+            photoView.rotation = (currentRotation + 90f) % 360f
+        }
     }
     
     private fun showExifEditorDialog() {
@@ -167,6 +182,7 @@ class MediaViewerActivity : AppCompatActivity() {
         audioIcon.visibility = View.GONE
         mediaControls.visibility = View.VISIBLE
         btnInfo.visibility = View.GONE  // Hide EXIF button for videos
+        findViewById<ImageButton>(R.id.btnRotate).visibility = View.VISIBLE
         
         val uri = Uri.parse(filePath)
         videoView.setVideoURI(uri)
@@ -215,6 +231,7 @@ class MediaViewerActivity : AppCompatActivity() {
         audioIcon.visibility = View.VISIBLE
         mediaControls.visibility = View.VISIBLE
         btnInfo.visibility = View.GONE  // Hide EXIF button for audio
+        findViewById<ImageButton>(R.id.btnRotate).visibility = View.GONE
         
         try {
             mediaPlayer = MediaPlayer().apply {
@@ -357,6 +374,7 @@ class MediaViewerActivity : AppCompatActivity() {
         mediaControls.visibility = View.GONE
         photoView.visibility = View.VISIBLE
         btnInfo.visibility = View.VISIBLE  // Show EXIF button for photos
+        findViewById<ImageButton>(R.id.btnRotate).visibility = View.VISIBLE
         
         try {
             val bitmap = android.graphics.BitmapFactory.decodeFile(filePath)
