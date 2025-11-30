@@ -119,6 +119,13 @@ object ImageCaptureHelper {
      * Convert ImageProxy to Bitmap
      */
     private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
+        if (imageProxy.format == ImageFormat.JPEG) {
+            val buffer = imageProxy.planes[0].buffer
+            val bytes = ByteArray(buffer.remaining())
+            buffer.get(bytes)
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        }
+
         val image = imageProxy.image ?: throw IllegalStateException("Image is null")
         
         // Convert YUV to RGB
