@@ -55,6 +55,14 @@ class GalleryActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1001 && resultCode == RESULT_OK) {
+            // MediaViewerActivity returned with success (frame was exported)
+            loadGallery()
+        }
+    }
+
     companion object {
         private const val TAG = "GalleryActivity"
     }
@@ -135,6 +143,10 @@ class GalleryActivity : AppCompatActivity() {
                         },
                         onFileShared = { file ->
                             shareFile(file)
+                        },
+                        onMediaViewerClosed = {
+                            // Reload gallery when returning from MediaViewerActivity
+                            loadGallery()
                         }
                     )
                 }

@@ -15,7 +15,8 @@ import android.widget.TextView
 class GalleryAdapter(
     private var files: MutableList<File>,
     private val onFileDeleted: () -> Unit,
-    private val onFileShared: (File) -> Unit
+    private val onFileShared: (File) -> Unit,
+    private val onMediaViewerClosed: () -> Unit = {}
 ) : RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -75,20 +76,32 @@ class GalleryAdapter(
                     val intent = android.content.Intent(context, MediaViewerActivity::class.java)
                     intent.putExtra("file_path", file.absolutePath)
                     intent.putExtra("file_type", "video")
-                    context.startActivity(intent)
+                    if (context is android.app.Activity) {
+                        context.startActivityForResult(intent, 1001)
+                    } else {
+                        context.startActivity(intent)
+                    }
                 }
                 isAudio -> {
                     val intent = android.content.Intent(context, MediaViewerActivity::class.java)
                     intent.putExtra("file_path", file.absolutePath)
                     intent.putExtra("file_type", "audio")
-                    context.startActivity(intent)
+                    if (context is android.app.Activity) {
+                        context.startActivityForResult(intent, 1001)
+                    } else {
+                        context.startActivity(intent)
+                    }
                 }
                 else -> {
                     // Photo - launch MediaViewerActivity
                     val intent = android.content.Intent(context, MediaViewerActivity::class.java)
                     intent.putExtra("file_path", file.absolutePath)
                     intent.putExtra("file_type", "photo")
-                    context.startActivity(intent)
+                    if (context is android.app.Activity) {
+                        context.startActivityForResult(intent, 1001)
+                    } else {
+                        context.startActivity(intent)
+                    }
                 }
             }
         }

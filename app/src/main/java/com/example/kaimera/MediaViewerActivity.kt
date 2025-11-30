@@ -321,6 +321,9 @@ class MediaViewerActivity : AppCompatActivity() {
             out.flush()
             out.close()
             
+            // Notify gallery that a new file was created
+            setResult(RESULT_OK)
+            
             Toast.makeText(this, "Frame saved: $fileName", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to save frame: ${e.message}", Toast.LENGTH_SHORT).show()
