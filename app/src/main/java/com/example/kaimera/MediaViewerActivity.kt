@@ -1,5 +1,6 @@
 package com.example.kaimera
 
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -19,6 +20,7 @@ class MediaViewerActivity : AppCompatActivity() {
     private lateinit var audioIcon: ImageView
     private lateinit var mediaControls: View
     private lateinit var btnPlayPause: ImageButton
+    private lateinit var btnExportFrame: ImageButton
     private lateinit var btnClose: ImageButton
     private lateinit var btnInfo: ImageButton
     private lateinit var seekBar: android.widget.SeekBar
@@ -47,6 +49,7 @@ class MediaViewerActivity : AppCompatActivity() {
         audioIcon = findViewById(R.id.audioIcon)
         mediaControls = findViewById(R.id.mediaControls)
         btnPlayPause = findViewById(R.id.btnPlayPause)
+        btnExportFrame = findViewById(R.id.btnExportFrame)
         btnClose = findViewById(R.id.btnClose)
         btnInfo = findViewById(R.id.btnInfo)
         seekBar = findViewById(R.id.seekBar)
@@ -200,6 +203,10 @@ class MediaViewerActivity : AppCompatActivity() {
             }
             updatePlayPauseButton()
         }
+        
+        btnExportFrame.setOnClickListener {
+            exportCurrentFrame()
+        }
     }
     
     private fun setupAudioPlayback(filePath: String) {
@@ -247,6 +254,57 @@ class MediaViewerActivity : AppCompatActivity() {
             if (isPlaying) android.R.drawable.ic_media_pause 
             else android.R.drawable.ic_media_play
         )
+        // Show export button only when video is paused
+        if (videoView.visibility == View.VISIBLE) {
+            btnExportFrame.visibility = if (isPlaying) View.GONE else View.VISIBLE
+        }
+    }
+    
+    private fun exportCurrentFrame() {
+        val filePath = currentFilePath ?: return
+        val retriever = MediaMetadataRetriever()
+        
+        try {
+            retriever.setDataSource(filePath)
+            val currentPosition = videoView.currentPosition * 1000L // Convert to microseconds
+            val bitmap = retriever.getFrameAtTime(currentPosition, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+            
+            if (bitmap != null) {
+                saveFrameAsImage(bitmap)
+            } else {
+                Toast.makeText(this, "Failed to extract frame", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        } finally {
+            retriever.release()
+        }
+    }
+    
+    private fun saveFrameAsImage(bitmap: android.graphics.Bitmap) {
+        try {
+            val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+            val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+            val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
+            val customPrefix = sharedPreferences.getString("custom_file_prefix", "FRAME")
+            
+            val outputDirectory = com.example.kaimera.managers.StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
+            val fileName = if (namingPattern == "sequential") {
+                com.example.kaimera.managers.StorageManager.generateSequentialFileName(outputDirectory, customPrefix ?: "FRAME", "jpg")
+            } else {
+                com.example.kaimera.managers.StorageManager.generateFileName(namingPattern ?: "timestamp", customPrefix ?: "FRAME", "jpg")
+            }
+            
+            val imageFile = java.io.File(outputDirectory, fileName)
+            val out = java.io.FileOutputStream(imageFile)
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 95, out)
+            out.flush()
+            out.close()
+            
+            Toast.makeText(this, "Frame saved: $fileName", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to save frame: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     
     override fun onPause() {
