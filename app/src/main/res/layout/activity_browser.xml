@@ -51,6 +51,8 @@
             android:imeOptions="actionGo"
             android:singleLine="true"
             android:background="@android:drawable/editbox_background"
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/darker_gray"
             android:padding="8dp" />
 
         <Button
