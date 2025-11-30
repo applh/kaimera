@@ -58,6 +58,11 @@ class BrowserActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         
+        // Set up download listener
+        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+            handleDownload(url, userAgent, contentDisposition, mimetype, contentLength)
+        }
+        
         // Handle page navigation within the WebView
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -311,6 +316,99 @@ class BrowserActivity : AppCompatActivity() {
             }
         }
         fileOrDirectory.delete()
+    }
+
+    private fun handleDownload(url: String, userAgent: String, contentDisposition: String, mimetype: String, contentLength: Long) {
+        try {
+            // Create downloads directory if it doesn't exist
+            val downloadsDir = java.io.File(filesDir, "downloads")
+            if (!downloadsDir.exists()) {
+                downloadsDir.mkdirs()
+            }
+
+            // Extract filename from content disposition or URL
+            var filename = extractFilename(contentDisposition, url)
+            
+            // Handle file naming conflicts
+            filename = getUniqueFilename(downloadsDir, filename)
+            
+            val outputFile = java.io.File(downloadsDir, filename)
+            
+            Toast.makeText(this, "Downloading: $filename", Toast.LENGTH_SHORT).show()
+            
+            // Download file in background thread
+            Thread {
+                try {
+                    val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.setRequestProperty("User-Agent", userAgent)
+                    connection.connect()
+                    
+                    val inputStream = connection.inputStream
+                    val outputStream = java.io.FileOutputStream(outputFile)
+                    
+                    val buffer = ByteArray(4096)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                    }
+                    
+                    outputStream.close()
+                    inputStream.close()
+                    
+                    runOnUiThread {
+                        Toast.makeText(this, "Download complete: $filename", Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(this, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
+            
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error starting download: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun extractFilename(contentDisposition: String, url: String): String {
+        // Try to extract filename from Content-Disposition header
+        if (contentDisposition.isNotEmpty()) {
+            val filenamePattern = "filename=\"?([^\"]+)\"?".toRegex()
+            val match = filenamePattern.find(contentDisposition)
+            if (match != null) {
+                return match.groupValues[1]
+            }
+        }
+        
+        // Fall back to extracting from URL
+        val uri = android.net.Uri.parse(url)
+        val lastSegment = uri.lastPathSegment
+        if (!lastSegment.isNullOrEmpty()) {
+            return lastSegment
+        }
+        
+        // Default filename
+        return "download_${System.currentTimeMillis()}"
+    }
+    
+    private fun getUniqueFilename(directory: java.io.File, filename: String): String {
+        var uniqueFilename = filename
+        var counter = 1
+        
+        while (java.io.File(directory, uniqueFilename).exists()) {
+            val dotIndex = filename.lastIndexOf('.')
+            uniqueFilename = if (dotIndex > 0) {
+                val name = filename.substring(0, dotIndex)
+                val extension = filename.substring(dotIndex)
+                "${name}_${counter}${extension}"
+            } else {
+                "${filename}_${counter}"
+            }
+            counter++
+        }
+        
+        return uniqueFilename
     }
 
     override fun onBackPressed() {
