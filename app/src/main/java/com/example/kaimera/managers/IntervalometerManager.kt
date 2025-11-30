@@ -291,9 +291,40 @@ class IntervalometerManager(
         if (currentConfig.lowPowerMode && currentConfig.intervalSeconds > 5) {
             enterSleepMode(nextShotTime)
         } else {
-            handler.postDelayed({
-                capturePhoto()
-            }, intervalMs)
+            // Show countdown for intervals > 1 second
+            if (intervalMs > 1000) {
+                startIntervalCountdown(intervalMs)
+            } else {
+                handler.postDelayed({
+                    capturePhoto()
+                }, intervalMs)
+            }
         }
+    }
+
+    /**
+     * Start countdown between interval shots
+     */
+    private fun startIntervalCountdown(delayMs: Long) {
+        val startTime = System.currentTimeMillis()
+        val endTime = startTime + delayMs
+
+        runnable = object : Runnable {
+            override fun run() {
+                if (!isRunning) return
+
+                val remaining = endTime - System.currentTimeMillis()
+                if (remaining <= 0) {
+                    // Clear the runnable before capturing to prevent re-posting
+                    runnable = null
+                    capturePhoto()
+                } else {
+                    val seconds = (remaining / 1000) + 1
+                    callback?.onCountdownUpdate(seconds.toInt())
+                    handler.postDelayed(this, 200)
+                }
+            }
+        }
+        handler.post(runnable!!)
     }
 }
