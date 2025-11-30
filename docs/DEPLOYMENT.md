@@ -26,12 +26,28 @@ Use the included Docker-based deployment for isolated, secure GitHub publishing:
    - Repository name: `kaimera`
    - Don't initialize with anything
 
-2. **Run deployment**:
-   ```bash
-   ./deploy-to-github.sh YOUR_GITHUB_USERNAME kaimera
-   ```
+2. **Run Deployment Script**
+Run the deployment script with your GitHub username and repository name:
 
-3. **First time only - Add SSH key to GitHub** when prompted:
+```bash
+./deploy-to-github.sh <username> <repo_name>
+```
+
+Example:
+```bash
+./deploy-to-github.sh applh kaimera
+```
+
+**First Run:**
+- The script will generate a new SSH key.
+- It will display the public key and instructions to add it to your GitHub repository settings.
+- Follow the on-screen instructions.
+
+**Subsequent Runs:**
+- The script automatically detects and reuses the saved SSH key (`.github-deploy-key`).
+- No manual intervention is required.
+
+> **Note:** The `docker-push.sh` script is an internal helper used by the container. You should always use `deploy-to-github.sh`.
    - Go to https://github.com/settings/ssh/new
    - Title: "Kaimera Deploy Key"
    - Paste the displayed key

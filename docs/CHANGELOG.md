@@ -69,12 +69,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Media Controls** - Unified playback for video and audio
 - **Debug Logs** - On-device log viewer in Settings
 
-## [1.0.0] - 2025-11-22
+## [v26.0.0] - 2025-11-30
+
+### Added
+- **Video Frame Export:** Extract high-quality frames from paused videos.
+  - Export button appears when video is paused.
+  - Saves as JPEG or WebP based on preferences.
+  - Respects quality settings (1-100).
+  - Automatically updates gallery.
+
+### Changed
+- **Refactoring:** Moved settings fragments to `com.example.kaimera.fragments` package for better organization.
+- **Documentation:** Updated deployment guide with SSH key persistence instructions.
+
+### Fixed
+- **Gallery Refresh:** Fixed issue where gallery didn't update after exporting a frame.
+- **Build Warnings:** Removed unused variables and parameters across multiple files.
+
+### Security
+- **Keystore:** Secured release keystore by removing it from git and moving credentials to `local.properties`.
+
+## [v25.0.0] - 2025-11-3022
 
 ### Added
 - Initial release with core camera functionality
 - Real-time camera preview
 - Photo and video capture
+
+## [1.0.0] - 2025-11-22
+
+### Added
 - Burst mode
 - Filters and effects
 - In-app gallery

@@ -31,7 +31,7 @@ kaimera/
 ├── app/
 │   ├── src/main/
 │   │   ├── java/com/example/kaimera/
-│   │   │   ├── managers/                # Manager classes (business logic)
+│   │   │   ├── managers/           # Feature-specific managers (Camera, Location, etc.)
 │   │   │   │   ├── CameraManager.kt
 │   │   │   │   ├── PermissionManager.kt
 │   │   │   │   ├── OrientationManager.kt

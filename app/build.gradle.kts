@@ -13,9 +13,9 @@ android {
     defaultConfig {
         applicationId = "com.example.kaimera"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 49
-        versionName = "25.0.0"
+        targetSdk = 34
+        versionCode = 50
+        versionName = "26.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
