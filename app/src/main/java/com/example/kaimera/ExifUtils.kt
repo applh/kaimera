@@ -13,9 +13,11 @@ import java.io.File
 object ExifUtils {
 
     fun showExifEditorDialog(context: Context, file: File) {
-        // Only allow editing for JPEG images
-        if (!file.extension.equals("jpg", ignoreCase = true) && !file.extension.equals("jpeg", ignoreCase = true)) {
-            Toast.makeText(context, "EXIF editing is only supported for JPEG images", Toast.LENGTH_SHORT).show()
+        // Only allow editing for JPEG and WebP images
+        if (!file.extension.equals("jpg", ignoreCase = true) && 
+            !file.extension.equals("jpeg", ignoreCase = true) &&
+            !file.extension.equals("webp", ignoreCase = true)) {
+            Toast.makeText(context, "EXIF editing is only supported for JPEG and WebP images", Toast.LENGTH_SHORT).show()
             return
         }
 
