@@ -29,6 +29,11 @@ class LauncherActivity : AppCompatActivity() {
             val intent = Intent(this, BrowserActivity::class.java)
             startActivity(intent)
         }
+
+        findViewById<ImageButton>(R.id.btnLaunchFileExplorer).setOnClickListener {
+            val intent = Intent(this, FileExplorerActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun startMainActivity() {

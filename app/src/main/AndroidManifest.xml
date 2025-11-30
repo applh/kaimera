@@ -59,6 +59,10 @@
             android:name=".BrowserActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name=".FileExplorerActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
         <activity
             android:name=".DebugLogActivity"
             android:label="Debug Logs"
