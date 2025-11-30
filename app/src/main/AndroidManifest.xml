@@ -59,7 +59,8 @@
         <activity
             android:name=".BrowserActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
             
         <activity
             android:name=".FileExplorerActivity"
