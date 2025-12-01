@@ -40,6 +40,11 @@ class LauncherActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        findViewById<LinearLayout>(R.id.colorLightIcon).setOnClickListener {
+            val intent = Intent(this, ColorLightActivity::class.java)
+            startActivity(intent)
+        }
+
         findViewById<LinearLayout>(R.id.settingsIcon).setOnClickListener {
             showSettingsDialog()
         }

@@ -26,6 +26,7 @@
     <string name="filter_sepia">Sepia</string>
     <string name="filter_vivid">Vivid</string>
     <string name="filter_cool">Cool</string>
+    <string name="home">Home</string>
 
     <!-- Settings Titles -->
     <string name="pref_category_general">General</string>

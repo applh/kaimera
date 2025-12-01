@@ -66,6 +66,10 @@
             android:name=".FileExplorerActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
         <activity
+            android:name=".ColorLightActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".DebugLogActivity"
             android:label="Debug Logs"
             android:theme="@style/Theme.MaterialComponents.DayNight"
