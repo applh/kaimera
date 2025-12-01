@@ -138,9 +138,20 @@ class MediaViewerActivity : AppCompatActivity() {
                 isTrackingTouch = false
                 seekBar?.let {
                     if (videoView.visibility == View.VISIBLE) {
-                        videoView.seekTo(it.progress)
+                        // Only seek if video is playing or paused (duration > 0 means it's ready)
+                        if (videoView.duration > 0) {
+                            try {
+                                videoView.seekTo(it.progress)
+                            } catch (e: Exception) {
+                                Toast.makeText(this@MediaViewerActivity, "Cannot seek at this time", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     } else if (mediaPlayer != null) {
-                        mediaPlayer?.seekTo(it.progress)
+                        try {
+                            mediaPlayer?.seekTo(it.progress)
+                        } catch (e: Exception) {
+                            Toast.makeText(this@MediaViewerActivity, "Cannot seek at this time", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -187,7 +198,10 @@ class MediaViewerActivity : AppCompatActivity() {
         val uri = Uri.parse(filePath)
         videoView.setVideoURI(uri)
         
+        var isVideoPrepared = false
+        
         videoView.setOnPreparedListener { mp ->
+            isVideoPrepared = true
             mp.start()
             isPlaying = true
             updatePlayPauseButton()
@@ -195,18 +209,27 @@ class MediaViewerActivity : AppCompatActivity() {
             
             // Fix for video view not updating duration immediately
             tvTotalTime.text = formatTime(videoView.duration)
+            
+            // Enable seek bar now that video is ready
+            seekBar.isEnabled = true
         }
         
         videoView.setOnCompletionListener {
             isPlaying = false
             updatePlayPauseButton()
-            videoView.seekTo(0)
+            if (isVideoPrepared && videoView.duration > 0) {
+                videoView.seekTo(0)
+            }
         }
         
         videoView.setOnErrorListener { _, what, extra ->
-            Toast.makeText(this, "Error playing video: $what, $extra", Toast.LENGTH_SHORT).show()
-            finish()
-            true
+            val errorMsg = when (what) {
+                android.media.MediaPlayer.MEDIA_ERROR_UNKNOWN -> "Unknown error"
+                android.media.MediaPlayer.MEDIA_ERROR_SERVER_DIED -> "Media server died"
+                else -> "Error code: $what"
+            }
+            Toast.makeText(this, "Error playing video: $errorMsg", Toast.LENGTH_LONG).show()
+            false  // Return false to allow default error handling
         }
         
         btnPlayPause.setOnClickListener {
