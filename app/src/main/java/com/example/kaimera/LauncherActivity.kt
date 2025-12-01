@@ -2,8 +2,10 @@ package com.example.kaimera
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RadioGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.kaimera.managers.PreferencesManager
@@ -38,12 +40,18 @@ class LauncherActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Set up theme switcher
-        setupThemeSwitcher()
+        findViewById<LinearLayout>(R.id.settingsIcon).setOnClickListener {
+            showSettingsDialog()
+        }
     }
 
-    private fun setupThemeSwitcher() {
-        val themeRadioGroup = findViewById<RadioGroup>(R.id.themeRadioGroup)
+    private fun showSettingsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_launcher_settings, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val themeRadioGroup = dialogView.findViewById<RadioGroup>(R.id.themeRadioGroup)
         
         // Get current theme preference
         val prefs = getSharedPreferences("app_preferences", MODE_PRIVATE)
@@ -71,6 +79,12 @@ class LauncherActivity : AppCompatActivity() {
             // Apply theme
             AppCompatDelegate.setDefaultNightMode(newTheme)
         }
+
+        dialogView.findViewById<Button>(R.id.btnClose).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun startMainActivity() {
