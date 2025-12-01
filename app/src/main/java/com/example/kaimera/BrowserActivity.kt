@@ -1,5 +1,6 @@
 package com.example.kaimera
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.KeyEvent
@@ -13,6 +14,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -293,6 +295,18 @@ class BrowserActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
+        }
+
+        // Handle open downloads button
+        dialogView.findViewById<Button>(R.id.btnOpenDownloads).setOnClickListener {
+            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            val downloadFolderName = prefs.getString("download_folder", "downloads") ?: "downloads"
+            
+            val intent = Intent(this, FileExplorerActivity::class.java).apply {
+                putExtra("start_path", java.io.File(filesDir, downloadFolderName).absolutePath)
+            }
+            startActivity(intent)
+            dialog.dismiss()
         }
 
         // Handle close button

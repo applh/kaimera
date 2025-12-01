@@ -160,6 +160,13 @@
             android:layout_marginTop="16dp">
 
             <Button
+                android:id="@+id/btnOpenDownloads"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="Open Downloads" />
+
+            <Button
                 android:id="@+id/btnClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

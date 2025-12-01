@@ -1,8 +1,10 @@
 package com.example.kaimera
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -33,8 +35,17 @@ class FileExplorerActivity : AppCompatActivity() {
 
         setupRecyclerView()
         
-        // Start in app data directory
-        navigateToDirectory(rootDirectory)
+        // Check if a specific path was provided
+        val startPath = intent.getStringExtra("start_path")
+        val startDir = if (startPath != null) {
+            val dir = java.io.File(startPath)
+            if (dir.exists() && dir.isDirectory) dir else rootDirectory
+        } else {
+            rootDirectory
+        }
+        
+        // Start in specified directory or app data directory
+        navigateToDirectory(startDir)
     }
 
     private fun setupRecyclerView() {
@@ -89,12 +100,14 @@ class FileExplorerActivity : AppCompatActivity() {
     private fun showFileActionMenu(file: File, anchorView: View) {
         val popup = PopupMenu(this, anchorView)
         popup.menu.add(0, 1, 0, "Share")
-        popup.menu.add(0, 2, 0, "Delete")
+        popup.menu.add(0, 2, 0, "Rename")
+        popup.menu.add(0, 3, 0, "Delete")
         
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> shareFile(file)
-                2 -> confirmDelete(file)
+                2 -> showRenameDialog(file)
+                3 -> confirmDelete(file)
             }
             true
         }
@@ -193,6 +206,46 @@ class FileExplorerActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+    
+    private fun showRenameDialog(file: File) {
+        val input = EditText(this)
+        input.setText(file.name)
+        input.selectAll()
+        
+        AlertDialog.Builder(this)
+            .setTitle("Rename ${if (file.isDirectory) "Folder" else "File"}")
+            .setView(input)
+            .setPositiveButton("Rename") { _, _ ->
+                val newName = input.text.toString().trim()
+                if (newName.isEmpty()) {
+                    Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                
+                if (newName == file.name) {
+                    return@setPositiveButton
+                }
+                
+                val newFile = File(file.parentFile, newName)
+                if (newFile.exists()) {
+                    Toast.makeText(this, "A file with that name already exists", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                
+                try {
+                    if (file.renameTo(newFile)) {
+                        Toast.makeText(this, "Renamed successfully", Toast.LENGTH_SHORT).show()
+                        currentDirectory?.let { navigateToDirectory(it) }
+                    } else {
+                        Toast.makeText(this, "Failed to rename", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun isImageFile(file: File): Boolean {
