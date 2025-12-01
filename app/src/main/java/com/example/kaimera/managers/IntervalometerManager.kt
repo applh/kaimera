@@ -226,8 +226,9 @@ class IntervalometerManager(
 
         // Create output file
         val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
-        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
-        val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
+        val saveLocationPref = sharedPreferences.getString("camera_save_location", "app_storage")
+        val namingPattern = sharedPreferences.getString("camera_file_naming_pattern", "timestamp")
+        val customPrefix = sharedPreferences.getString("camera_custom_file_prefix", "IMG")
 
         // Get image format
         val imageFormat = preferencesManager.getImageFormat()

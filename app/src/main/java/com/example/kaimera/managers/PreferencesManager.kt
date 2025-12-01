@@ -35,11 +35,11 @@ class PreferencesManager(context: Context) {
     fun is120fpsEnabled(): Boolean = prefs.getBoolean("enable_120fps", false)
     
     // Storage Settings
-    fun getSaveLocation(): String = prefs.getString("save_location", "app_storage") ?: "app_storage"
+    fun getSaveLocation(): String = prefs.getString("camera_save_location", "app_storage") ?: "app_storage"
     
-    fun getFileNamingPattern(): String = prefs.getString("file_naming_pattern", "timestamp") ?: "timestamp"
+    fun getFileNamingPattern(): String = prefs.getString("camera_file_naming_pattern", "timestamp") ?: "timestamp"
     
-    fun getCustomFilePrefix(): String = prefs.getString("custom_file_prefix", "IMG") ?: "IMG"
+    fun getCustomFilePrefix(): String = prefs.getString("camera_custom_file_prefix", "IMG") ?: "IMG"
     
     fun getAutoDeleteDays(): Int = prefs.getString("auto_delete_days", "0")?.toIntOrNull() ?: 0
     
@@ -117,6 +117,6 @@ class PreferencesManager(context: Context) {
     }
 
     fun isLocationTaggingEnabled(): Boolean {
-        return prefs.getBoolean("save_location", false)
+        return prefs.getBoolean("camera_save_gps_location", false)
     }
 }

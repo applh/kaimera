@@ -11,6 +11,18 @@ A modern Android camera application built with Kotlin and CameraX, featuring rea
 
 ## Features
 
+### Multi-App Launcher
+
+Kaimera includes a unified launcher screen that provides access to multiple integrated apps:
+- 📷 **Camera** - Full-featured camera with photo/video capture
+- 🌐 **Browser** - Built-in web browser for quick access
+- 📁 **File Explorer** - Browse and manage device files
+- ⚙️ **Settings** - Configure all app preferences
+
+All apps share a consistent Material Design interface and can be accessed from the home screen or via the home button in each app's title bar.
+
+### Camera Features
+
 - 📷 **Real-time Camera Preview** - Full-screen camera preview using CameraX
 - 🎯 **One-Tap Capture** - Simple floating action button for photo capture
 - 👁️ **Photo Preview** - Immediate preview with Keep/Retake options and auto-save timer (0-5s)

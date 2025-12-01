@@ -126,7 +126,7 @@ class ChronometerManager(
     private fun startAudioRecording() {
         try {
             val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
-            val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+            val saveLocationPref = sharedPreferences.getString("camera_save_location", "app_storage")
             val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
             val customPrefix = sharedPreferences.getString("custom_file_prefix", "AUDIO")
 

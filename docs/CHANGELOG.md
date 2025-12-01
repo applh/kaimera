@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v28.0.0] - 2025-12-01
+
+### Fixed
+- **SharedPreferences Conflicts:** Fixed crashes caused by preference key conflicts between Camera and File Explorer apps
+  - Renamed all Camera app preferences with `camera_` prefix
+  - `save_location` → `camera_save_location`
+  - `save_gps_location` → `camera_save_gps_location`
+  - `file_naming_pattern` → `camera_file_naming_pattern`
+  - `custom_file_prefix` → `camera_custom_file_prefix`
+  - `auto_delete_enabled` → `camera_auto_delete_enabled`
+  - `keep_files_for` → `camera_keep_files_for`
+- **Photo Capture Crash:** Fixed crash when location permissions were denied
+  - Made location permissions optional instead of required
+  - Added defensive checks before attempting location retrieval
+  - Shows informative message when GPS tagging is enabled but permissions denied
+- **Settings Naming:** Standardized settings titles for consistency
+  - Renamed "Overlays & Level Indicator" to "Overlay Settings"
+  - Extracted hardcoded strings to `strings.xml`
+
+### Changed
+- **Breaking Change:** Users will need to reconfigure Camera settings after this update due to preference key changes
+
 ## [v27.0.0] - 2025-11-30
 
 ### Added

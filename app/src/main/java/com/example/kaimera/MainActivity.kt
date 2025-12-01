@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
         if (autoDeleteEnabled) {
             val keepFilesFor = sharedPreferences.getString("keep_files_for", "30")?.toIntOrNull() ?: 30
             if (keepFilesFor > 0) {
-                val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+                val saveLocationPref = sharedPreferences.getString("camera_save_location", "app_storage")
                 val directory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
                 
                 cameraExecutor.execute {
@@ -366,6 +366,14 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
             startActivity(intent)
         }
 
+        // Handle home button
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.homeButton).setOnClickListener {
+            val intent = android.content.Intent(this, LauncherActivity::class.java)
+            intent.flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
+        }
+
         // Set up settings button click listener
         val settingsButton = findViewById<FloatingActionButton>(R.id.settingsButton)
         settingsButton.setOnClickListener {
@@ -547,8 +555,25 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
 
         // Check if location tagging is enabled
         if (preferencesManager.isLocationTaggingEnabled()) {
-            locationManager.getCurrentLocation { location ->
-                performCapture(imageCapture, location)
+            // Check if we actually have location permissions
+            if (locationManager.hasLocationPermission()) {
+                locationManager.getCurrentLocation { location ->
+                    performCapture(imageCapture, location)
+                }
+            } else {
+                // Location setting is enabled but permissions are denied
+                // Inform user once and proceed without location
+                val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+                val hasShownLocationWarning = sharedPreferences.getBoolean("location_permission_warning_shown", false)
+                if (!hasShownLocationWarning) {
+                    Toast.makeText(
+                        this,
+                        "Location permission required for GPS tagging. Photo will be saved without location.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    sharedPreferences.edit().putBoolean("location_permission_warning_shown", true).apply()
+                }
+                performCapture(imageCapture, null)
             }
         } else {
             performCapture(imageCapture, null)
@@ -562,9 +587,9 @@ class MainActivity : AppCompatActivity(), IntervalometerManager.Callback, BurstM
 
         // Create output file
         val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
-        val namingPattern = sharedPreferences.getString("file_naming_pattern", "timestamp")
-        val customPrefix = sharedPreferences.getString("custom_file_prefix", "IMG")
+        val saveLocationPref = sharedPreferences.getString("camera_save_location", "app_storage")
+        val namingPattern = sharedPreferences.getString("camera_file_naming_pattern", "timestamp")
+        val customPrefix = sharedPreferences.getString("camera_custom_file_prefix", "IMG")
         
         val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
         val fileName = if (namingPattern == "sequential") {

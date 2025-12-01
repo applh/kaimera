@@ -13,9 +13,9 @@ class StorageSettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun setupStoragePreferences() {
-        val saveLocationPref = findPreference<androidx.preference.ListPreference>("save_location")
+        val saveLocationPref = findPreference<androidx.preference.ListPreference>("camera_save_location")
         val storageUsagePref = findPreference<androidx.preference.Preference>("storage_usage")
-        val autoDeletePref = findPreference<androidx.preference.SwitchPreferenceCompat>("auto_delete_enabled")
+        val autoDeletePref = findPreference<androidx.preference.SwitchPreferenceCompat>("camera_auto_delete_enabled")
         
         // Initial state check
         val isDcim = saveLocationPref?.value == "dcim"

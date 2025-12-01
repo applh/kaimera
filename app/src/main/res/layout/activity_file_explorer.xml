@@ -11,6 +11,18 @@
         android:background="?attr/colorPrimary"
         android:elevation="4dp">
 
+        <ImageButton
+            android:id="@+id/btnHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_home"
+            android:tint="@android:color/white"
+            android:padding="8dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Home" />
+
         <TextView
             android:id="@+id/tvCurrentPath"
             android:layout_width="match_parent"
@@ -19,7 +31,8 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:maxLines="1"
-            android:ellipsize="start" />
+            android:ellipsize="start"
+            android:layout_marginEnd="48dp" />
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView

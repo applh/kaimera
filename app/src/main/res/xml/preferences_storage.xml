@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
-        app:key="file_naming_pattern"
+        app:key="camera_file_naming_pattern"
         app:title="File Naming Pattern"
         app:summary="%s"
         app:entries="@array/file_naming_entries"
@@ -11,14 +11,14 @@
         app:defaultValue="timestamp" />
 
     <EditTextPreference
-        app:key="custom_file_prefix"
+        app:key="camera_custom_file_prefix"
         app:title="Custom File Prefix"
         app:summary="Prefix for filenames (default: IMG/VID/AUDIO)"
         app:defaultValue="IMG"
-        app:dependency="file_naming_pattern" />
+        app:dependency="camera_file_naming_pattern" />
 
     <ListPreference
-        app:key="save_location"
+        app:key="camera_save_location"
         app:title="Save Location"
         app:summary="%s"
         app:entries="@array/save_location_entries"
@@ -31,18 +31,18 @@
         app:summary="Calculating..." />
 
     <SwitchPreferenceCompat
-        app:key="auto_delete_enabled"
+        app:key="camera_auto_delete_enabled"
         app:title="Auto-Delete Old Files"
         app:summary="Automatically delete files after a specified period"
         app:defaultValue="false" />
 
     <ListPreference
-        app:key="keep_files_for"
+        app:key="camera_keep_files_for"
         app:title="Keep Files For"
         app:summary="%s"
         app:entries="@array/keep_files_entries"
         app:entryValues="@array/keep_files_values"
         app:defaultValue="30"
-        app:dependency="auto_delete_enabled" />
+        app:dependency="camera_auto_delete_enabled" />
 
 </PreferenceScreen>

@@ -27,6 +27,16 @@
     <string name="filter_vivid">Vivid</string>
     <string name="filter_cool">Cool</string>
 
+    <!-- Settings Titles -->
+    <string name="pref_category_general">General</string>
+    <string name="pref_category_camera">Camera</string>
+    <string name="pref_category_storage">Storage</string>
+    <string name="pref_category_about">About</string>
+    <string name="pref_photo_settings">Photo Settings</string>
+    <string name="pref_video_settings">Video Settings</string>
+    <string name="pref_overlay_settings">Overlay Settings</string>
+    <string name="pref_storage_settings">Storage Settings</string>
+
     <string-array name="flash_mode_entries">
         <item>Auto</item>
         <item>On</item>

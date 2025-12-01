@@ -89,7 +89,7 @@ class GalleryActivity : AppCompatActivity() {
                 // Load files in background
                 val galleryData = withContext(Dispatchers.IO) {
                     val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this@GalleryActivity)
-                    val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+                    val saveLocationPref = sharedPreferences.getString("camera_save_location", "app_storage")
                     val directory = StorageManager.getStorageLocation(this@GalleryActivity, saveLocationPref ?: "app_storage")
                     
                     val files = directory.listFiles { file ->

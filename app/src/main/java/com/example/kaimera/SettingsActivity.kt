@@ -151,7 +151,7 @@ class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFrag
     private fun startAudioRecording() {
         try {
             val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-            val saveLocationPref = sharedPreferences.getString("save_location", "app_storage")
+            val saveLocationPref = sharedPreferences.getString("camera_save_location", "app_storage")
             val outputDirectory = StorageManager.getStorageLocation(this, saveLocationPref ?: "app_storage")
             val fileName = StorageManager.generateFileName("timestamp", "AUDIO", "m4a")
             val audioFile = File(outputDirectory, fileName)
