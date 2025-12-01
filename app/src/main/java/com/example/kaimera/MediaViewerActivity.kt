@@ -224,11 +224,25 @@ class MediaViewerActivity : AppCompatActivity() {
         
         videoView.setOnErrorListener { _, what, extra ->
             val errorMsg = when (what) {
-                android.media.MediaPlayer.MEDIA_ERROR_UNKNOWN -> "Unknown error"
-                android.media.MediaPlayer.MEDIA_ERROR_SERVER_DIED -> "Media server died"
-                else -> "Error code: $what"
+                android.media.MediaPlayer.MEDIA_ERROR_UNKNOWN -> "Unknown error (code: $what)"
+                android.media.MediaPlayer.MEDIA_ERROR_SERVER_DIED -> "Media server died (code: $what)"
+                else -> "Media error (code: $what)"
             }
-            Toast.makeText(this, "Error playing video: $errorMsg", Toast.LENGTH_LONG).show()
+            
+            val extraMsg = when (extra) {
+                android.media.MediaPlayer.MEDIA_ERROR_IO -> "I/O error - file may be corrupted or format unsupported"
+                android.media.MediaPlayer.MEDIA_ERROR_MALFORMED -> "Malformed media - video codec/format not supported"
+                android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED -> "Unsupported media format"
+                android.media.MediaPlayer.MEDIA_ERROR_TIMED_OUT -> "Operation timed out"
+                else -> "Extra info: $extra"
+            }
+            
+            Toast.makeText(
+                this, 
+                "$errorMsg\n$extraMsg\n\nTry renaming the file or re-downloading.", 
+                Toast.LENGTH_LONG
+            ).show()
+            
             false  // Return false to allow default error handling
         }
         
