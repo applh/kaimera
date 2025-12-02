@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v32.0.0] - 2025-12-02
+
+### Added
+- **Note App:**
+  - Google Keep-like note-taking application
+  - Create, edit, and delete notes
+  - Color-code notes for organization
+  - Pin important notes to the top
+  - Archive completed notes
+  - Search functionality
+  - Local persistence using Room Database
+- **Launcher Integration:**
+  - Added "Notes" app to the launcher grid
+  - **Quick Access Panel:** New bottom sheet panel in the launcher for quick note creation and viewing recent notes
+  - Added "Quick Notes" Floating Action Button (FAB) to the launcher
+
 ## [v31.0.0] - 2025-12-02
 
 ### Added

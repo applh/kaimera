@@ -69,6 +69,13 @@ data class LauncherApp(
                     iconRes = R.drawable.ic_settings,
                     activityClass = SettingsActivity::class.java,
                     order = 6
+                ),
+                LauncherApp(
+                    id = "notes",
+                    name = "Notes",
+                    iconRes = android.R.drawable.ic_menu_edit, // Placeholder icon
+                    activityClass = com.example.kaimera.notes.ui.NoteActivity::class.java,
+                    order = 7
                 )
             )
         }

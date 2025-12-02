@@ -16,6 +16,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.example.kaimera.managers.LauncherPreferencesManager
 import com.example.kaimera.managers.PreferencesManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -59,6 +61,11 @@ class LauncherActivity : AppCompatActivity() {
         // Settings FAB click listener
         settingsFab.setOnClickListener {
             showSettingsDialog()
+        }
+
+        // Quick Notes FAB click listener
+        findViewById<FloatingActionButton>(R.id.quickNotesFab).setOnClickListener {
+            showQuickAccessPanel()
         }
     }
 
@@ -146,5 +153,46 @@ class LauncherActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun showQuickAccessPanel() {
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_quick_access_panel, null)
+        dialog.setContentView(view)
+
+        val notesContainer = view.findViewById<LinearLayout>(R.id.notesContainer)
+        val createNoteButton = view.findViewById<View>(R.id.createNoteButton)
+
+        // Load recent notes asynchronously
+        val database = com.example.kaimera.notes.data.NoteDatabase.getDatabase(this)
+        val repository = com.example.kaimera.notes.data.NoteRepository(database.noteDao())
+        
+        // Use a simple coroutine to fetch data (in a real app, use ViewModel/LifecycleScope)
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+            repository.allNotes.collect { notes ->
+                notesContainer.removeAllViews()
+                notes.take(3).forEach { note ->
+                    val noteView = layoutInflater.inflate(R.layout.item_quick_note, notesContainer, false)
+                    noteView.findViewById<TextView>(R.id.noteTitle).text = note.title
+                    noteView.findViewById<TextView>(R.id.noteContent).text = note.content
+                    noteView.setOnClickListener {
+                        dialog.dismiss()
+                        val intent = Intent(this@LauncherActivity, com.example.kaimera.notes.ui.NoteActivity::class.java)
+                        // Pass note ID to open specific note (requires modification to NoteActivity to handle intent extras)
+                         intent.putExtra("noteId", note.id) // Assuming NoteActivity handles this
+                        startActivity(intent)
+                    }
+                    notesContainer.addView(noteView)
+                }
+            }
+        }
+
+        createNoteButton.setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(this, com.example.kaimera.notes.ui.NoteActivity::class.java)
+            startActivity(intent)
+        }
+
+        dialog.show()
     }
 }

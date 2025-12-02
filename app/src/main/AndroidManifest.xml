@@ -93,6 +93,11 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".LauncherActivity" />
 
+        <activity
+            android:name=".notes.ui.NoteActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
