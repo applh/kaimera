@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v29.2.0] - 2025-12-02
+
+### Changed
+- **Improved Chronometer UI:** Updated to use larger, more user-friendly interface from Settings panel.
+  - Display size increased from 12sp to 48sp for better readability.
+  - Buttons now show full labels ("▶️ Start", "🎤 Record") instead of just emojis.
+  - Camera app chronometer panel now centered with proper margins.
+
 ## [v29.1.0] - 2025-12-02
 
 ### Changed
