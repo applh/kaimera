@@ -48,6 +48,7 @@ kaimera/
 │   │   │   ├── GalleryAdapter.kt        # Gallery RecyclerView adapter
 │   │   │   ├── PreviewActivity.kt       # Photo preview after capture
 │   │   │   ├── SettingsActivity.kt      # Settings screen host
+│   │   │   ├── ChronometerActivity.kt   # Chronometer app activity
 │   │   │   ├── SettingsFragment.kt      # Settings preferences
 │   │   │   ├── StorageSettingsFragment.kt # Storage preferences
 │   │   │   ├── FilterAdapter.kt         # Filter selection adapter

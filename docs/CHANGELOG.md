@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v29.0.0] - 2025-12-02
+
+### Added
+- **Chronometer App:** Added a standalone Chronometer app to the Launcher.
+  - Reuses existing chronometer logic and UI styles.
+  - Accessible via a new "Timer" icon in the Launcher.
+  - Includes Start, Stop, Reset, and Start with Audio functionality.
+
 ## [v28.0.0] - 2025-12-01
 
 ### Fixed

@@ -48,6 +48,11 @@ class LauncherActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.settingsIcon).setOnClickListener {
             showSettingsDialog()
         }
+
+        findViewById<LinearLayout>(R.id.chronometerIcon).setOnClickListener {
+            val intent = Intent(this, ChronometerActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun showSettingsDialog() {

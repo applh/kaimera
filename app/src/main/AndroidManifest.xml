@@ -74,6 +74,10 @@
             android:label="Debug Logs"
             android:theme="@style/Theme.MaterialComponents.DayNight"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ChronometerActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

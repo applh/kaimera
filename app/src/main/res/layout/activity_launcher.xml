@@ -162,6 +162,37 @@
                     android:layout_marginTop="4dp" />
             </LinearLayout>
 
+            <!-- Chronometer Icon -->
+            <LinearLayout
+                android:id="@+id/chronometerIcon"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_recent_history"
+                    android:contentDescription="Chronometer"
+                    android:background="@drawable/round_icon_background"
+                    android:padding="12dp"
+                    android:tint="?attr/colorOnPrimary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Timer"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
             <!-- Settings Icon -->
             <LinearLayout
                 android:id="@+id/settingsIcon"
