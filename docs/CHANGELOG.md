@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v30.1.0] - 2025-12-02
+
+### Added
+- **MMS App Documentation:** Added `MMS_RESTRICTIONS.md` documenting Android SMS/MMS access restrictions
+  - Explains restricted settings on Android 13+
+  - Provides troubleshooting steps
+  - Documents security considerations and carrier limitations
+
 ## [v30.0.0] - 2025-12-02
 
 ### Added
