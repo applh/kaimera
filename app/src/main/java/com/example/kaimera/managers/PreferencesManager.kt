@@ -119,4 +119,12 @@ class PreferencesManager(context: Context) {
     fun isLocationTaggingEnabled(): Boolean {
         return prefs.getBoolean("camera_save_gps_location", false)
     }
+
+    fun getThemeMode(): Int {
+        return prefs.getInt("theme_mode", androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    }
+
+    fun setThemeMode(mode: Int) {
+        prefs.edit().putInt("theme_mode", mode).apply()
+    }
 }

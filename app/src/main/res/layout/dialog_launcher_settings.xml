@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -56,9 +57,19 @@
             android:checked="true" />
     </RadioGroup>
 
+    <!-- Customize Launcher Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/customizeLauncherButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Customize Launcher"
+        app:icon="@android:drawable/ic_menu_edit"
+        android:layout_marginBottom="16dp" />
+
     <!-- Close Button -->
     <Button
-        android:id="@+id/btnClose"
+        android:id="@+id/closeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Close"

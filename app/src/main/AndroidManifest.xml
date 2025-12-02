@@ -87,6 +87,11 @@
             android:name=".MmsActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".LauncherSettingsActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".LauncherActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

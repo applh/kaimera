@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v31.0.0] - 2025-12-02
+
+### Added
+- **Launcher Customization:**
+  - New settings screen to manage launcher apps
+  - Drag-and-drop reordering of apps
+  - Toggle visibility for individual apps
+  - Preferences persisted across restarts
+  - Dynamic launcher grid that updates based on settings
+
 ## [v30.1.0] - 2025-12-02
 
 ### Added

@@ -29,233 +29,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Dynamic GridLayout for apps -->
         <GridLayout
+            android:id="@+id/appsGrid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="3"
-            android:rowCount="2"
             android:alignmentMode="alignMargins"
             android:useDefaultMargins="true"
-            android:padding="24dp">
+            android:padding="24dp" />
 
-            <!-- Camera Icon -->
-            <LinearLayout
-                android:id="@+id/cameraIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_camera"
-                    android:contentDescription="Camera"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Camera"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- Browser Icon -->
-            <LinearLayout
-                android:id="@+id/browserIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_search"
-                    android:contentDescription="Browser"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Browser"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- File Explorer Icon -->
-            <LinearLayout
-                android:id="@+id/fileExplorerIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_folder"
-                    android:contentDescription="File Explorer"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Files"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- Color Light Icon -->
-            <LinearLayout
-                android:id="@+id/colorLightIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_color_light"
-                    android:contentDescription="Color Light"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Light"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- Chronometer Icon -->
-            <LinearLayout
-                android:id="@+id/chronometerIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@android:drawable/ic_menu_recent_history"
-                    android:contentDescription="Chronometer"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Timer"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- MMS Icon -->
-            <LinearLayout
-                android:id="@+id/mmsIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@android:drawable/ic_menu_send"
-                    android:contentDescription="MMS"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MMS"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- Settings Icon -->
-            <LinearLayout
-                android:id="@+id/settingsIcon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_settings"
-                    android:contentDescription="Settings"
-                    android:background="@drawable/round_icon_background"
-                    android:padding="12dp"
-                    android:tint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Settings"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-        </GridLayout>
     </ScrollView>
+
+    <!-- Settings FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/settingsFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:contentDescription="Settings"
+        app:srcCompat="@drawable/ic_settings"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
