@@ -49,6 +49,7 @@ kaimera/
 │   │   │   ├── PreviewActivity.kt       # Photo preview after capture
 │   │   │   ├── SettingsActivity.kt      # Settings screen host
 │   │   │   ├── ChronometerActivity.kt   # Chronometer app activity
+│   │   │   ├── MmsActivity.kt           # MMS messaging app activity
 │   │   │   ├── SettingsFragment.kt      # Settings preferences
 │   │   │   ├── StorageSettingsFragment.kt # Storage preferences
 │   │   │   ├── FilterAdapter.kt         # Filter selection adapter

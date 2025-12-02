@@ -53,6 +53,11 @@ class LauncherActivity : AppCompatActivity() {
             val intent = Intent(this, ChronometerActivity::class.java)
             startActivity(intent)
         }
+
+        findViewById<LinearLayout>(R.id.mmsIcon).setOnClickListener {
+            val intent = Intent(this, MmsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun showSettingsDialog() {

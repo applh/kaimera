@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v30.0.0] - 2025-12-02
+
+### Added
+- **MMS Messaging App:** New app for sending MMS messages with media attachments.
+  - Phone number input with validation
+  - Optional message body
+  - File picker for images, videos, and audio
+  - File type and size validation (warns if >1MB)
+  - Runtime permission handling (SMS, storage)
+  - Material Design UI with file preview
+  - Send button with validation
+  - Progress indicator and status feedback
+
 ## [v29.2.0] - 2025-12-02
 
 ### Changed
