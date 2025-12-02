@@ -28,7 +28,7 @@ class ChronometerActivity : AppCompatActivity(), ChronometerManager.Callback {
         // Initialize Chronometer Manager
         chronometerManager = ChronometerManager(this, handler)
 
-        // Initialize Views
+        // Initialize Views (IDs are now from the included layout)
         chronometerDisplay = findViewById(R.id.chronometerDisplay)
         chronoStartButton = findViewById(R.id.chronoStartButton)
         chronoStartWithAudioButton = findViewById(R.id.chronoStartWithAudioButton)

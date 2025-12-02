@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chronometerPanel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#CC000000"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/chronometerDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="3dp"
+        android:text="00:00"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/chronoStartButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="▶️"
+        android:textSize="10sp"
+        android:textColor="@android:color/white" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/chronoStartWithAudioButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="🎤"
+        android:textSize="10sp"
+        android:textColor="@android:color/white" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/chronoStopButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="⏹️"
+        android:textSize="10sp"
+        android:visibility="gone"
+        android:textColor="@android:color/white" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/chronoResetButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="🔄"
+        android:textSize="10sp"
+        android:textColor="@android:color/white" />
+</LinearLayout>

@@ -63,6 +63,7 @@ kaimera/
 │   │   │   │   ├── activity_gallery.xml # Gallery layout
 │   │   │   │   ├── activity_preview.xml # Preview layout
 │   │   │   │   ├── activity_settings.xml # Settings layout
+│   │   │   │   ├── view_chronometer_panel.xml # Shared chronometer panel
 │   │   │   │   ├── item_gallery_image.xml # Gallery item
 │   │   │   │   └── item_filter.xml      # Filter item
 │   │   │   ├── xml/

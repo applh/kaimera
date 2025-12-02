@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v29.1.0] - 2025-12-02
+
+### Changed
+- **UI Refactor:** Extracted chronometer UI into a shared layout `view_chronometer_panel.xml`.
+  - Ensures consistent look and feel between Camera app and Chronometer app.
+  - Improves code maintainability.
+
 ## [v29.0.0] - 2025-12-02
 
 ### Added

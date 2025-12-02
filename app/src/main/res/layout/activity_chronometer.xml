@@ -21,77 +21,15 @@
         app:tint="@android:color/white"
         app:backgroundTint="?attr/colorPrimary" />
 
-    <!-- Chronometer Display -->
-    <TextView
-        android:id="@+id/chronometerDisplay"
+    <!-- Shared Chronometer Panel -->
+    <include
+        android:id="@+id/chronometerPanel"
+        layout="@layout/view_chronometer_panel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00:00"
-        android:textColor="@android:color/white"
-        android:textSize="64sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/controlsPanel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <!-- Controls Panel -->
-    <LinearLayout
-        android:id="@+id/controlsPanel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:orientation="horizontal"
-        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chronometerDisplay">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/chronoStartButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Start"
-            android:textColor="@android:color/white"
-            app:strokeColor="@android:color/white" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/chronoStartWithAudioButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Start + Audio"
-            android:textColor="@android:color/white"
-            app:strokeColor="@android:color/white"
-            app:icon="@android:drawable/ic_btn_speak_now"
-            app:iconTint="@android:color/white" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/chronoStopButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Stop"
-            android:visibility="gone"
-            android:textColor="@android:color/holo_red_light"
-            app:strokeColor="@android:color/holo_red_light" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/chronoResetButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Reset"
-            android:textColor="@android:color/white"
-            app:strokeColor="@android:color/white" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
