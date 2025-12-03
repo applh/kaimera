@@ -1,4 +1,13 @@
 package com.example.kaimera
+import com.example.kaimera.mms.ui.MmsActivity
+import com.example.kaimera.chronometer.ui.ChronometerActivity
+import com.example.kaimera.colorlight.ui.ColorLightActivity
+import com.example.kaimera.browser.ui.BrowserActivity
+import com.example.kaimera.files.ui.FileExplorerActivity
+import com.example.kaimera.camera.ui.MainActivity
+import com.example.kaimera.camera.ui.SettingsActivity
+import com.example.kaimera.gallery.ui.GalleryActivity
+import com.example.kaimera.notes.ui.NoteActivity
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

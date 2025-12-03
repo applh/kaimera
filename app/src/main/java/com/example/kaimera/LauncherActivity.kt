@@ -8,13 +8,14 @@ import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioGroup
+import com.example.kaimera.camera.ui.MainActivity
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.kaimera.managers.LauncherPreferencesManager
-import com.example.kaimera.managers.PreferencesManager
+import com.example.kaimera.core.managers.PreferencesManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect

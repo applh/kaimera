@@ -1,4 +1,5 @@
 package com.example.kaimera.managers
+import com.example.kaimera.core.managers.PreferencesManager
 
 import android.content.Context
 import android.content.SharedPreferences
