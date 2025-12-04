@@ -63,10 +63,6 @@ The release APK is automatically signed with:
 
 The project includes scripts to generate launcher icons:
 
-**Using ImageMagick (recommended):**
-```bash
-./generate_icons.sh
-```
 
 **Using Python/Pillow:**
 ```bash

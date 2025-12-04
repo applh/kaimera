@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v32.1.0] - 2025-12-04
+
+### Fixed
+- **Sphereqix HUD:** Replaced text-based HUD with shape-based rendering to fix visibility issues on Android.
+  - Implemented `ShapeRenderer` for lives, treasures, and progress bars.
+  - Fixed crash related to font loading.
+
+### Removed
+- **Shell Scripts:** Removed obsolete migration scripts (`add_imports_phase4.sh`, `fix_imports.sh`, etc.) to clean up the repository.
+- **Documentation:** Removed reference to deleted `generate_icons.sh` in `BUILDING.md`.
+
 ## [v32.0.0] - 2025-12-02
 
 ### Added

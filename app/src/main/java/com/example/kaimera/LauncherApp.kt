@@ -8,6 +8,8 @@ import com.example.kaimera.camera.ui.MainActivity
 import com.example.kaimera.camera.ui.SettingsActivity
 import com.example.kaimera.gallery.ui.GalleryActivity
 import com.example.kaimera.notes.ui.NoteActivity
+import com.example.kaimera.sphereqix.SphereQixActivity
+import com.example.kaimera.R
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -85,6 +87,13 @@ data class LauncherApp(
                     iconRes = android.R.drawable.ic_menu_edit, // Placeholder icon
                     activityClass = com.example.kaimera.notes.ui.NoteActivity::class.java,
                     order = 7
+                ),
+                LauncherApp(
+                    id = "sphereqix",
+                    name = "SphereQix",
+                    iconRes = R.mipmap.ic_launcher, // Placeholder icon, assuming this is desired from the snippet
+                    activityClass = SphereQixActivity::class.java,
+                    order = 8
                 )
             )
         }

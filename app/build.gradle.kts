@@ -98,7 +98,56 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.6")
     
     // OkHttp for downloads
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    
+    // LibGDX
+    val gdxVersion = "1.12.1"
+    implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation("com.badlogicgames.gdx:gdx-backend-android:$gdxVersion")
+    implementation("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
+    
+    val natives by configurations.creating
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86")
+    natives("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64")
+    natives("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a")
+    natives("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-arm64-v8a")
+    natives("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86")
+    natives("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64")
+    
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Task to copy native libs
+    val copyAndroidNatives = tasks.register("copyAndroidNatives") {
+        doFirst {
+            val jniLibsDir = file("src/main/jniLibs")
+            jniLibsDir.mkdirs()
+            
+            configurations["natives"].files.forEach { jar ->
+                var outputDir: java.io.File? = null
+                if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("src/main/jniLibs/armeabi-v7a")
+                if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("src/main/jniLibs/arm64-v8a")
+                if (jar.name.endsWith("natives-x86.jar")) outputDir = file("src/main/jniLibs/x86")
+                if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("src/main/jniLibs/x86_64")
+                
+                if (outputDir != null) {
+                    outputDir.mkdirs()
+                    copy {
+                        from(zipTree(jar))
+                        into(outputDir)
+                        include("*.so")
+                    }
+                }
+            }
+        }
+    }
+    
+    tasks.whenTaskAdded {
+        if (name.contains("package")) {
+            dependsOn(copyAndroidNatives)
+        }
+    }
 
     // Jetpack Compose
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
