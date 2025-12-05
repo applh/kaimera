@@ -57,10 +57,19 @@ class SphereQixActivity : AndroidApplication() {
 
         val etHudText = dialogView.findViewById<EditText>(R.id.et_hud_text)
         val btnApply = dialogView.findViewById<Button>(R.id.btn_apply)
+        val btnHome = dialogView.findViewById<android.widget.ImageButton>(R.id.btn_home)
         val colorContainer = dialogView.findViewById<LinearLayout>(R.id.color_container)
         val sbHue = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_hue)
         val sbSaturation = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_saturation)
         val sbValue = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_value)
+        val sbLat = dialogView.findViewById<android.widget.SeekBar>(R.id.seekBarLat)
+        val sbLong = dialogView.findViewById<android.widget.SeekBar>(R.id.seekBarLong)
+        
+        val tvHue = dialogView.findViewById<android.widget.TextView>(R.id.tv_hue_label)
+        val tvSat = dialogView.findViewById<android.widget.TextView>(R.id.tv_sat_label)
+        val tvVal = dialogView.findViewById<android.widget.TextView>(R.id.tv_val_label)
+        val tvLat = dialogView.findViewById<android.widget.TextView>(R.id.tv_lat_label)
+        val tvLong = dialogView.findViewById<android.widget.TextView>(R.id.tv_long_label)
 
         // Pre-fill text
         etHudText.setText(screen.getHudText())
@@ -72,13 +81,39 @@ class SphereQixActivity : AndroidApplication() {
         val seekBarListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    hsv[0] = sbHue.progress.toFloat()
-                    hsv[1] = sbSaturation.progress / 100f
-                    hsv[2] = sbValue.progress / 100f
-                    val color = Color.HSVToColor(hsv)
-                    screen.updateHudColor(color)
+                    when (seekBar?.id) {
+                        R.id.sb_hue -> {
+                           hsv[0] = progress.toFloat()
+                           tvHue.text = "Hue: $progress"
+                           updateColor()
+                        }
+                        R.id.sb_saturation -> {
+                           hsv[1] = progress / 100f
+                           tvSat.text = "Saturation: $progress%"
+                           updateColor()
+                        }
+                        R.id.sb_value -> {
+                           hsv[2] = progress / 100f
+                           tvVal.text = "Value: $progress%"
+                           updateColor()
+                        }
+                        R.id.seekBarLat -> {
+                            tvLat.text = "Latitude Density: $progress"
+                            screen.updateGrid(sbLat.progress, sbLong.progress)
+                        }
+                        R.id.seekBarLong -> {
+                            tvLong.text = "Longitude Density: $progress"
+                            screen.updateGrid(sbLat.progress, sbLong.progress)
+                        }
+                    }
                 }
             }
+            
+            fun updateColor() {
+                val color = Color.HSVToColor(hsv)
+                screen.updateHudColor(color)
+            }
+            
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         }
@@ -86,16 +121,31 @@ class SphereQixActivity : AndroidApplication() {
         sbHue.setOnSeekBarChangeListener(seekBarListener)
         sbSaturation.setOnSeekBarChangeListener(seekBarListener)
         sbValue.setOnSeekBarChangeListener(seekBarListener)
+        sbLat.setOnSeekBarChangeListener(seekBarListener)
+        sbLong.setOnSeekBarChangeListener(seekBarListener)
         
         // Set initial progress
         sbHue.progress = 0
         sbSaturation.progress = 0
         sbValue.progress = 100
+        
+        // Get current grid density
+        sbLat.progress = screen.getLatSegments()
+        sbLong.progress = screen.getLongSegments()
+        
+        // Initialize labels
+        tvLat.text = "Latitude Density: ${screen.getLatSegments()}"
+        tvLong.text = "Longitude Density: ${screen.getLongSegments()}"
 
         btnApply.setOnClickListener {
             val newHudText = etHudText.text.toString()
             screen.updateHudText(newHudText)
             dialog.dismiss()
+        }
+        
+        btnHome.setOnClickListener {
+            dialog.dismiss()
+            finish()
         }
 
         // Add colors
@@ -117,6 +167,11 @@ class SphereQixActivity : AndroidApplication() {
                 sbHue.progress = hsv[0].toInt()
                 sbSaturation.progress = (hsv[1] * 100).toInt()
                 sbValue.progress = (hsv[2] * 100).toInt()
+                
+                // Update labels
+                tvHue.text = "Hue: ${sbHue.progress}"
+                tvSat.text = "Saturation: ${sbSaturation.progress}%"
+                tvVal.text = "Value: ${sbValue.progress}%"
             }
             colorContainer.addView(colorView)
         }
