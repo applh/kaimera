@@ -20,48 +20,8 @@ class LevelManager(private val enemyManager: EnemyManager, private val sphereMes
     private var totalTreasures = 0
     private var collectedTreasures = 0
     
+    private val shapeRenderer = com.badlogic.gdx.graphics.glutils.ShapeRenderer()
     
-    private val batch = com.badlogic.gdx.graphics.g2d.SpriteBatch()
-    
-    // Create a properly configured font using FreeType for Android
-    private val font: com.badlogic.gdx.graphics.g2d.BitmapFont by lazy {
-        try {
-            val generator = com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator(
-                com.badlogic.gdx.Gdx.files.internal("fonts/Roboto-Regular.ttf")
-            )
-            val parameter = com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter()
-            parameter.size = 48
-            parameter.color = com.badlogic.gdx.graphics.Color.WHITE
-            parameter.borderWidth = 2f
-            parameter.borderColor = com.badlogic.gdx.graphics.Color.BLACK
-            parameter.shadowOffsetX = 2
-            parameter.shadowOffsetY = 2
-            parameter.shadowColor = com.badlogic.gdx.graphics.Color(0f, 0f, 0f, 0.5f)
-            val generatedFont = generator.generateFont(parameter)
-            generator.dispose()
-            com.badlogic.gdx.Gdx.app.log("LevelManager", "FreeType font loaded successfully")
-            generatedFont
-        } catch (e: Exception) {
-            com.badlogic.gdx.Gdx.app.error("LevelManager", "Failed to load FreeType font, using default", e)
-            // Fallback to default font with large scale
-            com.badlogic.gdx.graphics.g2d.BitmapFont().apply {
-                data.setScale(3f)
-            }
-        }
-    }
-
-    
-    // Create a white 1x1 texture for drawing backgrounds
-    private val whiteTexture: com.badlogic.gdx.graphics.Texture by lazy {
-        val pixmap = com.badlogic.gdx.graphics.Pixmap(1, 1, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888)
-        pixmap.setColor(com.badlogic.gdx.graphics.Color.WHITE)
-        pixmap.fill()
-        val texture = com.badlogic.gdx.graphics.Texture(pixmap)
-        pixmap.dispose()
-        texture
-    }
-
-
     fun startLevel(level: Int) {
         currentLevel = level
         isLevelComplete = false
@@ -151,7 +111,6 @@ class LevelManager(private val enemyManager: EnemyManager, private val sphereMes
     fun renderTreasures(camera: com.badlogic.gdx.graphics.Camera) {
         if (currentLevel != 0) return
         
-        val shapeRenderer = com.badlogic.gdx.graphics.glutils.ShapeRenderer()
         shapeRenderer.projectionMatrix = camera.combined
         shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled)
         
@@ -165,7 +124,6 @@ class LevelManager(private val enemyManager: EnemyManager, private val sphereMes
         }
         
         shapeRenderer.end()
-        shapeRenderer.dispose()
     }
     
     fun update() {
@@ -189,99 +147,7 @@ class LevelManager(private val enemyManager: EnemyManager, private val sphereMes
         }
     }
 
-    fun renderHUD(screenWidth: Int, screenHeight: Int) {
-        // Since text rendering isn't working, use shapes to show game state
-        val shapeRenderer = com.badlogic.gdx.graphics.glutils.ShapeRenderer()
-        shapeRenderer.projectionMatrix.setToOrtho2D(0f, 0f, screenWidth.toFloat(), screenHeight.toFloat())
-        shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled)
-        
-        // Draw background panel at top
-        shapeRenderer.color = com.badlogic.gdx.graphics.Color(0.2f, 0.2f, 0.3f, 0.9f)
-        shapeRenderer.rect(10f, screenHeight - 120f, screenWidth - 20f, 110f)
-        
-        val leftMargin = 30f
-        val topY = screenHeight - 30f
-        
-        if (currentLevel == 0) {
-            // Training level - show treasure progress as colored squares
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.GOLD
-            for (i in 0 until totalTreasures) {
-                val x = leftMargin + i * 60f
-                if (i < collectedTreasures) {
-                    // Collected - filled gold square
-                    shapeRenderer.color = com.badlogic.gdx.graphics.Color.GOLD
-                    shapeRenderer.rect(x, topY - 50f, 50f, 50f)
-                } else {
-                    // Not collected - gray outline
-                    shapeRenderer.color = com.badlogic.gdx.graphics.Color.DARK_GRAY
-                    shapeRenderer.rect(x, topY - 50f, 50f, 50f)
-                }
-            }
-        } else {
-            // Regular level - show lives as hearts and capture percentage as progress bar
-            
-            // Lives (hearts) - red filled circles
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.RED
-            for (i in 0 until lives) {
-                val x = leftMargin + i * 50f
-                shapeRenderer.circle(x + 20f, topY - 25f, 20f)
-            }
-            
-            // Empty hearts for lost lives
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.DARK_GRAY
-            for (i in lives until 3) {
-                val x = leftMargin + i * 50f
-                shapeRenderer.circle(x + 20f, topY - 25f, 20f)
-            }
-            
-            // Capture percentage as progress bar
-            val barWidth = screenWidth - 60f
-            val barHeight = 30f
-            val barY = topY - 90f
-            
-            // Background (empty bar)
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.DARK_GRAY
-            shapeRenderer.rect(leftMargin, barY, barWidth, barHeight)
-            
-            // Progress (filled bar)
-            val fillWidth = barWidth * (capturePercentage / 100f)
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.GREEN
-            shapeRenderer.rect(leftMargin, barY, fillWidth, barHeight)
-            
-            // Target marker (vertical line)
-            val targetX = leftMargin + barWidth * (getTargetPercentage() / 100f)
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.YELLOW
-            shapeRenderer.rect(targetX - 2f, barY - 5f, 4f, barHeight + 10f)
-        }
-        
-        // Game over / Level complete overlays
-        if (isGameOver) {
-            // Red X overlay
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color(1f, 0f, 0f, 0.8f)
-            shapeRenderer.rect(screenWidth / 2f - 200f, screenHeight / 2f - 200f, 400f, 400f)
-            
-            // Draw X shape
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.WHITE
-            shapeRenderer.rectLine(screenWidth / 2f - 150f, screenHeight / 2f - 150f, 
-                                   screenWidth / 2f + 150f, screenHeight / 2f + 150f, 20f)
-            shapeRenderer.rectLine(screenWidth / 2f + 150f, screenHeight / 2f - 150f,
-                                   screenWidth / 2f - 150f, screenHeight / 2f + 150f, 20f)
-        } else if (isLevelComplete) {
-            // Green checkmark overlay
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color(0f, 1f, 0f, 0.8f)
-            shapeRenderer.rect(screenWidth / 2f - 200f, screenHeight / 2f - 200f, 400f, 400f)
-            
-            // Draw checkmark shape
-            shapeRenderer.color = com.badlogic.gdx.graphics.Color.WHITE
-            shapeRenderer.rectLine(screenWidth / 2f - 100f, screenHeight / 2f,
-                                   screenWidth / 2f - 20f, screenHeight / 2f - 80f, 20f)
-            shapeRenderer.rectLine(screenWidth / 2f - 20f, screenHeight / 2f - 80f,
-                                   screenWidth / 2f + 120f, screenHeight / 2f + 120f, 20f)
-        }
-        
-        shapeRenderer.end()
-        shapeRenderer.dispose()
-    }
+    
     
     private fun getTargetPercentage(): Float {
         return when (currentLevel) {
@@ -293,8 +159,6 @@ class LevelManager(private val enemyManager: EnemyManager, private val sphereMes
     }
     
     fun dispose() {
-        batch.dispose()
-        font.dispose()
-        whiteTexture.dispose()
+        shapeRenderer.dispose()
     }
 }

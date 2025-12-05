@@ -94,6 +94,13 @@ data class LauncherApp(
                     iconRes = R.mipmap.ic_launcher, // Placeholder icon, assuming this is desired from the snippet
                     activityClass = SphereQixActivity::class.java,
                     order = 8
+                ),
+                LauncherApp(
+                    id = "text3d",
+                    name = "Text 3D",
+                    iconRes = R.drawable.ic_text_3d,
+                    activityClass = com.example.kaimera.text3d.Text3DActivity::class.java,
+                    order = 9
                 )
             )
         }
