@@ -59,7 +59,11 @@ git config --global user.email "${GIT_EMAIL:-deploy@kaimera.local}"
 git config --global user.name "${GIT_NAME:-Kaimera Deploy}"
 
 # Add remote if not exists
-if ! git remote get-url origin 2>/dev/null; then
+# Add or update remote
+if git remote get-url origin 2>/dev/null; then
+    echo "📡 Updating GitHub remote to SSH..."
+    git remote set-url origin "${GITHUB_REPO}"
+else
     echo "📡 Adding GitHub remote..."
     git remote add origin "${GITHUB_REPO}"
 fi
