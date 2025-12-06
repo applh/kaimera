@@ -70,9 +70,9 @@ git add .
 git commit -m "${COMMIT_MESSAGE:-Release v19.0.0}" || echo "Nothing to commit"
 
 # Push to GitHub
-# Pull changes to resolve divergence
+# Pull changes to resolve divergence (favoring local version)
 echo "⬇️ Pulling from GitHub..."
-git pull origin main --rebase
+git pull origin main --no-rebase -s recursive -X ours
 
 # Push to GitHub
 echo "🚀 Pushing to GitHub..."
