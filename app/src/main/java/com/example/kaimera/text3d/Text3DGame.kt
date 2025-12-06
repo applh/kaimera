@@ -16,8 +16,9 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 
 class Text3DGame(
-    private var textContent: String = "Hello World",
-    private var textColor: Int = android.graphics.Color.WHITE
+    private var textContent: String = "H",
+    private var textColor: Int = android.graphics.Color.WHITE,
+    private val typeface: android.graphics.Typeface? = null
 ) : ApplicationAdapter(), GestureDetector.GestureListener {
 
     private lateinit var camera: PerspectiveCamera
@@ -27,11 +28,36 @@ class Text3DGame(
     private lateinit var shapeRenderer: ShapeRenderer
     private lateinit var gestureDetector: GestureDetector
 
+    // 3D Mesh for Side Walls
+    private var sideMesh: com.badlogic.gdx.graphics.Mesh? = null
+    // Store offsets to center the text
+    private var textOffsetX: Float = 0f
+    private var textOffsetY: Float = 0f
+    
+    // Scale adjustment to match mesh geometry
+    private var textScaleAdjustment: Float = 1f
+    
+    // Debug bounds
+    private var meshMinX: Float = 0f
+    private var meshMaxX: Float = 0f
+    private var meshMinY: Float = 0f
+    private var meshMaxY: Float = 0f
+    
+    private val meshGenerator = Text3DMeshGenerator()
+    private lateinit var shader: com.badlogic.gdx.graphics.glutils.ShaderProgram
+
     // HUD Text
     private var hudTextContent: String = "HUD Text"
 
     // Render color (tint)
     private val renderColor = Color(1f, 1f, 1f, 1f)
+    private val sideColor = Color(0.6f, 0.6f, 0.6f, 1f) // Default greyish for sides
+    private val backFaceColor = Color(0.5f, 0.5f, 0.5f, 1f) // Default for back face
+    private val backgroundColor = Color(0.1f, 0.1f, 0.1f, 1f)
+    
+    // Extrusion properties
+    private var extrusionDepth = 20 // Default depth units
+    private val density = 40f // Layers per unit depth (higher = more solid)
 
     // Camera control variables
     private var distance = 10f
@@ -52,16 +78,50 @@ class Text3DGame(
         camera.near = 1f
         camera.far = 100f
         
+        // Generate font first so we can calculate size
+        generateFont()
+
         // Initial distance calculation
         calculateOptimalDistance()
         updateCameraPosition()
-
-        // Set initial render color
-        Color.argb8888ToColor(renderColor, textColor)
-
-        // Generate font
+        
+        // Generate font first so we can calculate size
         generateFont()
 
+        // Initialize shader for mesh
+        val vertexShader = """
+            attribute vec4 a_position;
+            attribute vec4 a_color;
+            uniform mat4 u_projTrans;
+            varying vec4 v_color;
+            void main() {
+                v_color = a_color;
+                gl_Position = u_projTrans * a_position;
+            }
+        """.trimIndent()
+        
+        val fragmentShader = """
+            #ifdef GL_ES
+            precision mediump float;
+            #endif
+            varying vec4 v_color;
+            void main() {
+                gl_FragColor = v_color;
+            }
+        """.trimIndent()
+        
+        shader = com.badlogic.gdx.graphics.glutils.ShaderProgram(vertexShader, fragmentShader)
+        if (!shader.isCompiled) {
+            Gdx.app.error("Shader", shader.log)
+        }
+
+        // Generate initial mesh
+        updateMesh()
+
+        // Initial distance calculation
+        calculateOptimalDistance()
+        updateCameraPosition()
+        
         // Input handling
         gestureDetector = GestureDetector(this)
         Gdx.input.inputProcessor = gestureDetector
@@ -81,7 +141,7 @@ class Text3DGame(
     }
 
     override fun render() {
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1f)
+        Gdx.gl.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT or GL20.GL_DEPTH_BUFFER_BIT)
 
         camera.update()
@@ -90,53 +150,41 @@ class Text3DGame(
         // For this task, "3D text" usually implies it exists in 3D space.
         // We will render it on the XY plane at Z=0, and the camera orbits around it.
         
-        batch.projectionMatrix = camera.combined
-        batch.begin()
+        // Disable culling so we see back faces and inside of extrusion
+        Gdx.gl.glDisable(GL20.GL_CULL_FACE)
         
         // Calculate text size to center it
         val layout = com.badlogic.gdx.graphics.g2d.GlyphLayout(font, textContent)
         val width = layout.width * textScale
         val height = layout.height * textScale
         
-        // Transform for 3D scaling
-        val matrix = Matrix4()
-        
-        // Extrusion parameters
-        val layers = 20
-        val layerDepth = 0.02f // Distance between layers
-        
-        // Render back layers (extrusion)
-        for (i in 0 until layers) {
-            matrix.idt()
-            matrix.translate(-width / 2f, height / 2f, -i * layerDepth) // Stack backwards
-            matrix.scl(textScale)
-            
-            val oldMatrix = batch.transformMatrix.cpy()
-            batch.transformMatrix = matrix
-            
-            // Darker tint for depth
-            val depthTint = Color(renderColor)
-            depthTint.mul(0.6f) // Darken
-            font.color = depthTint
-            
-            font.draw(batch, textContent, 0f, 0f)
-            
-            batch.transformMatrix = oldMatrix
+        if (Gdx.input.justTouched()) {
+             Gdx.app.log("Text3DDebug", "Layout Metrics: Width=${layout.width}, Height=${layout.height} (Scaled W=$width, H=$height). CapHeight=${font.capHeight}, XHeight=${font.xHeight}, Ascent=${font.ascent}, Descent=${font.descent}")
         }
         
-        // Render front layer
-        matrix.idt()
-        matrix.translate(-width / 2f, height / 2f, 0f)
-        matrix.scl(textScale)
+        val totalDepth = extrusionDepth * 0.01f // Scaling factor
+
+        // Enable Depth Test
+        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST)
         
-        val oldMatrix = batch.transformMatrix.cpy()
-        batch.transformMatrix = matrix
+        // 1. Draw 3D Mesh (sides, front face, and back face - all in one!)
+        if (sideMesh != null && shader.isCompiled) {
+             shader.bind()
+             
+             // Simple transformation: scale and center the mesh
+             val meshWidth = meshMaxX - meshMinX
+             val meshHeight = meshMaxY - meshMinY
+             val meshTransX = -0.65f * meshWidth  // Center horizontally
+             val meshTransY = -0.5f * meshHeight   // Center vertically
+             
+             // Apply transformations: scale first, then translate
+             shader.setUniformMatrix("u_projTrans", camera.combined.cpy().scl(textScale).translate(meshTransX, meshTransY, 0f))
+             sideMesh!!.render(shader, GL20.GL_TRIANGLES)
+        }
         
-        font.color = renderColor
-        font.draw(batch, textContent, 0f, 0f)
-        
-        batch.transformMatrix = oldMatrix
-        batch.end()
+        // All rendering is now done with the 3D mesh (front, back, and sides)
+        // No more 2D SpriteBatch rendering needed!
+
 
         // Render HUD
         uiBatch.begin()
@@ -194,6 +242,71 @@ class Text3DGame(
         uiBatch.dispose()
         font.dispose()
         shapeRenderer.dispose()
+        sideMesh?.dispose()
+        shader.dispose()
+    }
+
+    private fun updateMesh() {
+        if (typeface == null) return
+        
+        // Calculate font size (Needs to match generation)
+        // We generated bitmat font at size 64.
+        
+        val totalDepth = extrusionDepth * 0.01f // Same scaling as render loop
+        
+        val meshData = meshGenerator.generateFullMesh(
+            textContent,
+            typeface,
+            64f, // Match font generation size
+            totalDepth / textScale, // Un-scale depth so it matches font coords
+            sideColor.toFloatBits(),
+            renderColor.toFloatBits(), // Front face color
+            backFaceColor.toFloatBits() // Back face color
+        )
+        
+        val attributes = com.badlogic.gdx.graphics.VertexAttributes(
+            com.badlogic.gdx.graphics.VertexAttribute.Position(),
+            com.badlogic.gdx.graphics.VertexAttribute.ColorPacked()
+        )
+        
+        if (sideMesh == null || sideMesh!!.maxVertices < meshData.vertexCount) {
+             sideMesh?.dispose()
+             sideMesh = com.badlogic.gdx.graphics.Mesh(true, meshData.vertexCount, 0, attributes)
+        }
+        
+        sideMesh!!.setVertices(meshData.vertices, 0, meshData.vertices.size)
+        sideMesh!!.setVertices(meshData.vertices, 0, meshData.vertices.size)
+        
+        // Calculate proper centering
+        val layout = com.badlogic.gdx.graphics.g2d.GlyphLayout(font, textContent)
+        
+        // Mesh bounds are in raw coordinates (not centered)
+        val meshCenterX = (meshData.minX + meshData.maxX) / 2f
+        val meshCenterY = (meshData.minY + meshData.maxY) / 2f
+        
+        // Text is drawn from baseline at (0,0)
+        // font.draw() places the baseline at the Y coordinate
+        // So if we draw at y=0, the text body extends UPWARD from 0
+        // To center the text, we need to shift it DOWN by half its height
+        // But user reports text is "one height below" the box, so we need to add layout.height
+        
+        textOffsetX = meshCenterX - (layout.width * 0.1f)  // Move 0.1 width to the right
+        textOffsetY = meshCenterY + layout.height / 2f - (layout.height * 0.5f)  // Move text UP to center blue cross
+        
+        // No scale adjustment
+        textScaleAdjustment = 1f
+        
+        // Save debug bounds
+        meshMinX = meshData.minX
+        meshMaxX = meshData.maxX
+        meshMinY = meshData.minY
+        meshMaxY = meshData.maxY
+        
+        Gdx.app.log("Text3DDebug", "=== ALIGNMENT ===")
+        Gdx.app.log("Text3DDebug", "Mesh center: (${meshCenterX}, ${meshCenterY})")
+        Gdx.app.log("Text3DDebug", "Mesh bounds: X=[${meshData.minX}, ${meshData.maxX}] Y=[${meshData.minY}, ${meshData.maxY}]")
+        Gdx.app.log("Text3DDebug", "Text offset: (${textOffsetX}, ${textOffsetY})")
+        Gdx.app.log("Text3DDebug", "Layout: W=${layout.width}, H=${layout.height}")
     }
 
     // Public API for Android Activity
@@ -203,6 +316,7 @@ class Text3DGame(
     fun updateText(text: String) {
         Gdx.app.postRunnable {
             textContent = text
+            updateMesh()
             calculateOptimalDistance()
             updateCameraPosition()
         }
@@ -220,6 +334,42 @@ class Text3DGame(
             Color.argb8888ToColor(renderColor, color)
         }
     }
+
+    fun updateBackgroundColor(color: Int) {
+        Gdx.app.postRunnable {
+            Color.argb8888ToColor(backgroundColor, color)
+        }
+    }
+
+    fun updateExtrusionDepth(depth: Int) {
+        Gdx.app.postRunnable {
+            extrusionDepth = depth
+            updateMesh()
+        }
+    }
+    
+    fun updateSideColor(color: Int) {
+        Gdx.app.postRunnable {
+            Color.argb8888ToColor(sideColor, color)
+            // Update Mesh Color by regenerating
+            // Ideally we just update color attributes, but regeneration is fast enough here.
+            updateMesh()
+        }
+    }
+    
+    fun updateBackFaceColor(color: Int) {
+        Gdx.app.postRunnable {
+            Color.argb8888ToColor(backFaceColor, color)
+        }
+    }
+    
+    // Getters for UI sync
+    fun getRenderColor(): Int = Color.argb8888(renderColor)
+    fun getSideColor(): Int = Color.argb8888(sideColor)
+    fun getBackFaceColor(): Int = Color.argb8888(backFaceColor)
+    fun getBackgroundColor(): Int = Color.argb8888(backgroundColor)
+    
+    fun getExtrusionDepth(): Int = extrusionDepth
     
     fun resetCamera() {
         calculateOptimalDistance()

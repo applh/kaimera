@@ -30,7 +30,9 @@ class Text3DActivity : AndroidApplication() {
         val config = AndroidApplicationConfiguration()
         config.useAccelerometer = false
         config.useCompass = false
-        game = Text3DGame()
+        // Initialize Game
+        val typeface = android.graphics.Typeface.createFromAsset(assets, "fonts/Roboto-Regular.ttf")
+        game = Text3DGame(typeface = typeface)
         
         val gameView = initializeForView(game, config)
         
@@ -58,9 +60,17 @@ class Text3DActivity : AndroidApplication() {
         val etHudText = dialogView.findViewById<EditText>(R.id.et_hud_text)
         val btnApply = dialogView.findViewById<Button>(R.id.btn_apply_text)
         val colorContainer = dialogView.findViewById<LinearLayout>(R.id.color_container)
+        val rgColorTarget = dialogView.findViewById<android.widget.RadioGroup>(R.id.rg_color_target)
         val sbHue = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_hue)
         val sbSaturation = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_saturation)
         val sbValue = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_value)
+        val sbExtrudedDepth = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_extrusion_depth)
+        
+        // Value Text Views
+        val tvHue = dialogView.findViewById<android.widget.TextView>(R.id.tv_hue_value)
+        val tvSaturation = dialogView.findViewById<android.widget.TextView>(R.id.tv_saturation_value)
+        val tvValue = dialogView.findViewById<android.widget.TextView>(R.id.tv_value_value)
+        val tvDepth = dialogView.findViewById<android.widget.TextView>(R.id.tv_extrusion_depth_value)
 
         // Pre-fill text
         etText.setText(game.getText())
@@ -68,6 +78,53 @@ class Text3DActivity : AndroidApplication() {
 
         // Initial HSV values (default white)
         val hsv = floatArrayOf(0f, 0f, 1f)
+
+        // Target switching logic
+        var currentTarget = 0 // 0=Face, 1=Side, 2=Bg, 3=Back Face
+        
+        fun updateSlidersFromColor(color: Int) {
+            Color.colorToHSV(color, hsv)
+            // Use setProgress without triggering listener logic loop if possible, 
+            // but we use a flag to prevent re-updating game
+            sbHue.progress = hsv[0].toInt()
+            sbSaturation.progress = (hsv[1] * 100).toInt()
+            sbValue.progress = (hsv[2] * 100).toInt()
+            
+            // Update Labels
+            tvHue.text = "${sbHue.progress}"
+            tvSaturation.text = "${sbSaturation.progress}%"
+            tvValue.text = "${sbValue.progress}%"
+        }
+        
+        // Initial sync
+        updateSlidersFromColor(game.getRenderColor())
+        
+        rgColorTarget.setOnCheckedChangeListener { _, checkedId ->
+             when (checkedId) {
+                 R.id.rb_target_face -> {
+                     currentTarget = 0
+                     updateSlidersFromColor(game.getRenderColor())
+                 }
+                 R.id.rb_target_side -> {
+                     currentTarget = 1
+                     updateSlidersFromColor(game.getSideColor())
+                 }
+                 R.id.rb_target_background -> {
+                     currentTarget = 2
+                     updateSlidersFromColor(game.getBackgroundColor())
+                 }
+                 R.id.rb_target_back_face -> {
+                     currentTarget = 3
+                     updateSlidersFromColor(game.getBackFaceColor())
+                 }
+             }
+        }
+        
+        btnApply.setOnClickListener {
+            game.updateText(etText.text.toString())
+            game.updateHudText(etHudText.text.toString())
+            Toast.makeText(this, "Text Updated", Toast.LENGTH_SHORT).show()
+        }
         
         // Listener for SeekBars
         val seekBarListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -77,36 +134,51 @@ class Text3DActivity : AndroidApplication() {
                     hsv[1] = sbSaturation.progress / 100f
                     hsv[2] = sbValue.progress / 100f
                     val color = Color.HSVToColor(hsv)
-                    game.updateColor(color)
+                    
+                    when (currentTarget) {
+                        0 -> game.updateColor(color)
+                        1 -> game.updateSideColor(color)
+                        2 -> game.updateBackgroundColor(color)
+                        3 -> game.updateBackFaceColor(color)
+                    }
+                    
+                    // Update Labels
+                    tvHue.text = "${sbHue.progress}"
+                    tvSaturation.text = "${sbSaturation.progress}%"
+                    tvValue.text = "${sbValue.progress}%"
                 }
             }
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         }
+        
+        // ... (attach listeners) ...
 
         sbHue.setOnSeekBarChangeListener(seekBarListener)
         sbSaturation.setOnSeekBarChangeListener(seekBarListener)
         sbValue.setOnSeekBarChangeListener(seekBarListener)
         
         // Set initial progress
-        sbHue.progress = 0
-        sbSaturation.progress = 0
-        sbValue.progress = 100
+        sbExtrudedDepth.progress = game.getExtrusionDepth()
+        tvDepth.text = "${sbExtrudedDepth.progress}"
 
-        btnApply.setOnClickListener {
-            val newText = etText.text.toString()
-            if (newText.isNotEmpty()) {
-                game.updateText(newText)
+        sbExtrudedDepth.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    game.updateExtrusionDepth(progress)
+                    tvDepth.text = "$progress"
+                }
             }
-            val newHudText = etHudText.text.toString()
-            game.updateHudText(newHudText)
-            dialog.dismiss()
-        }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
 
-        // Add colors
+        // Add colors (Presets apply to current target)
         val colors = listOf(
-            Color.WHITE, Color.RED, Color.GREEN, Color.BLUE, 
-            Color.YELLOW, Color.CYAN, Color.MAGENTA, Color.LTGRAY
+            Color.WHITE, Color.LTGRAY, Color.GRAY, Color.DKGRAY, Color.BLACK,
+            Color.RED, Color.GREEN, Color.BLUE, 
+            Color.YELLOW, Color.CYAN, Color.MAGENTA, 
+            Color.rgb(255, 165, 0) // Orange
         )
 
         for (color in colors) {
@@ -116,13 +188,14 @@ class Text3DActivity : AndroidApplication() {
             colorView.layoutParams = params
             colorView.setBackgroundColor(color)
             colorView.setOnClickListener {
-                game.updateColor(color)
-                // Update sliders to match preset
-                Color.colorToHSV(color, hsv)
-                sbHue.progress = hsv[0].toInt()
-                sbSaturation.progress = (hsv[1] * 100).toInt()
-                sbValue.progress = (hsv[2] * 100).toInt()
-                // dialog.dismiss() // Don't dismiss, let user tweak
+                when (currentTarget) {
+                    0 -> game.updateColor(color)
+                    1 -> game.updateSideColor(color)
+                    2 -> game.updateBackgroundColor(color)
+                    3 -> game.updateBackFaceColor(color)
+                }
+                // Sync sliders
+                updateSlidersFromColor(color)
             }
             colorContainer.addView(colorView)
         }
