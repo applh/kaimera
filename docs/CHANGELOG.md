@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v33.0.0] - 2025-12-06
+    
+### Fixed
+- **3D Text Rendering:** Fixed issue where letters with holes (O, A, B, etc.) rendered as solid blocks.
+  - Implemented robust polygon triangulation using the Earcut algorithm.
+  - Added hole detection logic to correctly subtract inner contours from outer glyph shapes.
+  - Embedded `Earcut` Java implementation directly to ensure stability and remove external dependency risks.
+  - Verified rendering of complex multi-part glyphs (e.g., "i", "!", "&").
+
 ## [v32.1.0] - 2025-12-04
 
 ### Fixed

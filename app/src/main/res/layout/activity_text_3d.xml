@@ -16,6 +16,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"
         android:padding="16dp">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

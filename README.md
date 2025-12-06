@@ -17,6 +17,7 @@ Kaimera includes a unified launcher screen that provides access to multiple inte
 - 📷 **Camera** - Full-featured camera with photo/video capture
 - 🌐 **Browser** - Built-in web browser for quick access
 - 📁 **File Explorer** - Browse and manage device files
+- 🆒 **Text3D** - Create and view 3D volumetric text
 - ⚙️ **Settings** - Configure all app preferences
 
 All apps share a consistent Material Design interface and can be accessed from the home screen or via the home button in each app's title bar.
@@ -76,6 +77,7 @@ We have detailed documentation available in the `docs/` directory:
 - 🎯 **[Manager Architecture](docs/MANAGERS.md)** - Detailed guide to the manager pattern and all manager classes.
 - 🛠️ **[Building & Installation](docs/BUILDING.md)** - How to build, install, and customize the app.
 - 📹 **[CameraX 1.5.1 Upgrade & 120fps](docs/CAMERAX_UPGRADE.md)** - Details on the CameraX upgrade and high-speed video feature.
+- 🆒 **[Text3D App](docs/apps/text3d.md)** - Documentation for the volumetric text generator.
 - 🚀 **[Deployment](docs/DEPLOYMENT.md)** - Deploying to GitHub and publishing to Google Play.
 - 🗺️ **[Roadmap](docs/ROADMAP.md)** - Planned features and future ideas.
 - 🔧 **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and fixes.

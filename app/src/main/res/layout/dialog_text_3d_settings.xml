@@ -41,42 +41,140 @@
         android:inputType="text"
         android:layout_marginBottom="16dp"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Extrusion Depth"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tv_extrusion_depth_value"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="20" />
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/sb_extrusion_depth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="500"
+        android:layout_marginBottom="16dp"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Text Color (HSV)"
+        android:text="Color Settings"
         android:textStyle="bold"
         android:layout_marginBottom="8dp"/>
+
+    <RadioGroup
+        android:id="@+id/rg_color_target"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+        
+        <RadioButton
+            android:id="@+id/rb_target_face"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Face"
+            android:checked="true"
+            android:layout_weight="1"/>
+            
+        <RadioButton
+            android:id="@+id/rb_target_side"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Side"
+            android:layout_weight="1"/>
+            
+        <RadioButton
+            android:id="@+id/rb_target_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bg"
+            android:layout_weight="1"/>
+
+        <RadioButton
+            android:id="@+id/rb_target_back_face"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back Face"
+            android:layout_weight="1"/>
+    </RadioGroup>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hue" />
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hue" />
+            <TextView
+                android:id="@+id/tv_hue_value"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="0" />
+        </LinearLayout>
         <SeekBar
             android:id="@+id/sb_hue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="360" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Saturation" />
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saturation" />
+            <TextView
+                android:id="@+id/tv_saturation_value"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="0%" />
+        </LinearLayout>
         <SeekBar
             android:id="@+id/sb_saturation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="100" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Value" />
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Value" />
+            <TextView
+                android:id="@+id/tv_value_value"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="100%" />
+        </LinearLayout>
         <SeekBar
             android:id="@+id/sb_value"
             android:layout_width="match_parent"
@@ -105,5 +203,7 @@
             android:orientation="horizontal" />
             
     </HorizontalScrollView>
+
+
 
 </LinearLayout>

@@ -16,8 +16,8 @@ android {
         applicationId = "com.example.kaimera"
         minSdk = 24
         targetSdk = 34
-        versionCode = 51
-        versionName = "27.0.0"
+        versionCode = 57
+        versionName = "33.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -117,6 +117,7 @@ dependencies {
     natives("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64")
     
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 
     // Task to copy native libs
     val copyAndroidNatives = tasks.register("copyAndroidNatives") {
