@@ -70,6 +70,11 @@ git add .
 git commit -m "${COMMIT_MESSAGE:-Release v19.0.0}" || echo "Nothing to commit"
 
 # Push to GitHub
+# Pull changes to resolve divergence
+echo "⬇️ Pulling from GitHub..."
+git pull origin main --rebase
+
+# Push to GitHub
 echo "🚀 Pushing to GitHub..."
 git push -u origin main --tags
 

@@ -31,7 +31,7 @@ echo "🚀 Running deployment container..."
 echo "Repository: ${GITHUB_REPO}"
 echo ""
 
-docker run -it --rm \
+docker run --rm \
   -v "$(pwd):/repo" \
   -e GITHUB_REPO="${GITHUB_REPO}" \
   -e GIT_EMAIL="${GIT_EMAIL:-deploy@kaimera.local}" \
