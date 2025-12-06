@@ -21,7 +21,9 @@ The game runs within a standard Android Activity that hosts a LibGDX `AndroidApp
 
 ### 3D World
 - **Icosphere**: The game world is a subdivided Icosahedron.
-- **Camera**: Orbital camera allowing the player to rotate around the sphere.
+- **Camera**: Orbital camera with **pinch-to-zoom** and full 360-degree rotation (no pole clamping).
+- **Settings**: In-game settings via dialog to adjust HUD color, Light color/intensity (HUD vs Camera Light), and grid density.
+- **Home Navigation**: Standardized "Home" button in settings to return to Launcher.
 
 ### Gameplay
 - **Capture**: Players draw lines to enclose areas. A graph-based flood fill algorithm determines captured regions.

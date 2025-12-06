@@ -329,6 +329,12 @@ class BrowserActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        // Handle Home/Launcher button
+        dialogView.findViewById<View>(R.id.btn_home)?.setOnClickListener {
+            dialog.dismiss()
+            finish()
+        }
+
         dialog.show()
     }
 

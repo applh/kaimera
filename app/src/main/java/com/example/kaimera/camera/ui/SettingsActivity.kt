@@ -47,6 +47,12 @@ class SettingsActivity : AppCompatActivity(), androidx.preference.PreferenceFrag
                 .commit()
         }
         
+
+        
+        findViewById<android.view.View>(R.id.btn_home)?.setOnClickListener {
+            finish()
+        }
+        
         setupChronometer()
     }
     

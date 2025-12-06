@@ -200,6 +200,14 @@ class Text3DActivity : AndroidApplication() {
             colorContainer.addView(colorView)
         }
 
+
+
+        // Home/Launcher button
+        dialogView.findViewById<View>(R.id.btn_home)?.setOnClickListener {
+            dialog.dismiss()
+            finish()
+        }
+
         dialog.show()
     }
 

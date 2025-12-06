@@ -142,6 +142,11 @@ class LauncherActivity : AppCompatActivity() {
             settingsLauncher.launch(intent)
         }
 
+        // Home button
+        dialogView.findViewById<View>(R.id.btn_home)?.setOnClickListener {
+            dialog.dismiss()
+        }
+
         // Close button
         dialogView.findViewById<View>(R.id.closeButton)?.setOnClickListener {
             dialog.dismiss()

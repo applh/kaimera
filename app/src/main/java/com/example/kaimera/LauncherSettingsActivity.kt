@@ -34,6 +34,11 @@ class LauncherSettingsActivity : AppCompatActivity() {
             finish()
         }
 
+        // Home button
+        findViewById<android.view.View>(R.id.btn_home)?.setOnClickListener {
+            finish()
+        }
+
         // Initialize preferences manager
         preferencesManager = LauncherPreferencesManager(this)
 

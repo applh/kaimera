@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v33.0.0] - 2025-12-06
+## v33.1.0 (2025-12-06)
+### Sphereqix / App UX
+- **UX Standardization**: Added a "Home" button to the top-right of all settings panels (Browser, Launcher, Text3D, Camera) for easier navigation back to the launcher.
+- **Sphereqix Controls**:
+  - Implemented pinch-to-zoom gesture for camera distance.
+  - Removed rotation limits (pole clamping) for full 360-degree input.
+  - Added "Gimbal Lock" mitigation to handle pole crossings gracefully.
+- **Sphereqix Settings**:
+  - Settings dialog now synchronizes its initial values (Color, Intensity) with the current state of the game.
+  - Added "Light Intensity" slider to settings.
+  - Added color target selection (HUD vs Camera Light).
+
+## [v33.0.0] - 2025-12-05
     
 ### Fixed
 - **3D Text Rendering:** Fixed issue where letters with holes (O, A, B, etc.) rendered as solid blocks.

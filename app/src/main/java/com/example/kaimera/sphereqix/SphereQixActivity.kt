@@ -74,8 +74,27 @@ class SphereQixActivity : AndroidApplication() {
         // Pre-fill text
         etHudText.setText(screen.getHudText())
 
-        // Initial HSV values (default white)
-        val hsv = floatArrayOf(0f, 0f, 1f)
+        // Initial HSV values
+        val hsvHud = floatArrayOf(0f, 0f, 1f)
+        val hsvLight = floatArrayOf(0f, 0f, 1f)
+        
+        // Fetch current values
+        Color.colorToHSV(screen.getHudColor(), hsvHud)
+        Color.colorToHSV(screen.getCamLightColor(), hsvLight)
+        val currentIntensity = screen.getCamLightIntensity()
+        
+        val rgTarget = dialogView.findViewById<android.widget.RadioGroup>(R.id.rg_color_target)
+        val sbIntensity = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_intensity)
+        val tvIntensity = dialogView.findViewById<android.widget.TextView>(R.id.tv_intensity_label)
+        
+        // Init UI
+        sbIntensity.progress = (currentIntensity * 10).toInt()
+        tvIntensity.text = "Light Intensity: $currentIntensity"
+        
+        // ... (Listeners implementation remains same) ...
+        
+        // State
+        var editTarget = 0 // 0 = HUD, 1 = Light
         
         // Listener for SeekBars
         val seekBarListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -83,19 +102,27 @@ class SphereQixActivity : AndroidApplication() {
                 if (fromUser) {
                     when (seekBar?.id) {
                         R.id.sb_hue -> {
-                           hsv[0] = progress.toFloat()
-                           tvHue.text = "Hue: $progress"
-                           updateColor()
+                            val hsv = if (editTarget == 0) hsvHud else hsvLight
+                            hsv[0] = progress.toFloat()
+                            tvHue.text = "Hue: $progress"
+                            updateColor()
                         }
                         R.id.sb_saturation -> {
-                           hsv[1] = progress / 100f
-                           tvSat.text = "Saturation: $progress%"
-                           updateColor()
+                            val hsv = if (editTarget == 0) hsvHud else hsvLight
+                            hsv[1] = progress / 100f
+                            tvSat.text = "Saturation: $progress%"
+                            updateColor()
                         }
                         R.id.sb_value -> {
-                           hsv[2] = progress / 100f
-                           tvVal.text = "Value: $progress%"
-                           updateColor()
+                            val hsv = if (editTarget == 0) hsvHud else hsvLight
+                            hsv[2] = progress / 100f
+                            tvVal.text = "Value: $progress%"
+                            updateColor()
+                        }
+                        R.id.sb_intensity -> {
+                            val intensity = progress / 10f
+                            tvIntensity.text = "Light Intensity: $intensity"
+                            screen.updateCamLightIntensity(intensity)
                         }
                         R.id.seekBarLat -> {
                             tvLat.text = "Latitude Density: $progress"
@@ -110,8 +137,13 @@ class SphereQixActivity : AndroidApplication() {
             }
             
             fun updateColor() {
+                val hsv = if (editTarget == 0) hsvHud else hsvLight
                 val color = Color.HSVToColor(hsv)
-                screen.updateHudColor(color)
+                if (editTarget == 0) {
+                    screen.updateHudColor(color)
+                } else {
+                    screen.updateCamLightColor(color)
+                }
             }
             
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
@@ -121,13 +153,36 @@ class SphereQixActivity : AndroidApplication() {
         sbHue.setOnSeekBarChangeListener(seekBarListener)
         sbSaturation.setOnSeekBarChangeListener(seekBarListener)
         sbValue.setOnSeekBarChangeListener(seekBarListener)
+        sbIntensity.setOnSeekBarChangeListener(seekBarListener)
         sbLat.setOnSeekBarChangeListener(seekBarListener)
         sbLong.setOnSeekBarChangeListener(seekBarListener)
         
+        // Target Switch Logic
+        rgTarget.setOnCheckedChangeListener { _, checkedId ->
+            editTarget = if (checkedId == R.id.rb_target_hud) 0 else 1
+            
+            // Update sliders to reflect current target
+            val hsv = if (editTarget == 0) hsvHud else hsvLight
+            sbHue.progress = hsv[0].toInt()
+            sbSaturation.progress = (hsv[1] * 100).toInt()
+            sbValue.progress = (hsv[2] * 100).toInt()
+            
+            tvHue.text = "Hue: ${sbHue.progress}"
+            tvSat.text = "Saturation: ${sbSaturation.progress}%"
+            tvVal.text = "Value: ${sbValue.progress}%"
+            
+            // Light Intensity only relevant for Light? Or keep visible?
+            // User requested intensity for light.
+        }
+        
         // Set initial progress
-        sbHue.progress = 0
-        sbSaturation.progress = 0
-        sbValue.progress = 100
+        sbHue.progress = hsvHud[0].toInt()
+        sbSaturation.progress = (hsvHud[1] * 100).toInt()
+        sbValue.progress = (hsvHud[2] * 100).toInt()
+        
+        tvHue.text = "Hue: ${sbHue.progress}"
+        tvSat.text = "Saturation: ${sbSaturation.progress}%"
+        tvVal.text = "Value: ${sbValue.progress}%"
         
         // Get current grid density
         sbLat.progress = screen.getLatSegments()
@@ -161,9 +216,16 @@ class SphereQixActivity : AndroidApplication() {
             colorView.layoutParams = params
             colorView.setBackgroundColor(color)
             colorView.setOnClickListener {
-                screen.updateHudColor(color)
-                // Update sliders to match preset
-                Color.colorToHSV(color, hsv)
+                if (editTarget == 0) {
+                    screen.updateHudColor(color)
+                    Color.colorToHSV(color, hsvHud)
+                } else {
+                    screen.updateCamLightColor(color)
+                    Color.colorToHSV(color, hsvLight)
+                }
+                
+                // Update sliders
+                val hsv = if (editTarget == 0) hsvHud else hsvLight
                 sbHue.progress = hsv[0].toInt()
                 sbSaturation.progress = (hsv[1] * 100).toInt()
                 sbValue.progress = (hsv[2] * 100).toInt()

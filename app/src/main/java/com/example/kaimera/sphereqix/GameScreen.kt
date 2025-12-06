@@ -37,6 +37,7 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
     private lateinit var gridInstance: ModelInstance
     private lateinit var environment: Environment
     private lateinit var camController: CameraInputController
+    private lateinit var camLight: com.badlogic.gdx.graphics.g3d.environment.PointLight
     
     // Grid settings
     private var latSegments = 24
@@ -60,21 +61,29 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
         cam.far = 300f
         cam.update()
 
+        // Add Camera Light (PointLight) at camera position
+        camLight = com.badlogic.gdx.graphics.g3d.environment.PointLight().set(Color.WHITE, cam.position, 10f)
+        environment.add(camLight)
+
         createSphere()
         createGrid()
 
-        camController = CameraInputController(cam)
-        camController.translateUnits = 30f // faster pan
-        Gdx.input.inputProcessor = camController
+        // Create custom input controller
+        val inputController = InputController(cam)
+        Gdx.input.inputProcessor = inputController
+
+        createSphere()
+        createGrid()
     }
 
     private fun createSphere() {
+        val texture = com.badlogic.gdx.graphics.Texture(Gdx.files.internal("earth_map_clean.jpg"))
         val modelBuilder = ModelBuilder()
         sphereModel = modelBuilder.createSphere(
-            4f, 4f, 4f, // Diameter 4 (Radius 2)
+            4f, 4f, 4f,
             32, 32,
-            Material(ColorAttribute.createDiffuse(Color.ROYAL)),
-            (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
+            Material(com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute.createDiffuse(texture)),
+            (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal or VertexAttributes.Usage.TextureCoordinates).toLong()
         )
         sphereInstance = ModelInstance(sphereModel)
     }
@@ -164,7 +173,10 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
     }
 
     override fun render(delta: Float) {
-        camController.update()
+        // camController.update() handled by InputController logic now
+        
+        // Update light to follow camera
+        camLight.position.set(cam.position)
 
         // Clear screen
         Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
@@ -223,6 +235,30 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
 
     fun updateHudText(newText: String) {
         updateText(newText)
+    }
+    
+    fun updateCamLightColor(color: Int) {
+         Gdx.app.postRunnable {
+             Color.argb8888ToColor(camLight.color, color)
+         }
+    }
+    
+    fun updateCamLightIntensity(intensity: Float) {
+         Gdx.app.postRunnable {
+             camLight.intensity = intensity
+         }
+    }
+
+    fun getHudColor(): Int {
+        return Color.rgba8888(renderColor)
+    }
+
+    fun getCamLightColor(): Int {
+        return Color.rgba8888(camLight.color)
+    }
+
+    fun getCamLightIntensity(): Float {
+        return camLight.intensity
     }
 
     fun getLatSegments(): Int = latSegments

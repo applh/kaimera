@@ -64,6 +64,40 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
+        <RadioGroup
+            android:id="@+id/rg_color_target"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_target_hud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HUD Text"
+                android:checked="true"
+                android:layout_marginEnd="16dp"/>
+
+            <RadioButton
+                android:id="@+id/rb_target_light"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Camera Light"/>
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/tv_intensity_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Light Intensity: 10.0" />
+        <SeekBar
+            android:id="@+id/sb_intensity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="500"
+            android:progress="100" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
