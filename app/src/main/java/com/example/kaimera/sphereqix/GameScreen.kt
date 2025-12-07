@@ -45,6 +45,7 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
     private lateinit var environment: Environment
     // Use DirectionalLightEx for easier intensity control and better coverage
     private lateinit var camLight: DirectionalLightEx
+    private lateinit var headLight: net.mgsx.gltf.scene3d.lights.SpotLightEx
     
     // GLTF Props
     private lateinit var sceneManager: SceneManager
@@ -89,6 +90,32 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
         camLight.set(Color.WHITE, cam.direction)
         camLight.intensity = 1.0f
         environment.add(camLight)
+        // Headlamp Setup
+        headLight = net.mgsx.gltf.scene3d.lights.SpotLightEx()
+        headLight.color.set(Color.CYAN) 
+        headLight.intensity = 500f // Boosted
+        headLight.cutoffAngle = 7f 
+        headLight.exponent = 20f 
+        environment.add(headLight)
+        
+        // GLTF Init
+        // SceneManager creates its own ModelBatch and shaders
+        val config = net.mgsx.gltf.scene3d.shaders.PBRShaderConfig()
+        config.numBones = 128 // Increase bones for complex models
+        config.numDirectionalLights = 1
+        config.numPointLights = 0
+        config.numSpotLights = 1 // ENABLE SPOTLIGHTS
+        
+        // Config for Depth Shader (Shadow pass)
+        val depthConfig = com.badlogic.gdx.graphics.g3d.shaders.DepthShader.Config()
+        depthConfig.numBones = 128
+        
+        sceneManager = SceneManager(
+            net.mgsx.gltf.scene3d.shaders.PBRShaderProvider(config),
+            net.mgsx.gltf.scene3d.shaders.PBRDepthShaderProvider(depthConfig)
+        )
+        sceneManager.setCamera(cam)
+        sceneManager.environment = environment
 
         createSphere()
         createGrid()
@@ -135,41 +162,72 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
         }
         Gdx.input.inputProcessor = inputController
         
-        // GLTF Init
-        // SceneManager creates its own ModelBatch and shaders
-        val config = net.mgsx.gltf.scene3d.shaders.PBRShaderConfig()
-        config.numBones = 60
-        
-        // Config for Depth Shader (Shadow pass)
-        // PBRDepthShader uses DepthShader.Config
-        val depthConfig = com.badlogic.gdx.graphics.g3d.shaders.DepthShader.Config()
-        depthConfig.numBones = 60
-        
-        sceneManager = SceneManager(
-            net.mgsx.gltf.scene3d.shaders.PBRShaderProvider(config),
-            net.mgsx.gltf.scene3d.shaders.PBRDepthShaderProvider(depthConfig)
-        )
-        sceneManager.setCamera(cam)
-        sceneManager.environment = environment
-        
         // Load GLB
-        sceneAsset = GLBLoader().load(Gdx.files.internal("RobotExpressive.glb"))
-        
-        // Fix for "All Grey" / Dark appearance:
-        // PBR models with high metalness look black/grey without an Environment Map (IBL).
-        // We set metalness to 0 (dielectric) and roughness to 1 (matte) to ensure standard lights work.
-        for (mat in sceneAsset.scene.model.materials) {
-            // Force non-metallic, fully rough
-            mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(0f))
-            mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(10f))
-        }
+        sceneAsset = GLBLoader().load(Gdx.files.internal("robot_expressive.glb"))
         
         val scene = Scene(sceneAsset.scene)
         sceneManager.addScene(scene)
         
+        // Headlamp Setup
+        headLight = net.mgsx.gltf.scene3d.lights.SpotLightEx()
+        headLight.color.set(Color.CYAN) // Tech Blue
+        headLight.intensity = 500f // Boosted to punch through IBL
+        headLight.cutoffAngle = 7f // Tight beam (~1/3 of previous)
+        headLight.exponent = 20f // Very sharp focus
+        environment.add(headLight)
+        
+        // ... (SceneManager init) ...
+        
+        // Setup IBL (Image Based Lighting) - RESTORED
+        val iblBuilder = net.mgsx.gltf.scene3d.utils.IBLBuilder.createOutdoor(camLight)
+        val environmentCubemap = iblBuilder.buildEnvMap(1024)
+        val diffuseCubemap = iblBuilder.buildIrradianceMap(256)
+        val specularCubemap = iblBuilder.buildRadianceMap(10)
+        iblBuilder.dispose()
+
+        environment.set(net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute.createSpecularEnv(specularCubemap))
+        environment.set(net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap))
+        
+        // Removed manual AmbientLight since IBL is back
+        // environment.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createAmbient(0.05f, 0.05f, 0.05f, 1f))
+        
         // Create Character
-        character = Character(scene, 2f) // radius matches sphere radius (Diameter 4f -> Radius 2f)
-        character.setSpeed(2f) // Start walking
+        character = Character(scene, 2.05f) 
+        character.setSpeed(2f) 
+        
+        // Manual Material overrides for Robot Expressive
+        for (mat in scene.modelInstance.materials) {
+            
+            // Clean up existing attributes
+            mat.remove(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.Metallic)
+            mat.remove(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.Roughness)
+            
+            if (mat.id == "Main" || mat.id == "Material_MR" || mat.id == "RobotExpressive" || mat.id == "Body") {
+                // Body: GOLD (Metallic PBR)
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(com.badlogic.gdx.graphics.Color.GOLD))
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(1.0f))
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(0.2f))
+            } else if (mat.id == "Grey") {
+                // Joints:- [x] Fix Rendering (Metallic/Roughness)
+                // - [x] Rotate Robot 180
+                // - [/] Add Robot Headlamp
+                //     - [ ] Create SpotLight in GameScreen
+                //     - [ ] Update Light Position/Direction in Render Loop
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(com.badlogic.gdx.graphics.Color.DARK_GRAY))
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(0.8f))
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(0.5f))
+            } else if (mat.id == "Black") {
+                 // Details: Black (Rubber/Plastic)
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(com.badlogic.gdx.graphics.Color.BLACK))
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(0.0f))
+                mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(0.8f))
+            } else {
+                 // Fallback for any other parts: Gold
+                 mat.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(com.badlogic.gdx.graphics.Color.GOLD))
+                 mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(1.0f))
+                 mat.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(0.2f))
+            }
+        }
     }
 
     private fun createSphere() {
@@ -429,7 +487,7 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
         // 3D Render
         modelBatch.begin(cam)
         modelBatch.render(sphereInstance, environment)
-        modelBatch.render(gridInstance, environment)
+        modelBatch.render(gridInstance) // Grid is unlit, handled by default shader
         if (showMarker) {
             modelBatch.render(markerInstance, environment)
         }
@@ -440,8 +498,30 @@ class GameScreen(private val game: SphereQixGame) : ScreenAdapter() {
         }
         modelBatch.end()
 
-        // GLTF Render
-        character.update(delta)
+        // Update Camera Light
+        camLight.direction.set(cam.direction)
+        
+        // Update Headlamp
+        if (::headLight.isInitialized && ::character.isInitialized) {
+            // Robot Scale is 0.05. If robot is ~2m tall, it's 0.1m in world.
+            // Old offset (1.5m) was way too high.
+            // New Position: Up(0.15m) -> Above head, Forward(0.05m) -> Slightly front
+            val lightPos = character.position.cpy()
+                .add(character.up.cpy().scl(0.15f))
+                .add(character.forward.cpy().scl(0.05f))
+            headLight.position.set(lightPos)
+            
+            // Direction: Character Forward + Tilt Down to hit ground
+            // Forward(1.0) + Down(0.5)
+            val lightDir = character.forward.cpy().sub(character.up.cpy().scl(0.5f)).nor()
+            headLight.direction.set(lightDir)
+            
+            // Update Character Logic (Move/Animate)
+            character.update(delta)
+        } else if (::character.isInitialized) {
+            character.update(delta)
+        }
+        
         sceneManager.update(delta)
         sceneManager.render()
 

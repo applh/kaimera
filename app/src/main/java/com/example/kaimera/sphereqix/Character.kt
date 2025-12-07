@@ -187,19 +187,20 @@ class Character(val scene: Scene, val radius: Float) {
         // Model Up (+Y) = our `up`.
         // Model Right (+X) = our `right`.
         
-        // Col 0: Right
-        transform.`val`[Matrix4.M00] = right.x
-        transform.`val`[Matrix4.M10] = right.y
-        transform.`val`[Matrix4.M20] = right.z
+        // Col 0: Right (Rotated 180 -> -Right)
+        transform.`val`[Matrix4.M00] = -right.x
+        transform.`val`[Matrix4.M10] = -right.y
+        transform.`val`[Matrix4.M20] = -right.z
         
-        // Col 1: Up
+        // Col 1: Up (Unchanged)
         transform.`val`[Matrix4.M01] = up.x
         transform.`val`[Matrix4.M11] = up.y
         transform.`val`[Matrix4.M21] = up.z
         
-        // Col 2: Backward (-Forward)
-        // If Model looks down -Z, then +Z is backward.
-        val backward = forward.cpy().scl(-1f)
+        // Col 2: Backward (Rotated 180 -> -Backward = Forward)
+        // Previous: Backward = -Forward
+        // New: Backward = Forward
+        val backward = forward.cpy() // Was scl(-1f)
         transform.`val`[Matrix4.M02] = backward.x
         transform.`val`[Matrix4.M12] = backward.y
         transform.`val`[Matrix4.M22] = backward.z
