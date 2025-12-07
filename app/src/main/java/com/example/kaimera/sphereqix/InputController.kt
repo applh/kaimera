@@ -25,6 +25,8 @@ class InputController(private val camera: Camera) : InputAdapter(), GestureDetec
     private val gestureDetector = GestureDetector(this)
 
     private var isPinching = false
+    
+    var onTap: ((Float, Float) -> Unit)? = null
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         // Forward to GestureDetector
@@ -75,7 +77,7 @@ class InputController(private val camera: Camera) : InputAdapter(), GestureDetec
         return true
     }
     
-    // Private helper (renamed to avoid conflict)
+    // Private helper
     private fun applyZoom(amount: Float) {
         distance += amount
         if (distance < minZoom) distance = minZoom
@@ -89,7 +91,11 @@ class InputController(private val camera: Camera) : InputAdapter(), GestureDetec
         return false // InputProcessor handles this mostly, but this is the Listener callback
     }
 
-    override fun tap(x: Float, y: Float, count: Int, button: Int): Boolean = false
+    override fun tap(x: Float, y: Float, count: Int, button: Int): Boolean {
+        onTap?.invoke(x, y)
+        return true
+    }
+    
     override fun longPress(x: Float, y: Float): Boolean = false
     override fun fling(velocityX: Float, velocityY: Float, button: Int): Boolean = false
     override fun pan(x: Float, y: Float, deltaX: Float, deltaY: Float): Boolean = false

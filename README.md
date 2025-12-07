@@ -113,6 +113,14 @@ For issues or questions about the implementation, refer to:
 - UI components from [Material Design](https://material.io)
 - Developed with [Android Studio](https://developer.android.com/studio)
 
+## Assets
+
+This project uses the following third-party assets:
+
+*   **Robot Expressive**: 3D Character Model from [Google Filament Samples](https://github.com/google/filament/tree/main/assets/models/RobotExpressive).
+*   **Earth Map**: Texture maps derived from [NASA Visible Earth](https://visibleearth.nasa.gov/).
+*   **Fonts**: Roboto font family.
+
 ---
 
 **Made with ❤️ using Kotlin and CameraX**

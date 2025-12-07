@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -20,7 +20,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="HUD Settings"
+                android:text="Settings"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
 
@@ -28,11 +28,22 @@
                 android:id="@+id/btn_home"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_marginEnd="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_home"
                 android:scaleType="fitCenter"
                 android:padding="4dp"
                 android:contentDescription="Back to Launcher"/>
+
+            <ImageButton
+                android:id="@+id/btn_close"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:scaleType="fitCenter"
+                android:padding="4dp"
+                android:contentDescription="Close Settings"/>
         </LinearLayout>
 
         <TextView
@@ -48,19 +59,19 @@
             android:layout_height="wrap_content"
             android:hint="Enter HUD text"
             android:inputType="text"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="8dp"/>
 
         <Button
             android:id="@+id/btn_apply"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Apply"
-            android:layout_marginBottom="16dp"/>
+            android:text="Apply HUD Text"
+            android:layout_marginBottom="24dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Text Color (HSV)"
+            android:text="Color &amp; Light"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
@@ -69,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="16dp">
 
             <RadioButton
                 android:id="@+id/rb_target_hud"
@@ -95,13 +106,15 @@
             android:id="@+id/sb_intensity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="500"
-            android:progress="100" />
+            android:max="100"
+            android:progress="50"
+            android:layout_marginBottom="16dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
 
             <TextView
                 android:id="@+id/tv_hue_label"
@@ -135,38 +148,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="100" />
-                
-     <!-- Grid Settings -->
-    <TextView
-        android:id="@+id/tv_lat_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Latitude Density: 24"
-        android:layout_marginTop="16dp"/>
-
-    <SeekBar
-        android:id="@+id/seekBarLat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="24"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:id="@+id/tv_long_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Longitude Density: 24"
-        android:layout_marginTop="16dp"/>
-
-    <SeekBar
-        android:id="@+id/seekBarLong"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="24"
-        android:layout_marginTop="8dp"/>
-                
         </LinearLayout>
 
         <TextView
@@ -174,13 +155,13 @@
             android:layout_height="wrap_content"
             android:text="Presets"
             android:textStyle="bold"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"/>
 
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="none">
+            android:scrollbars="none"
+            android:layout_marginBottom="24dp">
             
             <LinearLayout
                 android:id="@+id/color_container"
@@ -189,6 +170,52 @@
                 android:orientation="horizontal" />
                 
         </HorizontalScrollView>
+
+     <!-- Grid Settings -->
+     <TextView
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="Grid Density"
+         android:textStyle="bold"
+         android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tv_lat_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latitude Density: 24" />
+
+    <SeekBar
+        android:id="@+id/seekBarLat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="24"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tv_long_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Longitude Density: 24" />
+
+    <SeekBar
+        android:id="@+id/seekBarLong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="24"
+        android:layout_marginBottom="24dp"/>
+                
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_debug_arrows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Debug Arrows"
+            android:layout_marginBottom="16dp" 
+            app:showText="false"
+            android:textOn=""
+            android:textOff=""/>
 
     </LinearLayout>
 </ScrollView>

@@ -57,6 +57,7 @@ class SphereQixActivity : AndroidApplication() {
 
         val etHudText = dialogView.findViewById<EditText>(R.id.et_hud_text)
         val btnApply = dialogView.findViewById<Button>(R.id.btn_apply)
+        val btnClose = dialogView.findViewById<android.widget.ImageButton>(R.id.btn_close)
         val btnHome = dialogView.findViewById<android.widget.ImageButton>(R.id.btn_home)
         val colorContainer = dialogView.findViewById<LinearLayout>(R.id.color_container)
         val sbHue = dialogView.findViewById<android.widget.SeekBar>(R.id.sb_hue)
@@ -65,12 +66,6 @@ class SphereQixActivity : AndroidApplication() {
         val sbLat = dialogView.findViewById<android.widget.SeekBar>(R.id.seekBarLat)
         val sbLong = dialogView.findViewById<android.widget.SeekBar>(R.id.seekBarLong)
         
-        val tvHue = dialogView.findViewById<android.widget.TextView>(R.id.tv_hue_label)
-        val tvSat = dialogView.findViewById<android.widget.TextView>(R.id.tv_sat_label)
-        val tvVal = dialogView.findViewById<android.widget.TextView>(R.id.tv_val_label)
-        val tvLat = dialogView.findViewById<android.widget.TextView>(R.id.tv_lat_label)
-        val tvLong = dialogView.findViewById<android.widget.TextView>(R.id.tv_long_label)
-
         // Pre-fill text
         etHudText.setText(screen.getHudText())
 
@@ -91,10 +86,29 @@ class SphereQixActivity : AndroidApplication() {
         sbIntensity.progress = (currentIntensity * 10).toInt()
         tvIntensity.text = "Light Intensity: $currentIntensity"
         
-        // ... (Listeners implementation remains same) ...
-        
         // State
         var editTarget = 0 // 0 = HUD, 1 = Light
+
+        val tvHue = dialogView.findViewById<android.widget.TextView>(R.id.tv_hue_label)
+        val tvSat = dialogView.findViewById<android.widget.TextView>(R.id.tv_sat_label)
+        val tvVal = dialogView.findViewById<android.widget.TextView>(R.id.tv_val_label)
+        val tvLat = dialogView.findViewById<android.widget.TextView>(R.id.tv_lat_label)
+        val tvLong = dialogView.findViewById<android.widget.TextView>(R.id.tv_long_label)
+
+        // Wrapper to update labels
+        val updateLabels = {
+             val hsv = if (editTarget == 0) hsvHud else hsvLight
+             tvHue.text = "Hue: ${hsv[0].toInt()}"
+             tvSat.text = "Saturation: ${(hsv[1] * 100).toInt()}%"
+             tvVal.text = "Value: ${(hsv[2] * 100).toInt()}%"
+        }
+
+        // Wrapper to update color
+        val updateColor = {
+             val hsv = if (editTarget == 0) hsvHud else hsvLight
+             val color = Color.HSVToColor(hsv)
+             if (editTarget == 0) screen.updateHudColor(color) else screen.updateCamLightColor(color)
+        }
         
         // Listener for SeekBars
         val seekBarListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -104,19 +118,19 @@ class SphereQixActivity : AndroidApplication() {
                         R.id.sb_hue -> {
                             val hsv = if (editTarget == 0) hsvHud else hsvLight
                             hsv[0] = progress.toFloat()
-                            tvHue.text = "Hue: $progress"
+                            updateLabels()
                             updateColor()
                         }
                         R.id.sb_saturation -> {
                             val hsv = if (editTarget == 0) hsvHud else hsvLight
                             hsv[1] = progress / 100f
-                            tvSat.text = "Saturation: $progress%"
+                            updateLabels()
                             updateColor()
                         }
                         R.id.sb_value -> {
                             val hsv = if (editTarget == 0) hsvHud else hsvLight
                             hsv[2] = progress / 100f
-                            tvVal.text = "Value: $progress%"
+                            updateLabels()
                             updateColor()
                         }
                         R.id.sb_intensity -> {
@@ -135,17 +149,6 @@ class SphereQixActivity : AndroidApplication() {
                     }
                 }
             }
-            
-            fun updateColor() {
-                val hsv = if (editTarget == 0) hsvHud else hsvLight
-                val color = Color.HSVToColor(hsv)
-                if (editTarget == 0) {
-                    screen.updateHudColor(color)
-                } else {
-                    screen.updateCamLightColor(color)
-                }
-            }
-            
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         }
@@ -158,6 +161,17 @@ class SphereQixActivity : AndroidApplication() {
         sbLong.setOnSeekBarChangeListener(seekBarListener)
         
         // Target Switch Logic
+        val switchDebug = dialogView.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switch_debug_arrows)
+        
+        // Init values
+        if (gameScreen != null) {
+            switchDebug.isChecked = gameScreen!!.getShowDebug()
+        }
+        
+        switchDebug.setOnCheckedChangeListener { _, isChecked ->
+            gameScreen?.setShowDebug(isChecked)
+        }
+        
         rgTarget.setOnCheckedChangeListener { _, checkedId ->
             editTarget = if (checkedId == R.id.rb_target_hud) 0 else 1
             
@@ -167,9 +181,7 @@ class SphereQixActivity : AndroidApplication() {
             sbSaturation.progress = (hsv[1] * 100).toInt()
             sbValue.progress = (hsv[2] * 100).toInt()
             
-            tvHue.text = "Hue: ${sbHue.progress}"
-            tvSat.text = "Saturation: ${sbSaturation.progress}%"
-            tvVal.text = "Value: ${sbValue.progress}%"
+            updateLabels()
             
             // Light Intensity only relevant for Light? Or keep visible?
             // User requested intensity for light.
@@ -180,9 +192,7 @@ class SphereQixActivity : AndroidApplication() {
         sbSaturation.progress = (hsvHud[1] * 100).toInt()
         sbValue.progress = (hsvHud[2] * 100).toInt()
         
-        tvHue.text = "Hue: ${sbHue.progress}"
-        tvSat.text = "Saturation: ${sbSaturation.progress}%"
-        tvVal.text = "Value: ${sbValue.progress}%"
+        updateLabels()
         
         // Get current grid density
         sbLat.progress = screen.getLatSegments()
@@ -195,6 +205,10 @@ class SphereQixActivity : AndroidApplication() {
         btnApply.setOnClickListener {
             val newHudText = etHudText.text.toString()
             screen.updateHudText(newHudText)
+            dialog.dismiss()
+        }
+        
+        btnClose.setOnClickListener {
             dialog.dismiss()
         }
         
