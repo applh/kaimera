@@ -18,6 +18,7 @@ Kaimera includes a unified launcher screen that provides access to multiple inte
 - 🌐 **Browser** - Built-in web browser for quick access
 - 📁 **File Explorer** - Browse and manage device files
 - 🆒 **Text3D** - Create and view 3D volumetric text
+- 🤖 **SphereQix** - 3D Robot experience with PBR rendering and interactions
 - ⚙️ **Settings** - Configure all app preferences
 
 All apps share a consistent Material Design interface and can be accessed from the home screen or via the home button in each app's title bar.
