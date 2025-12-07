@@ -117,7 +117,7 @@ For issues or questions about the implementation, refer to:
 
 This project uses the following third-party assets:
 
-*   **Robot Expressive**: 3D Character Model from [Google Filament Samples](https://github.com/google/filament/tree/main/assets/models/RobotExpressive).
+*   **Robot Expressive**: 3D Character Model from [Sketchfab](https://sketchfab.com/3d-models/robot-expressive-190ef77551c14273a9b4145f06f35dc1#download).
 *   **Earth Map**: Texture maps derived from [NASA Visible Earth](https://visibleearth.nasa.gov/).
 *   **Fonts**: Roboto font family.
 
